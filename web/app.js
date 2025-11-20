@@ -90,18 +90,35 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 
 // App Initialization
 function initApp() {
+    console.log('🚀 initApp called');
+    console.log('📝 currentUser:', currentUser);
+
     initWebSocket();
 
     if (!currentUser) {
+        console.log('❌ No user found, showing user modal');
         document.getElementById('userModal').style.display = 'block';
+        document.getElementById('dashboardBtn').style.display = 'none';
     } else {
+        console.log('✅ User found, showing returning user modal for:', currentUser);
+        // User exists in localStorage, show returning user modal
         showReturningUserModal(currentUser);
+        document.getElementById('dashboardBtn').style.display = 'inline-block';
     }
 }
 
 function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
-    document.getElementById('returningUserModal').style.display = 'block';
+    console.log('👋 showReturningUserModal called for:', username);
+    const nameElement = document.getElementById('returningUserName');
+    const modalElement = document.getElementById('returningUserModal');
+
+    console.log('📍 returningUserName element:', nameElement);
+    console.log('📍 returningUserModal element:', modalElement);
+
+    if (nameElement) nameElement.textContent = username;
+    if (modalElement) modalElement.style.display = 'block';
+
+    console.log('✅ Modal should be visible now');
 }
 
 function confirmReturningUser() {
@@ -663,37 +680,39 @@ async function exportBoardToCSV(boardId) {
             ['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']
         ];
 
-        board.columns.forEach(column => {
-            const cards = column.cards.filter(c => !c.merged_with_id);
+        if (board.columns && Array.isArray(board.columns)) {
+            board.columns.forEach(column => {
+                const cards = (column.cards || []).filter(c => !c.merged_with_id);
 
-            cards.forEach(card => {
-                const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
-                const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
-                const mergedCount = card.merged_cards?.length || 0;
+                cards.forEach(card => {
+                    const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
+                    const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
+                    const mergedCount = card.merged_cards?.length || 0;
 
-                rows.push([
-                    column.name,
-                    card.content,
-                    likes,
-                    dislikes,
-                    mergedCount
-                ]);
+                    rows.push([
+                        column.name,
+                        card.content,
+                        likes,
+                        dislikes,
+                        mergedCount
+                    ]);
+                });
             });
-        });
 
-        const csvContent = rows.map(row =>
-            row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-        ).join('\n');
+            const csvContent = rows.map(row =>
+                row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     } catch (error) {
         console.error('Failed to export CSV:', error);
         alert('Failed to export: ' + error.message);
@@ -710,136 +729,88 @@ window.exportBoardToCSV = exportBoardToCSV;
 window.openUnmergeModal = openUnmergeModal;
 window.unmergeCard = unmergeCard;
 window.selectCard = selectCard;
-document.getElementById('createFirstBoard').addEventListener('click', () => {
-    document.getElementById('newBoardModal').style.display = 'block';
-});
 
-document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('boardName').value;
-    const columnsText = document.getElementById('columnNames').value.trim();
-    const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
-
-    await createBoard(name, columns);
-    closeModals();
-});
-
-document.getElementById('newCardForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const columnId = document.getElementById('cardColumnId').value;
-    const content = document.getElementById('cardContent').value;
-
-    await createCard(columnId, content);
-    closeModals();
-});
-
-document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const columnId = document.getElementById('editColumnId').value;
-    const name = document.getElementById('columnNameEdit').value;
-
-    await updateColumn(columnId, name);
-    closeModals();
-});
-
-document.getElementById('addColumnBtn').addEventListener('click', async () => {
-    const name = prompt('Enter column name:');
-    if (name) {
-        const position = currentBoard.columns.length;
-        await createColumn(name, position);
-    }
-});
-
-document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
-
-document.getElementById('finishRetroBtn').addEventListener('click', () => {
-    if (currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
-        updateBoardStatus(currentBoard.id, 'finished');
-    }
-});
-
-document.getElementById('reopenRetroBtn').addEventListener('click', () => {
-    if (currentBoard && confirm('Re-open this retrospective?')) {
-        updateBoardStatus(currentBoard.id, 'active');
-    }
-});
-
-document.querySelectorAll('.close').forEach(closeBtn => {
-    closeBtn.addEventListener('click', closeModals);
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-        closeModals();
-    }
-});
-
-
-
-// BenTro v0.2.0 Features
-
-// Update initApp to show returning user modal
-const originalInitApp = initApp;
-function initApp() {
-    initWebSocket();
-    if (!currentUser) {
-        document.getElementById('userModal').style.display = 'block';
-    } else {
-        showReturningUserModal(currentUser);
-    }
-}
-
-function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
-    document.getElementById('returningUserModal').style.display = 'block';
-}
-
-function confirmReturningUser() {
-    document.getElementById('returningUserModal').style.display = 'none';
-    updateUserDisplay();
-    document.getElementById('editUserBtn').style.display = 'inline-block';
-    showDashboard();
-}
-
-function openEditUserModal() {
-    const modal = document.getElementById('userModal');
-    document.getElementById('userNameInput').value = currentUser;
-    modal.style.display = 'block';
-}
-
-async function exportBoardToCSV(boardId) {
-    try {
-        const board = await apiCall(/boards/);
-        const rows = [['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']];
-        board.columns.forEach(column => {
-            const cards = column.cards.filter(c => !c.merged_with_id);
-            cards.forEach(card => {
-                const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
-                const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
-                const mergedCount = card.merged_cards?.length || 0;
-                rows.push([column.name, card.content, likes, dislikes, mergedCount]);
-            });
-        });
-        const csvContent = rows.map(row => row.map(cell => "").join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(blob));
-        link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch (error) {
-        console.error('Failed to export CSV:', error);
-        alert('Failed to export: ' + error.message);
-    }
-}
-
-window.exportBoardToCSV = exportBoardToCSV;
-
+// Event Listeners - Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the app
+    initApp();
+
+    // User Form Handler
+    document.getElementById('userForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('userNameInput').value.trim();
+        if (name) {
+            currentUser = name;
+            localStorage.setItem('retroUser', name);
+            closeModals();
+            updateUserDisplay();
+            showDashboard();
+        }
+    });
+
+    document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+
+    document.getElementById('newBoardBtn').addEventListener('click', () => {
+        document.getElementById('newBoardModal').style.display = 'block';
+    });
+
+    document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('boardName').value;
+        const columnsText = document.getElementById('columnNames').value.trim();
+        const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
+
+        await createBoard(name, columns);
+        closeModals();
+    });
+
+    document.getElementById('newCardForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const columnId = document.getElementById('cardColumnId').value;
+        const content = document.getElementById('cardContent').value;
+
+        await createCard(columnId, content);
+        closeModals();
+    });
+
+    document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const columnId = document.getElementById('editColumnId').value;
+        const name = document.getElementById('columnNameEdit').value;
+
+        await updateColumn(columnId, name);
+        closeModals();
+    });
+
+    document.getElementById('addColumnBtn').addEventListener('click', async () => {
+        const name = prompt('Enter column name:');
+        if (name) {
+            const position = currentBoard.columns.length;
+            await createColumn(name, position);
+        }
+    });
+
+    document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+    document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
+    document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
+
+    document.getElementById('finishRetroBtn').addEventListener('click', () => {
+        if (currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
+            updateBoardStatus(currentBoard.id, 'finished');
+        }
+    });
+
+    document.getElementById('reopenRetroBtn').addEventListener('click', () => {
+        if (currentBoard && confirm('Re-open this retrospective?')) {
+            updateBoardStatus(currentBoard.id, 'active');
+        }
+    });
+
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', closeModals);
+    });
+
+    // BenTro v0.2.0 Event Listeners
     document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
     document.getElementById('changeUserBtn')?.addEventListener('click', () => {
         document.getElementById('returningUserModal').style.display = 'none';
@@ -854,5 +825,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportBoardBtn')?.addEventListener('click', () => {
         if (currentBoard) exportBoardToCSV(currentBoard.id);
     });
+
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeModals();
+        }
+    });
 });
+
+
 
