@@ -46,6 +46,15 @@ function showDashboard() {
     loadBoards();
 }
 
+// Board Templates
+const BOARD_TEMPLATES = {
+    'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
+    'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
+    '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
+    'wwn-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
+    'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
+};
+
 // Event Listeners - Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the app
@@ -72,6 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('createFirstBoard')?.addEventListener('click', () => {
         document.getElementById('newBoardModal').style.display = 'block';
+    });
+
+    // Board Template Selector
+    document.getElementById('boardTemplate')?.addEventListener('change', (e) => {
+        const template = e.target.value;
+        const columnNamesTextarea = document.getElementById('columnNames');
+
+        if (template === 'custom') {
+            columnNamesTextarea.value = '';
+        } else if (BOARD_TEMPLATES[template]) {
+            columnNamesTextarea.value = BOARD_TEMPLATES[template].join('\n');
+        }
     });
 
     document.getElementById('newBoardForm').addEventListener('submit', async (e) => {

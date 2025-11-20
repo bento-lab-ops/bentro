@@ -7,7 +7,7 @@
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
     <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/bentro-v0.2.0.css">
+    <link rel="stylesheet" href="/static/bentro.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -148,9 +148,21 @@
                     <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective" required>
                 </div>
                 <div class="form-group">
+                    <label for="boardTemplate">Template</label>
+                    <select id="boardTemplate" class="form-input">
+                        <option value="custom">Custom (Manual Entry)</option>
+                        <option value="start-stop-continue">Start, Stop, Continue</option>
+                        <option value="mad-sad-glad">Mad, Sad, Glad</option>
+                        <option value="4ls">4Ls (Liked, Learned, Lacked, Longed For)</option>
+                        <option value="wwn-action">What Went Well / Needs Attention / Action Items</option>
+                        <option value="sailboat">Sailboat (Wind, Anchor, Rocks, Island)</option>
+                    </select>
+                    <small>Choose a template or enter custom columns below</small>
+                </div>
+                <div class="form-group">
                     <label>Column Names (one per line)</label>
                     <textarea id="columnNames" class="form-textarea" rows="4"
-                        placeholder="What Went Well&#10;Needs Attention&#10;What Went Badly&#10;Action Items"></textarea>
+                        placeholder="Select a template above or enter custom columns"></textarea>
                     <small>Leave empty for default columns</small>
                 </div>
                 <button type="submit" class="btn btn-primary">Create Board</button>
