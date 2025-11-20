@@ -87,30 +87,174 @@
     background: var(--bg-light);
 }
 
+/* BenTro v0.2.0 Branding Additions */
+
+/* Container */
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Header Branding */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px var(--shadow);
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.brand-logo-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.3));
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.tagline {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-left: 62px;
+    /* Align with title (logo width + gap) */
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--bg-light);
+}
+
 .user-display {
     color: var(--text-primary);
     font-weight: 600;
 }
 
-/* Help Panel */
-.help-content {
-    text-align: left;
-    line-height: 1.8;
+/* Team Switcher */
+.team-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.help-content h3 {
-    margin-top: 1rem;
+#currentTeamName {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* Team Selection Modal */
+.team-selection-options {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin: 0.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+    padding: 0 10px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.mb-2 {
     margin-bottom: 0.5rem;
-    color: var(--primary);
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+/* Help Modal Content */
+.help-content {
+    text-align: left;
+    line-height: 1.6;
+}
+
+.tagline-help {
+    font-style: italic;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
 }
 
 .help-content ul {
-    margin-left: 1.5rem;
-    color: var(--text-secondary);
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.help-content li {
+    margin-bottom: 0.5rem;
 }
 
 .help-content hr {
-    border: none;
-    border-top: 1px solid var(--border);
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 1.5rem 0;
 }

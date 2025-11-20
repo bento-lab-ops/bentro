@@ -44,6 +44,11 @@ func main() {
 		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
 
+		// Team routes
+		api.POST("/teams", handlers.CreateTeam)
+		api.GET("/teams", handlers.ListTeams)
+		api.POST("/teams/:id/join", handlers.JoinTeam)
+
 		// Column routes
 		api.POST("/boards/:boardId/columns", handlers.CreateColumn)
 		api.PUT("/columns/:id", handlers.UpdateColumn)

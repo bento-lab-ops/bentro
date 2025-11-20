@@ -88,6 +88,22 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     return response.json();
 }
 
+// Team State
+let currentTeam = JSON.parse(localStorage.getItem('retroTeam'));
+
+// Team Service
+const TeamService = {
+    async create(name) {
+        return await apiCall('/teams', 'POST', { name });
+    },
+    async list() {
+        return await apiCall('/teams');
+    },
+    async join(teamId, userId) {
+        return await apiCall(`/teams/${teamId}/join`, 'POST', { user_id: userId });
+    }
+};
+
 // App Initialization
 function initApp() {
     console.log('🚀 initApp called');
@@ -105,6 +121,8 @@ function initApp() {
         showReturningUserModal(currentUser);
         document.getElementById('dashboardBtn').style.display = 'inline-block';
     }
+
+    updateTeamDisplay();
 }
 
 function showReturningUserModal(username) {
@@ -126,6 +144,58 @@ function confirmReturningUser() {
     document.getElementById('returningUserModal').style.display = 'none';
     updateUserDisplay();
     document.getElementById('editUserBtn').style.display = 'inline-block';
+
+    // Check if team is selected
+    if (!currentTeam) {
+        showTeamSelectionModal();
+    } else {
+        showDashboard();
+    }
+}
+
+function showTeamSelectionModal() {
+    const modal = document.getElementById('teamSelectionModal');
+    const select = document.getElementById('teamSelectDropdown');
+
+    // Load teams
+    TeamService.list().then(teams => {
+        select.innerHTML = '<option value="">Select a team...</option>';
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.id;
+            option.textContent = team.name;
+            select.appendChild(option);
+        });
+    });
+
+    modal.style.display = 'block';
+}
+
+function updateTeamDisplay() {
+    const teamName = currentTeam ? currentTeam.name : 'Global';
+    const teamLabel = document.getElementById('currentTeamName');
+    const dashboardLabel = document.getElementById('dashboardTeamLabel');
+    const switcher = document.getElementById('teamSwitcher');
+
+    if (teamLabel) teamLabel.textContent = teamName;
+    if (dashboardLabel) dashboardLabel.textContent = `(${teamName})`;
+
+    // Only show switcher if user is logged in
+    if (currentUser && switcher) {
+        switcher.style.display = 'flex';
+    }
+}
+
+function handleTeamSelection(team) {
+    currentTeam = team;
+    if (team) {
+        localStorage.setItem('retroTeam', JSON.stringify(team));
+    } else {
+        localStorage.removeItem('retroTeam');
+    }
+
+    document.getElementById('teamSelectionModal').style.display = 'none';
+    updateTeamDisplay();
     showDashboard();
 }
 
@@ -138,6 +208,7 @@ function openEditUserModal() {
 function updateUserDisplay() {
     document.getElementById('userDisplay').textContent = `👤 ${currentUser}`;
     document.getElementById('editUserBtn').style.display = 'inline-block';
+    updateTeamDisplay();
 }
 
 function showDashboard() {
@@ -151,7 +222,15 @@ function showDashboard() {
 // Board Management
 async function loadBoards() {
     try {
-        const boards = await apiCall('/boards');
+        // Add team_id query param if team is selected
+        let endpoint = '/boards';
+        if (currentTeam) {
+            endpoint += `?team_id=${currentTeam.id}`;
+        } else {
+            endpoint += `?team_id=null`; // Explicitly ask for global boards
+        }
+
+        const boards = await apiCall(endpoint);
         renderDashboard(boards);
     } catch (error) {
         console.error('Failed to load boards:', error);
@@ -164,6 +243,13 @@ function renderDashboard(boards) {
 
     if (boards.length === 0) {
         document.getElementById('emptyDashboard').style.display = 'flex';
+        // Update empty state message based on context
+        const emptyMsg = document.querySelector('#emptyDashboard p');
+        if (emptyMsg) {
+            emptyMsg.textContent = currentTeam
+                ? `No boards found for team "${currentTeam.name}". Create one!`
+                : 'No global boards found. Create one!';
+        }
         return;
     }
 
@@ -195,7 +281,12 @@ function renderDashboard(boards) {
 
 async function createBoard(name, columns) {
     try {
-        const board = await apiCall('/boards', 'POST', { name, columns });
+        const payload = { name, columns };
+        if (currentTeam) {
+            payload.team_id = currentTeam.id;
+        }
+
+        const board = await apiCall('/boards', 'POST', payload);
         await loadBoard(board.id);
         return board;
     } catch (error) {
@@ -204,90 +295,155 @@ async function createBoard(name, columns) {
     }
 }
 
-async function loadBoard(boardId) {
-    try {
-        const board = await apiCall(`/boards/${boardId}`);
-        currentBoard = board;
+// ... (rest of the file)
 
-        document.getElementById('dashboardView').style.display = 'none';
-        document.getElementById('boardContainer').style.display = 'block';
-        document.getElementById('dashboardBtn').style.display = 'inline-block';
+// Event Listeners - Initialize app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the app
+    initApp();
 
-        renderBoard(board);
-        updateBoardStatusUI(board.status);
-    } catch (error) {
-        console.error('Failed to load board:', error);
-        alert('Failed to load board: ' + error.message);
-        showDashboard();
-    }
-}
-
-async function updateBoardStatus(boardId, status) {
-    try {
-        await apiCall(`/boards/${boardId}/status`, 'PUT', { status });
-        if (currentBoard && currentBoard.id === boardId) {
-            loadBoard(boardId);
-        } else {
-            loadBoards();
-        }
-        sendWebSocketMessage('board_update', { board_id: boardId });
-    } catch (error) {
-        console.error('Failed to update status:', error);
-        alert('Failed to update status: ' + error.message);
-    }
-}
-
-async function deleteBoard(boardId) {
-    if (!confirm('Are you sure you want to delete this board? This cannot be undone.')) return;
-    try {
-        await apiCall(`/boards/${boardId}`, 'DELETE');
-        loadBoards();
-    } catch (error) {
-        console.error('Failed to delete board:', error);
-        alert('Failed to delete board: ' + error.message);
-    }
-}
-
-function updateBoardStatusUI(status) {
-    const isFinished = status === 'finished';
-    const container = document.getElementById('boardContainer');
-
-    document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
-    document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
-    document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
-
-    if (isFinished) {
-        container.classList.add('read-only');
-    } else {
-        container.classList.remove('read-only');
-    }
-}
-
-function renderBoard(board) {
-    const container = document.getElementById('columnsContainer');
-    container.innerHTML = '';
-
-    const sortedColumns = board.columns.sort((a, b) => a.position - b.position);
-
-    sortedColumns.forEach(column => {
-        if (column.cards) {
-            column.cards = column.cards.filter(c => !c.merged_with_id);
-        }
-        const columnEl = createColumnElement(column);
-        container.appendChild(columnEl);
+    // Team Event Listeners
+    document.getElementById('continueGlobalBtn')?.addEventListener('click', () => {
+        handleTeamSelection(null);
     });
 
-    if (board.status === 'active') {
-        initializeDragAndDrop();
+    document.getElementById('teamSelectDropdown')?.addEventListener('change', (e) => {
+        document.getElementById('joinTeamBtn').disabled = !e.target.value;
+    });
+
+    document.getElementById('joinTeamBtn')?.addEventListener('click', async () => {
+        const select = document.getElementById('teamSelectDropdown');
+        const teamId = select.value;
+        const teamName = select.options[select.selectedIndex].text;
+
+        if (teamId) {
+            try {
+                await TeamService.join(teamId, currentUser);
+                handleTeamSelection({ id: teamId, name: teamName });
+            } catch (error) {
+                alert('Failed to join team: ' + error.message);
+            }
+        }
+    });
+
+    document.getElementById('createTeamBtn')?.addEventListener('click', async () => {
+        const nameInput = document.getElementById('newTeamNameInput');
+        const name = nameInput.value.trim();
+
+        if (name) {
+            try {
+                const team = await TeamService.create(name);
+                await TeamService.join(team.id, currentUser);
+                handleTeamSelection(team);
+            } catch (error) {
+                alert('Failed to create team: ' + error.message);
+            }
+        }
+    });
+
+    document.getElementById('switchTeamBtn')?.addEventListener('click', () => {
+        showTeamSelectionModal();
+    });
+
+    // User Form Handler
+    document.getElementById('userForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('userNameInput').value.trim();
+        if (name) {
+            currentUser = name;
+            localStorage.setItem('retroUser', name);
+            closeModals();
+            updateUserDisplay();
+
+            // Show team selection instead of dashboard directly
+            showTeamSelectionModal();
+        }
+    });
+
+    async function loadBoard(boardId) {
+        try {
+            const board = await apiCall(`/boards/${boardId}`);
+            currentBoard = board;
+
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('boardContainer').style.display = 'block';
+            document.getElementById('dashboardBtn').style.display = 'inline-block';
+
+            renderBoard(board);
+            updateBoardStatusUI(board.status);
+        } catch (error) {
+            console.error('Failed to load board:', error);
+            alert('Failed to load board: ' + error.message);
+            showDashboard();
+        }
     }
-}
 
-function createColumnElement(column) {
-    const columnDiv = document.createElement('div');
-    columnDiv.className = 'column';
-    columnDiv.dataset.columnId = column.id;
+    async function updateBoardStatus(boardId, status) {
+        try {
+            await apiCall(`/boards/${boardId}/status`, 'PUT', { status });
+            if (currentBoard && currentBoard.id === boardId) {
+                loadBoard(boardId);
+            } else {
+                loadBoards();
+            }
+            sendWebSocketMessage('board_update', { board_id: boardId });
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            alert('Failed to update status: ' + error.message);
+        }
+    }
 
-    columnDiv.innerHTML = `
+    async function deleteBoard(boardId) {
+        if (!confirm('Are you sure you want to delete this board? This cannot be undone.')) return;
+        try {
+            await apiCall(`/boards/${boardId}`, 'DELETE');
+            loadBoards();
+        } catch (error) {
+            console.error('Failed to delete board:', error);
+            alert('Failed to delete board: ' + error.message);
+        }
+    }
+
+    function updateBoardStatusUI(status) {
+        const isFinished = status === 'finished';
+        const container = document.getElementById('boardContainer');
+
+        document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
+        document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
+        document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
+
+        if (isFinished) {
+            container.classList.add('read-only');
+        } else {
+            container.classList.remove('read-only');
+        }
+    }
+
+    function renderBoard(board) {
+        const container = document.getElementById('columnsContainer');
+        container.innerHTML = '';
+
+        const sortedColumns = board.columns.sort((a, b) => a.position - b.position);
+
+        sortedColumns.forEach(column => {
+            if (column.cards) {
+                column.cards = column.cards.filter(c => !c.merged_with_id);
+            }
+            const columnEl = createColumnElement(column);
+            container.appendChild(columnEl);
+        });
+
+        if (board.status === 'active') {
+            initializeDragAndDrop();
+        }
+    }
+
+    function createColumnElement(column) {
+        const columnDiv = document.createElement('div');
+        columnDiv.className = 'column';
+        columnDiv.dataset.columnId = column.id;
+
+        columnDiv.innerHTML = `
         <div class="column-header">
             <h3 class="column-title">${escapeHtml(column.name)}</h3>
             <div class="column-actions">
@@ -302,24 +458,24 @@ function createColumnElement(column) {
         <button class="add-card-btn" data-column-id="${column.id}">+ Add Card</button>
     `;
 
-    columnDiv.querySelector('.add-card-btn').addEventListener('click', () => openNewCardModal(column.id));
-    columnDiv.querySelector('.sort-column-btn').addEventListener('click', () => sortColumnByVotes(column.id));
-    columnDiv.querySelector('.edit-column-btn').addEventListener('click', () => openEditColumnModal(column.id, column.name));
-    columnDiv.querySelector('.delete-column-btn').addEventListener('click', () => deleteColumn(column.id));
+        columnDiv.querySelector('.add-card-btn').addEventListener('click', () => openNewCardModal(column.id));
+        columnDiv.querySelector('.sort-column-btn').addEventListener('click', () => sortColumnByVotes(column.id));
+        columnDiv.querySelector('.edit-column-btn').addEventListener('click', () => openEditColumnModal(column.id, column.name));
+        columnDiv.querySelector('.delete-column-btn').addEventListener('click', () => deleteColumn(column.id));
 
-    return columnDiv;
-}
+        return columnDiv;
+    }
 
-function createCardHTML(card) {
-    const votes = card.votes || [];
-    const likes = votes.filter(v => v.vote_type === 'like').length;
-    const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
-    const isSelected = selectedCardId === card.id ? 'selected' : '';
-    const userVoted = votes.some(v => v.user_name === currentUser);
+    function createCardHTML(card) {
+        const votes = card.votes || [];
+        const likes = votes.filter(v => v.vote_type === 'like').length;
+        const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
+        const isSelected = selectedCardId === card.id ? 'selected' : '';
+        const userVoted = votes.some(v => v.user_name === currentUser);
 
-    let mergedContentHTML = '';
-    if (card.merged_cards && card.merged_cards.length > 0) {
-        mergedContentHTML = `
+        let mergedContentHTML = '';
+        if (card.merged_cards && card.merged_cards.length > 0) {
+            mergedContentHTML = `
             <div class="merged-cards-container">
                 ${card.merged_cards.map(mc => `
                     <div class="merged-card-preview">
@@ -328,20 +484,20 @@ function createCardHTML(card) {
                 `).join('')}
             </div>
         `;
-    }
-
-    let mergeActionHTML = '';
-    if (selectedCardId) {
-        if (selectedCardId === card.id) {
-            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
-        } else {
-            mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
         }
-    } else {
-        mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">Select</button>`;
-    }
 
-    return `
+        let mergeActionHTML = '';
+        if (selectedCardId) {
+            if (selectedCardId === card.id) {
+                mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
+            } else {
+                mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
+            }
+        } else {
+            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">Select</button>`;
+        }
+
+        return `
         <div class="card ${isSelected}" data-card-id="${card.id}">
             <div class="card-content">${escapeHtml(card.content)}</div>
             ${mergedContentHTML}
@@ -367,239 +523,629 @@ function createCardHTML(card) {
             </div>
         </div>
     `;
-}
+    }
 
-// Select-to-Merge Logic
-function selectCard(cardId) {
-    selectedCardId = cardId;
-    renderBoard(currentBoard);
-}
+    // Select-to-Merge Logic
+    function selectCard(cardId) {
+        selectedCardId = cardId;
+        renderBoard(currentBoard);
+    }
 
-function cancelSelection() {
-    selectedCardId = null;
-    renderBoard(currentBoard);
-}
-
-async function mergeCard(targetCardId) {
-    if (!selectedCardId) return;
-
-    const sourceCardId = selectedCardId;
-    if (sourceCardId === targetCardId) return;
-
-    try {
-        await apiCall(`/cards/${sourceCardId}/merge`, 'POST', {
-            target_card_id: targetCardId
-        });
+    function cancelSelection() {
         selectedCardId = null;
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-        await loadBoard(currentBoard.id);
-    } catch (error) {
-        console.error('Failed to merge card:', error);
-        alert('Failed to merge: ' + error.message);
-    }
-}
-
-// Unmerge Logic
-function openUnmergeModal(cardId) {
-    const card = findCardById(cardId);
-    if (!card || !card.merged_cards) {
-        return;
+        renderBoard(currentBoard);
     }
 
-    const list = document.getElementById('mergedCardsList');
-    list.innerHTML = '';
+    async function mergeCard(targetCardId) {
+        if (!selectedCardId) return;
 
-    card.merged_cards.forEach(mergedCard => {
-        const item = document.createElement('div');
-        item.className = 'merged-card-item';
-        item.innerHTML = `
+        const sourceCardId = selectedCardId;
+        if (sourceCardId === targetCardId) return;
+
+        try {
+            await apiCall(`/cards/${sourceCardId}/merge`, 'POST', {
+                target_card_id: targetCardId
+            });
+            selectedCardId = null;
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+            await loadBoard(currentBoard.id);
+        } catch (error) {
+            console.error('Failed to merge card:', error);
+            alert('Failed to merge: ' + error.message);
+        }
+    }
+
+    // Unmerge Logic
+    function openUnmergeModal(cardId) {
+        const card = findCardById(cardId);
+        if (!card || !card.merged_cards) {
+            return;
+        }
+
+        const list = document.getElementById('mergedCardsList');
+        list.innerHTML = '';
+
+        card.merged_cards.forEach(mergedCard => {
+            const item = document.createElement('div');
+            item.className = 'merged-card-item';
+            item.innerHTML = `
             <span>${escapeHtml(mergedCard.content)}</span>
             <button class="btn btn-danger btn-small" onclick="unmergeCard('${mergedCard.id}')">Unmerge</button>
         `;
-        list.appendChild(item);
-    });
+            list.appendChild(item);
+        });
 
-    document.getElementById('unmergeModal').style.display = 'block';
-}
-
-async function unmergeCard(cardId) {
-    try {
-        await apiCall(`/cards/${cardId}/unmerge`, 'POST');
-        document.getElementById('unmergeModal').style.display = 'none';
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-    } catch (error) {
-        console.error('Failed to unmerge card:', error);
-        alert('Failed to unmerge: ' + error.message);
+        document.getElementById('unmergeModal').style.display = 'block';
     }
-}
 
-function findCardById(cardId) {
-    for (const column of currentBoard.columns) {
-        if (column.cards) {
-            const card = column.cards.find(c => c.id === cardId);
-            if (card) return card;
+    async function unmergeCard(cardId) {
+        try {
+            await apiCall(`/cards/${cardId}/unmerge`, 'POST');
+            document.getElementById('unmergeModal').style.display = 'none';
+            await loadBoard(currentBoard.id);
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        } catch (error) {
+            console.error('Failed to unmerge card:', error);
+            alert('Failed to unmerge: ' + error.message);
         }
     }
-    return null;
-}
 
-// Drag and Drop (Sorting Only)
-function initializeDragAndDrop() {
-    const cardLists = document.querySelectorAll('.cards-list');
+    function findCardById(cardId) {
+        for (const column of currentBoard.columns) {
+            if (column.cards) {
+                const card = column.cards.find(c => c.id === cardId);
+                if (card) return card;
+            }
+        }
+        return null;
+    }
 
-    cardLists.forEach(list => {
-        new Sortable(list, {
-            group: 'cards',
-            animation: 150,
-            ghostClass: 'dragging',
-            onEnd: async (evt) => {
-                const itemEl = evt.item;
-                const cardId = itemEl.dataset.cardId;
-                const newColumnId = evt.to.dataset.columnId;
-                const newPosition = evt.newIndex;
+    // Drag and Drop (Sorting Only)
+    function initializeDragAndDrop() {
+        const cardLists = document.querySelectorAll('.cards-list');
 
-                try {
-                    await apiCall(`/cards/${cardId}/move`, 'PUT', {
-                        column_id: newColumnId,
-                        position: newPosition
+        cardLists.forEach(list => {
+            new Sortable(list, {
+                group: 'cards',
+                animation: 150,
+                ghostClass: 'dragging',
+                onEnd: async (evt) => {
+                    const itemEl = evt.item;
+                    const cardId = itemEl.dataset.cardId;
+                    const newColumnId = evt.to.dataset.columnId;
+                    const newPosition = evt.newIndex;
+
+                    try {
+                        await apiCall(`/cards/${cardId}/move`, 'PUT', {
+                            column_id: newColumnId,
+                            position: newPosition
+                        });
+                        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+                    } catch (error) {
+                        console.error('Failed to move card:', error);
+                        loadBoard(currentBoard.id);
+                    }
+                }
+            });
+        });
+    }
+
+    async function sortColumnByVotes(columnId) {
+        const column = currentBoard.columns.find(c => c.id === columnId);
+        if (!column || !column.cards) return;
+
+        const sortedCards = [...column.cards].sort((a, b) => {
+            const scoreA = (a.votes?.filter(v => v.vote_type === 'like').length || 0) - (a.votes?.filter(v => v.vote_type === 'dislike').length || 0);
+            const scoreB = (b.votes?.filter(v => v.vote_type === 'like').length || 0) - (b.votes?.filter(v => v.vote_type === 'dislike').length || 0);
+            return scoreB - scoreA;
+        });
+
+        try {
+            for (let i = 0; i < sortedCards.length; i++) {
+                const card = sortedCards[i];
+                if (card.position !== i) {
+                    await apiCall(`/cards/${card.id}/move`, 'PUT', {
+                        column_id: columnId,
+                        position: i
                     });
-                    sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-                } catch (error) {
-                    console.error('Failed to move card:', error);
-                    loadBoard(currentBoard.id);
                 }
             }
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+            loadBoard(currentBoard.id);
+        } catch (error) {
+            console.error('Failed to sort column:', error);
+            alert('Failed to sort column: ' + error.message);
+        }
+    }
+
+    // Card Management
+    async function createCard(columnId, content) {
+        try {
+            await apiCall(`/columns/${columnId}/cards`, 'POST', { content, position: 0 });
+            await loadBoard(currentBoard.id);
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        } catch (error) {
+            console.error('Failed to create card:', error);
+            alert('Failed to create card: ' + error.message);
+        }
+    }
+
+    async function deleteCard(cardId) {
+        if (!confirm('Are you sure you want to delete this card?')) return;
+
+        try {
+            await apiCall(`/cards/${cardId}`, 'DELETE');
+            await loadBoard(currentBoard.id);
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        } catch (error) {
+            console.error('Failed to delete card:', error);
+            alert('Failed to delete card: ' + error.message);
+        }
+    }
+
+    async function voteCard(cardId, voteType) {
+        try {
+            await apiCall(`/cards/${cardId}/votes`, 'POST', {
+                user_name: currentUser,
+                vote_type: voteType
+            });
+            await loadBoard(currentBoard.id);
+            sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        } catch (error) {
+            console.error('Failed to vote:', error);
+            alert(error.message);
+        }
+    }
+
+    // Column Management
+    async function createColumn(name, position) {
+        try {
+            await apiCall(`/boards/${currentBoard.id}/columns`, 'POST', { name, position });
+            await loadBoard(currentBoard.id);
+        } catch (error) {
+            console.error('Failed to create column:', error);
+            alert('Failed to create column: ' + error.message);
+        }
+    }
+
+    async function updateColumn(columnId, name) {
+        try {
+            await apiCall(`/columns/${columnId}`, 'PUT', { name });
+            await loadBoard(currentBoard.id);
+        } catch (error) {
+            console.error('Failed to update column:', error);
+            alert('Failed to update column: ' + error.message);
+        }
+    }
+
+    async function deleteColumn(columnId) {
+        if (!confirm('Are you sure you want to delete this column? All cards will be deleted.')) return;
+
+        try {
+            await apiCall(`/columns/${columnId}`, 'DELETE');
+            await loadBoard(currentBoard.id);
+        } catch (error) {
+            console.error('Failed to delete column:', error);
+            alert('Failed to delete column: ' + error.message);
+        }
+    }
+
+    // Timer Management
+    function startTimer() {
+        const minutes = parseInt(document.getElementById('timerMinutes').value) || 5;
+        timerSeconds = minutes * 60;
+
+        sendWebSocketMessage('timer_start', { seconds: timerSeconds });
+        startTimerUI(timerSeconds);
+    }
+
+    function startTimerUI(seconds) {
+        timerSeconds = seconds;
+        document.getElementById('startTimerBtn').style.display = 'none';
+        document.getElementById('stopTimerBtn').style.display = 'inline-block';
+
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            updateTimerDisplay(timerSeconds);
+            sendWebSocketMessage('timer_update', { seconds: timerSeconds });
+
+            if (timerSeconds <= 0) {
+                stopTimer();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        sendWebSocketMessage('timer_stop', {});
+        stopTimerUI();
+    }
+
+    function stopTimerUI() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        document.getElementById('startTimerBtn').style.display = 'inline-block';
+        document.getElementById('stopTimerBtn').style.display = 'none';
+        timerSeconds = 0;
+        updateTimerDisplay(0);
+    }
+
+    function updateTimerDisplay(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        document.getElementById('timerDisplay').textContent =
+            `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function switchPhase() {
+        currentPhase = currentPhase === 'input' ? 'voting' : 'input';
+        updatePhase(currentPhase);
+        sendWebSocketMessage('phase_change', { phase: currentPhase });
+    }
+
+    function updatePhase(phase) {
+        currentPhase = phase;
+        const phaseLabel = phase === 'input' ? 'Input Phase' : 'Voting Phase';
+        document.getElementById('currentPhase').textContent = phaseLabel;
+        document.getElementById('switchPhaseBtn').textContent =
+            phase === 'input' ? 'Switch to Voting' : 'Switch to Input';
+
+        if (currentBoard) {
+            loadBoard(currentBoard.id);
+        }
+    }
+
+    // Modal Management
+    function openNewCardModal(columnId) {
+        document.getElementById('cardColumnId').value = columnId;
+        document.getElementById('newCardModal').style.display = 'block';
+        document.getElementById('cardContent').value = '';
+        document.getElementById('cardContent').focus();
+    }
+
+    function openEditColumnModal(columnId, currentName) {
+        document.getElementById('editColumnId').value = columnId;
+        document.getElementById('columnNameEdit').value = currentName;
+        document.getElementById('editColumnModal').style.display = 'block';
+        document.getElementById('columnNameEdit').focus();
+    }
+
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (modal.id === 'userModal' && !currentUser) return;
+            modal.style.display = 'none';
         });
-    });
-}
+    }
 
-async function sortColumnByVotes(columnId) {
-    const column = currentBoard.columns.find(c => c.id === columnId);
-    if (!column || !column.cards) return;
+    // Utility Functions
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
-    const sortedCards = [...column.cards].sort((a, b) => {
-        const scoreA = (a.votes?.filter(v => v.vote_type === 'like').length || 0) - (a.votes?.filter(v => v.vote_type === 'dislike').length || 0);
-        const scoreB = (b.votes?.filter(v => v.vote_type === 'like').length || 0) - (b.votes?.filter(v => v.vote_type === 'dislike').length || 0);
-        return scoreB - scoreA;
-    });
+    // CSV Export Function
+    async function exportBoardToCSV(boardId) {
+        try {
+            const board = await apiCall(`/boards/${boardId}`);
 
-    try {
-        for (let i = 0; i < sortedCards.length; i++) {
-            const card = sortedCards[i];
-            if (card.position !== i) {
-                await apiCall(`/cards/${card.id}/move`, 'PUT', {
-                    column_id: columnId,
-                    position: i
+            const rows = [
+                ['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']
+            ];
+
+            if (board.columns && Array.isArray(board.columns)) {
+                board.columns.forEach(column => {
+                    const cards = (column.cards || []).filter(c => !c.merged_with_id);
+
+                    cards.forEach(card => {
+                        const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
+                        const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
+                        const mergedCount = card.merged_cards?.length || 0;
+
+                        rows.push([
+                            column.name,
+                            card.content,
+                            likes,
+                            dislikes,
+                            mergedCount
+                        ]);
+                    });
                 });
+
+                const csvContent = rows.map(row =>
+                    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+                ).join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error('Failed to export CSV:', error);
+            alert('Failed to export: ' + error.message);
+        }
+    }
+
+    // Make functions global for onclick handlers
+    window.loadBoard = loadBoard;
+    window.deleteBoard = deleteBoard;
+    window.updateBoardStatus = updateBoardStatus;
+    window.voteCard = voteCard;
+    window.deleteCard = deleteCard;
+    window.exportBoardToCSV = exportBoardToCSV;
+    window.openUnmergeModal = openUnmergeModal;
+    window.unmergeCard = unmergeCard;
+    window.selectCard = selectCard;
+
+    // Event Listeners - Initialize app when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize the app
+        initApp();
+
+        // User Form Handler
+        document.getElementById('userForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userNameInput').value.trim();
+            if (name) {
+                currentUser = name;
+                localStorage.setItem('retroUser', name);
+                closeModals();
+                updateUserDisplay();
+                showDashboard();
+            }
+        });
+
+        document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+
+        document.getElementById('newBoardBtn').addEventListener('click', () => {
+            document.getElementById('newBoardModal').style.display = 'block';
+        });
+
+        document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('boardName').value;
+            const columnsText = document.getElementById('columnNames').value.trim();
+            const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
+
+            await createBoard(name, columns);
+            closeModals();
+        });
+
+        document.getElementById('newCardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const columnId = document.getElementById('cardColumnId').value;
+            const content = document.getElementById('cardContent').value;
+
+            await createCard(columnId, content);
+            closeModals();
+        });
+
+        document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const columnId = document.getElementById('editColumnId').value;
+            const name = document.getElementById('columnNameEdit').value;
+
+            await updateColumn(columnId, name);
+            closeModals();
+        });
+
+        document.getElementById('addColumnBtn').addEventListener('click', async () => {
+            const name = prompt('Enter column name:');
+            if (name) {
+                timerSeconds--;
+                updateTimerDisplay(timerSeconds);
+                sendWebSocketMessage('timer_update', { seconds: timerSeconds });
+
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                }
+            }, 1000);
+    }
+
+    function stopTimer() {
+            sendWebSocketMessage('timer_stop', {});
+            stopTimerUI();
+        }
+
+    function stopTimerUI() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('stopTimerBtn').style.display = 'none';
+            timerSeconds = 0;
+            updateTimerDisplay(0);
+        }
+
+    function updateTimerDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('timerDisplay').textContent =
+                `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+    function switchPhase() {
+            currentPhase = currentPhase === 'input' ? 'voting' : 'input';
+            updatePhase(currentPhase);
+            sendWebSocketMessage('phase_change', { phase: currentPhase });
+        }
+
+    function updatePhase(phase) {
+            currentPhase = phase;
+            const phaseLabel = phase === 'input' ? 'Input Phase' : 'Voting Phase';
+            document.getElementById('currentPhase').textContent = phaseLabel;
+            document.getElementById('switchPhaseBtn').textContent =
+                phase === 'input' ? 'Switch to Voting' : 'Switch to Input';
+
+            if (currentBoard) {
+                loadBoard(currentBoard.id);
             }
         }
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-        loadBoard(currentBoard.id);
-    } catch (error) {
-        console.error('Failed to sort column:', error);
-        alert('Failed to sort column: ' + error.message);
-    }
-}
 
-// Card Management
-async function createCard(columnId, content) {
-    try {
-        await apiCall(`/columns/${columnId}/cards`, 'POST', { content, position: 0 });
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-    } catch (error) {
-        console.error('Failed to create card:', error);
-        alert('Failed to create card: ' + error.message);
-    }
-}
-
-async function deleteCard(cardId) {
-    if (!confirm('Are you sure you want to delete this card?')) return;
-
-    try {
-        await apiCall(`/cards/${cardId}`, 'DELETE');
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-    } catch (error) {
-        console.error('Failed to delete card:', error);
-        alert('Failed to delete card: ' + error.message);
-    }
-}
-
-async function voteCard(cardId, voteType) {
-    try {
-        await apiCall(`/cards/${cardId}/votes`, 'POST', {
-            user_name: currentUser,
-            vote_type: voteType
-        });
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-    } catch (error) {
-        console.error('Failed to vote:', error);
-        alert(error.message);
-    }
-}
-
-// Column Management
-async function createColumn(name, position) {
-    try {
-        await apiCall(`/boards/${currentBoard.id}/columns`, 'POST', { name, position });
-        await loadBoard(currentBoard.id);
-    } catch (error) {
-        console.error('Failed to create column:', error);
-        alert('Failed to create column: ' + error.message);
-    }
-}
-
-async function updateColumn(columnId, name) {
-    try {
-        await apiCall(`/columns/${columnId}`, 'PUT', { name });
-        await loadBoard(currentBoard.id);
-    } catch (error) {
-        console.error('Failed to update column:', error);
-        alert('Failed to update column: ' + error.message);
-    }
-}
-
-async function deleteColumn(columnId) {
-    if (!confirm('Are you sure you want to delete this column? All cards will be deleted.')) return;
-
-    try {
-        await apiCall(`/columns/${columnId}`, 'DELETE');
-        await loadBoard(currentBoard.id);
-    } catch (error) {
-        console.error('Failed to delete column:', error);
-        alert('Failed to delete column: ' + error.message);
-    }
-}
-
-// Timer Management
-function startTimer() {
-    const minutes = parseInt(document.getElementById('timerMinutes').value) || 5;
-    timerSeconds = minutes * 60;
-
-    sendWebSocketMessage('timer_start', { seconds: timerSeconds });
-    startTimerUI(timerSeconds);
-}
-
-function startTimerUI(seconds) {
-    timerSeconds = seconds;
-    document.getElementById('startTimerBtn').style.display = 'none';
-    document.getElementById('stopTimerBtn').style.display = 'inline-block';
-
-    if (timerInterval) clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-        timerSeconds--;
-        updateTimerDisplay(timerSeconds);
-        sendWebSocketMessage('timer_update', { seconds: timerSeconds });
-
-        if (timerSeconds <= 0) {
-            stopTimer();
+    // Modal Management
+    function openNewCardModal(columnId) {
+            document.getElementById('cardColumnId').value = columnId;
+            document.getElementById('newCardModal').style.display = 'block';
+            document.getElementById('cardContent').value = '';
+            document.getElementById('cardContent').focus();
         }
-    }, 1000);
-}
+
+    function openEditColumnModal(columnId, currentName) {
+            document.getElementById('editColumnId').value = columnId;
+            document.getElementById('columnNameEdit').value = currentName;
+            document.getElementById('editColumnModal').style.display = 'block';
+            document.getElementById('columnNameEdit').focus();
+        }
+
+    function closeModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (modal.id === 'userModal' && !currentUser) return;
+                modal.style.display = 'none';
+            });
+        }
+
+    // Utility Functions
+    function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+    // CSV Export Function
+    async function exportBoardToCSV(boardId) {
+            try {
+                const board = await apiCall(`/boards/${boardId}`);
+
+                const rows = [
+                    ['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']
+                ];
+
+                if (board.columns && Array.isArray(board.columns)) {
+                    board.columns.forEach(column => {
+                        const cards = (column.cards || []).filter(c => !c.merged_with_id);
+
+                        cards.forEach(card => {
+                            const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
+                            const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
+                            const mergedCount = card.merged_cards?.length || 0;
+
+                            rows.push([
+                                column.name,
+                                card.content,
+                                likes,
+                                dislikes,
+                                mergedCount
+                            ]);
+                        });
+                    });
+
+                    const csvContent = rows.map(row =>
+                        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+                    ).join('\n');
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            } catch (error) {
+                console.error('Failed to export CSV:', error);
+                alert('Failed to export: ' + error.message);
+            }
+        }
+
+    // Make functions global for onclick handlers
+    window.loadBoard = loadBoard;
+    window.deleteBoard = deleteBoard;
+    window.updateBoardStatus = updateBoardStatus;
+    window.voteCard = voteCard;
+    window.deleteCard = deleteCard;
+    window.exportBoardToCSV = exportBoardToCSV;
+    window.openUnmergeModal = openUnmergeModal;
+    window.unmergeCard = unmergeCard;
+    window.selectCard = selectCard;
+
+    // Event Listeners - Initialize app when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize the app
+        initApp();
+
+        // User Form Handler
+        document.getElementById('userForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userNameInput').value.trim();
+            if (name) {
+                currentUser = name;
+                localStorage.setItem('retroUser', name);
+                closeModals();
+                updateUserDisplay();
+                showDashboard();
+            }
+        });
+
+        document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+
+        document.getElementById('newBoardBtn').addEventListener('click', () => {
+            document.getElementById('newBoardModal').style.display = 'block';
+        });
+
+        document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('boardName').value;
+            const columnsText = document.getElementById('columnNames').value.trim();
+            const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
+
+            await createBoard(name, columns);
+            closeModals();
+        });
+
+        document.getElementById('newCardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const columnId = document.getElementById('cardColumnId').value;
+            const content = document.getElementById('cardContent').value;
+
+            await createCard(columnId, content);
+            closeModals();
+        });
+
+        document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const columnId = document.getElementById('editColumnId').value;
+            const name = document.getElementById('columnNameEdit').value;
+
+            await updateColumn(columnId, name);
+            closeModals();
+        });
+
+        document.getElementById('addColumnBtn').addEventListener('click', async () => {
+            const name = prompt('Enter column name:');
+            if (name) {
+                const position = currentBoard.columns.length;
+                await createColumn(name, position);
+            }
+        });
+
+        stopTimer();
+    }
+            }, 1000);
+    }
 
 function stopTimer() {
     sendWebSocketMessage('timer_stop', {});
@@ -833,6 +1379,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-
-

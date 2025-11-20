@@ -13,8 +13,9 @@ import (
 // CreateBoard creates a new retrospective board
 func CreateBoard(c *gin.Context) {
 	var input struct {
-		Name    string   `json:"name" binding:"required"`
-		Columns []string `json:"columns"`
+		Name    string     `json:"name" binding:"required"`
+		Columns []string   `json:"columns"`
+		TeamID  *uuid.UUID `json:"team_id"` // Optional TeamID
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -26,6 +27,7 @@ func CreateBoard(c *gin.Context) {
 	board := models.Board{
 		Name:   input.Name,
 		Status: "active",
+		TeamID: input.TeamID,
 	}
 
 	if err := database.DB.Create(&board).Error; err != nil {
@@ -117,7 +119,28 @@ func GetBoard(c *gin.Context) {
 // ListBoards retrieves all boards
 func ListBoards(c *gin.Context) {
 	var boards []models.Board
-	if err := database.DB.Order("created_at DESC").Find(&boards).Error; err != nil {
+	query := database.DB.Order("created_at DESC")
+
+	// Filter by TeamID if provided
+	teamIDStr := c.Query("team_id")
+	if teamIDStr != "" {
+		if teamIDStr == "null" {
+			// Explicitly fetch global boards (TeamID is NULL)
+			query = query.Where("team_id IS NULL")
+		} else {
+			// Fetch boards for specific team
+			teamID, err := uuid.Parse(teamIDStr)
+			if err == nil {
+				query = query.Where("team_id = ?", teamID)
+			}
+		}
+	} else {
+		// Default behavior: Fetch ONLY global boards (TeamID is NULL)
+		// This ensures backward compatibility and separation
+		query = query.Where("team_id IS NULL")
+	}
+
+	if err := query.Find(&boards).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch boards"})
 		return
 	}

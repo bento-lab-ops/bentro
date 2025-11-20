@@ -15,125 +15,24 @@
     <div class="container">
         <header class="header">
             <div class="header-brand">
-                <div class="brand-logo-title">
-                    <img src="/static/bentrologo.png" alt="BenTro Logo" class="header-logo">
-                    <h1 class="title">BenTro</h1>
-                </div>
-                <p class="tagline">Retrospectives, packed perfectly!</p>
-            </div>
-            <div class="header-controls">
-                <span id="userDisplay" class="user-display"></span>
-                <button id="editUserBtn" class="btn-icon" title="Edit Name" style="display: none;">✏️</button>
-                <button id="helpBtn" class="btn-icon" title="Help">?</button>
-                <button id="dashboardBtn" class="btn btn-outline" style="display: none;">Dashboard</button>
-                <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
-            </div>
-        </header>
-
-        <!-- Dashboard View -->
-        <div id="dashboardView" class="dashboard-view">
-            <h2>Your Boards</h2>
-            <div id="dashboardGrid" class="dashboard-grid">
-                <!-- Boards will be loaded here -->
-            </div>
-
-            <div id="emptyDashboard" class="welcome-screen" style="display: none;">
-                <div class="welcome-content">
-                    <h2>Welcome to BenTro</h2>
-                    <p>Create a new board to get started.</p>
-                    <button id="createFirstBoard" class="btn btn-primary btn-large">Create Your First Board</button>
+                <h2>About BenTro 🎯</h2>
+                <div class="help-content">
+                    <p><strong>BenTro</strong> = <em>Bento</em> + <em>Retrospective</em></p>
+                    <p class="tagline-help">Retrospectives, packed perfectly!</p>
+                    <p>A friendly retrospective tool created to make team collaboration effortless!</p>
+                    <hr>
+                    <h3>Quick Start</h3>
+                    <ul>
+                        <li>Create a board with custom columns</li>
+                        <li>Add cards during Input Phase</li>
+                        <li>Switch to Voting Phase to vote on cards</li>
+                        <li>Click "Select" on a card, then "Merge Here" on another to combine similar ideas</li>
+                        <li>Export your retrospective data as CSV</li>
+                    </ul>
+                    <hr>
+                    <p><small>Version: 0.2.0-beta.1</small></p>
                 </div>
             </div>
-        </div>
-
-        <!-- Board View -->
-        <div id="boardContainer" class="board-container" style="display: none;">
-            <div id="readOnlyBanner" class="read-only-banner" style="display: none;">
-                ⚠️ This board is finished (Read Only)
-            </div>
-
-            <!-- Timer Section -->
-            <div class="timer-section">
-                <div class="phase-info">
-                    <span class="phase-label">Current Phase:</span>
-                    <span id="currentPhase" class="phase-name">Input Phase</span>
-                </div>
-                <div class="timer-display">
-                    <span id="timerDisplay" class="timer-text">00:00</span>
-                </div>
-                <div class="timer-controls">
-                    <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
-                        value="5">
-                    <button id="startTimerBtn" class="btn btn-success">Start Timer</button>
-                    <button id="stopTimerBtn" class="btn btn-danger" style="display: none;">Stop Timer</button>
-                    <button id="switchPhaseBtn" class="btn btn-secondary">Switch to Voting</button>
-                    <button id="exportBoardBtn" class="btn btn-secondary">📊 Export CSV</button>
-                    <button id="finishRetroBtn" class="btn btn-danger">Finish Retro</button>
-                    <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;">Re-open Retro</button>
-                </div>
-            </div>
-
-            <!-- Columns Section -->
-            <div id="columnsContainer" class="columns-container">
-                <!-- Columns will be dynamically added here -->
-            </div>
-
-            <!-- Add Column Button -->
-            <div class="add-column-section">
-                <button id="addColumnBtn" class="btn btn-outline">+ Add Column</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Returning User Confirmation -->
-    <div id="returningUserModal" class="modal">
-        <div class="modal-content">
-            <h2>Welcome Back! 👋</h2>
-            <p>Continue as <strong id="returningUserName"></strong>?</p>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button id="continueAsUserBtn" class="btn btn-primary" style="flex: 1;">Continue</button>
-                <button id="changeUserBtn" class="btn btn-outline" style="flex: 1;">Change Name</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for User Identity -->
-    <div id="userModal" class="modal" style="display: block;">
-        <div class="modal-content">
-            <h2>Welcome!</h2>
-            <p>Please enter your name to join the session.</p>
-            <form id="userForm">
-                <div class="form-group">
-                    <label for="userNameInput">Your Name</label>
-                    <input type="text" id="userNameInput" class="form-input" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Join Retrospective</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for Help/About -->
-    <div id="helpModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>About BenTro 🎯</h2>
-            <div class="help-content">
-                <p><strong>BenTro</strong> = <em>Bento</em> + <em>Retrospective</em></p>
-                <p class="tagline-help">Retrospectives, packed perfectly!</p>
-                <p>A friendly retrospective tool created to make team collaboration effortless!</p>
-                <hr>
-                <h3>Quick Start</h3>
-                <ul>
-                    <li>Create a board with custom columns</li>
-                    <li>Add cards during Input Phase</li>
-                    <li>Switch to Voting Phase to vote on cards</li>
-                    <li>Click "Select" on a card, then "Merge Here" on another to combine similar ideas</li>
-                    <li>Export your retrospective data as CSV</li>
-                </ul>
-                <hr>
-                <p><small>Version: 0.2.0-beta.1</small></p>
-            </div>
-        </div>
     </div>
 
     <!-- Modal for New Board -->

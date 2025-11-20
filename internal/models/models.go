@@ -7,14 +7,40 @@ import (
 	"gorm.io/gorm"
 )
 
+// Team represents a group of users
+type Team struct {
+	ID        uuid.UUID  `gorm:"type:uuid;primary_key" json:"id"`
+	Name      string     `gorm:"unique;not null" json:"name"`
+	CreatedAt time.Time  `json:"created_at"`
+	Boards    []Board    `gorm:"foreignKey:TeamID" json:"boards,omitempty"`
+	Members   []UserTeam `gorm:"foreignKey:TeamID" json:"members,omitempty"`
+}
+
+// BeforeCreate hook to generate UUID
+func (t *Team) BeforeCreate(tx *gorm.DB) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	return nil
+}
+
+// UserTeam represents the many-to-many relationship between users and teams
+type UserTeam struct {
+	UserID    string    `gorm:"primary_key" json:"user_id"` // Using username
+	TeamID    uuid.UUID `gorm:"type:uuid;primary_key" json:"team_id"`
+	Role      string    `gorm:"default:'member'" json:"role"` // admin, member
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // Board represents a retrospective board
 type Board struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	Name      string    `gorm:"not null" json:"name"`
-	Status    string    `gorm:"default:'active'" json:"status"` // active, finished
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Columns   []Column  `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
+	ID        uuid.UUID  `gorm:"type:uuid;primary_key" json:"id"`
+	Name      string     `gorm:"not null" json:"name"`
+	TeamID    *uuid.UUID `gorm:"type:uuid;index" json:"team_id,omitempty"` // Nullable
+	Status    string     `gorm:"default:'active'" json:"status"`           // active, finished
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Columns   []Column   `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
 }
 
 // BeforeCreate hook to generate UUID
