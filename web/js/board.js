@@ -1,136 +1,5 @@
-// API Base URL
-const API_BASE = '/api';
-const WS_URL = `ws://${window.location.host}/ws`;
-
-// Global state
-let currentBoard = null;
-let currentPhase = 'input'; // 'input' or 'voting'
-let timerInterval = null;
-let timerSeconds = 0;
-let ws = null;
-let currentUser = localStorage.getItem('retroUser');
-let selectedCardId = null; // For Select-to-Merge
-
-// Initialize WebSocket
-function initWebSocket() {
-    ws = new WebSocket(WS_URL);
-
-    ws.onopen = () => {
-        console.log('WebSocket connected');
-    };
-
-    ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        handleWebSocketMessage(message);
-    };
-
-    ws.onclose = () => {
-        console.log('WebSocket disconnected, reconnecting...');
-        setTimeout(initWebSocket, 3000);
-    };
-
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-}
-
-function handleWebSocketMessage(message) {
-    switch (message.type) {
-        case 'timer_update':
-            updateTimerDisplay(message.data.seconds);
-            break;
-        case 'timer_start':
-            startTimerUI(message.data.seconds);
-            break;
-        case 'timer_stop':
-            stopTimerUI();
-            break;
-        case 'phase_change':
-            updatePhase(message.data.phase);
-            break;
-        case 'board_update':
-            if (document.getElementById('dashboardView').style.display !== 'none') {
-                loadBoards();
-            }
-            if (currentBoard && currentBoard.id === message.data.board_id) {
-                loadBoard(currentBoard.id);
-            }
-            break;
-    }
-}
-
-function sendWebSocketMessage(type, data) {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type, data }));
-    }
-}
-
-// API Functions
-async function apiCall(endpoint, method = 'GET', body = null) {
-    const options = {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    };
-
-    if (body) {
-        options.body = JSON.stringify(body);
-    }
-
-    const response = await fetch(`${API_BASE}${endpoint}`, options);
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'API request failed');
-    }
-
-    return response.json();
-}
-
-// App Initialization
-function initApp() {
-    initWebSocket();
-
-    if (!currentUser) {
-        document.getElementById('userModal').style.display = 'block';
-    } else {
-        showReturningUserModal(currentUser);
-    }
-}
-
-function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
-    document.getElementById('returningUserModal').style.display = 'block';
-}
-
-function confirmReturningUser() {
-    document.getElementById('returningUserModal').style.display = 'none';
-    updateUserDisplay();
-    document.getElementById('editUserBtn').style.display = 'inline-block';
-    showDashboard();
-}
-
-function openEditUserModal() {
-    const modal = document.getElementById('userModal');
-    document.getElementById('userNameInput').value = currentUser;
-    modal.style.display = 'block';
-}
-
-function updateUserDisplay() {
-    document.getElementById('userDisplay').textContent = `👤 ${currentUser}`;
-    document.getElementById('editUserBtn').style.display = 'inline-block';
-}
-
-function showDashboard() {
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('boardContainer').style.display = 'none';
-    document.getElementById('dashboardBtn').style.display = 'none';
-    currentBoard = null;
-    loadBoards();
-}
-
 // Board Management
+
 async function loadBoards() {
     try {
         const boards = await apiCall('/boards');
@@ -189,7 +58,7 @@ async function createBoard(name, columns) {
 async function loadBoard(boardId) {
     try {
         const board = await apiCall(`/boards/${boardId}`);
-        currentBoard = board;
+        window.currentBoard = board;
 
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'block';
@@ -207,7 +76,7 @@ async function loadBoard(boardId) {
 async function updateBoardStatus(boardId, status) {
     try {
         await apiCall(`/boards/${boardId}/status`, 'PUT', { status });
-        if (currentBoard && currentBoard.id === boardId) {
+        if (window.currentBoard && window.currentBoard.id === boardId) {
             loadBoard(boardId);
         } else {
             loadBoards();
@@ -296,8 +165,8 @@ function createCardHTML(card) {
     const votes = card.votes || [];
     const likes = votes.filter(v => v.vote_type === 'like').length;
     const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
-    const isSelected = selectedCardId === card.id ? 'selected' : '';
-    const userVoted = votes.some(v => v.user_name === currentUser);
+    const isSelected = window.selectedCardId === card.id ? 'selected' : '';
+    const userVoted = votes.some(v => v.user_name === window.currentUser);
 
     let mergedContentHTML = '';
     if (card.merged_cards && card.merged_cards.length > 0) {
@@ -313,8 +182,8 @@ function createCardHTML(card) {
     }
 
     let mergeActionHTML = '';
-    if (selectedCardId) {
-        if (selectedCardId === card.id) {
+    if (window.selectedCardId) {
+        if (window.selectedCardId === card.id) {
             mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
         } else {
             mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
@@ -340,7 +209,7 @@ function createCardHTML(card) {
                 </div>
                 <div class="card-actions">
                     ${mergeActionHTML}
-                    ${currentPhase === 'voting' && !userVoted ? `
+                    ${window.currentPhase === 'voting' && !userVoted ? `
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'like')">👍</button>
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'dislike')">👎</button>
                     ` : ''}
@@ -353,28 +222,28 @@ function createCardHTML(card) {
 
 // Select-to-Merge Logic
 function selectCard(cardId) {
-    selectedCardId = cardId;
-    renderBoard(currentBoard);
+    window.selectedCardId = cardId;
+    renderBoard(window.currentBoard);
 }
 
 function cancelSelection() {
-    selectedCardId = null;
-    renderBoard(currentBoard);
+    window.selectedCardId = null;
+    renderBoard(window.currentBoard);
 }
 
 async function mergeCard(targetCardId) {
-    if (!selectedCardId) return;
+    if (!window.selectedCardId) return;
 
-    const sourceCardId = selectedCardId;
+    const sourceCardId = window.selectedCardId;
     if (sourceCardId === targetCardId) return;
 
     try {
         await apiCall(`/cards/${sourceCardId}/merge`, 'POST', {
             target_card_id: targetCardId
         });
-        selectedCardId = null;
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-        await loadBoard(currentBoard.id);
+        window.selectedCardId = null;
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+        await loadBoard(window.currentBoard.id);
     } catch (error) {
         console.error('Failed to merge card:', error);
         alert('Failed to merge: ' + error.message);
@@ -408,8 +277,8 @@ async function unmergeCard(cardId) {
     try {
         await apiCall(`/cards/${cardId}/unmerge`, 'POST');
         document.getElementById('unmergeModal').style.display = 'none';
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
     } catch (error) {
         console.error('Failed to unmerge card:', error);
         alert('Failed to unmerge: ' + error.message);
@@ -417,7 +286,7 @@ async function unmergeCard(cardId) {
 }
 
 function findCardById(cardId) {
-    for (const column of currentBoard.columns) {
+    for (const column of window.currentBoard.columns) {
         if (column.cards) {
             const card = column.cards.find(c => c.id === cardId);
             if (card) return card;
@@ -446,10 +315,10 @@ function initializeDragAndDrop() {
                         column_id: newColumnId,
                         position: newPosition
                     });
-                    sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+                    sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
                 } catch (error) {
                     console.error('Failed to move card:', error);
-                    loadBoard(currentBoard.id);
+                    loadBoard(window.currentBoard.id);
                 }
             }
         });
@@ -457,7 +326,7 @@ function initializeDragAndDrop() {
 }
 
 async function sortColumnByVotes(columnId) {
-    const column = currentBoard.columns.find(c => c.id === columnId);
+    const column = window.currentBoard.columns.find(c => c.id === columnId);
     if (!column || !column.cards) return;
 
     const sortedCards = [...column.cards].sort((a, b) => {
@@ -476,8 +345,8 @@ async function sortColumnByVotes(columnId) {
                 });
             }
         }
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
-        loadBoard(currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+        loadBoard(window.currentBoard.id);
     } catch (error) {
         console.error('Failed to sort column:', error);
         alert('Failed to sort column: ' + error.message);
@@ -488,8 +357,8 @@ async function sortColumnByVotes(columnId) {
 async function createCard(columnId, content) {
     try {
         await apiCall(`/columns/${columnId}/cards`, 'POST', { content, position: 0 });
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
     } catch (error) {
         console.error('Failed to create card:', error);
         alert('Failed to create card: ' + error.message);
@@ -501,8 +370,8 @@ async function deleteCard(cardId) {
 
     try {
         await apiCall(`/cards/${cardId}`, 'DELETE');
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
     } catch (error) {
         console.error('Failed to delete card:', error);
         alert('Failed to delete card: ' + error.message);
@@ -512,11 +381,11 @@ async function deleteCard(cardId) {
 async function voteCard(cardId, voteType) {
     try {
         await apiCall(`/cards/${cardId}/votes`, 'POST', {
-            user_name: currentUser,
+            user_name: window.currentUser,
             vote_type: voteType
         });
-        await loadBoard(currentBoard.id);
-        sendWebSocketMessage('board_update', { board_id: currentBoard.id });
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
     } catch (error) {
         console.error('Failed to vote:', error);
         alert(error.message);
@@ -526,8 +395,8 @@ async function voteCard(cardId, voteType) {
 // Column Management
 async function createColumn(name, position) {
     try {
-        await apiCall(`/boards/${currentBoard.id}/columns`, 'POST', { name, position });
-        await loadBoard(currentBoard.id);
+        await apiCall(`/boards/${window.currentBoard.id}/columns`, 'POST', { name, position });
+        await loadBoard(window.currentBoard.id);
     } catch (error) {
         console.error('Failed to create column:', error);
         alert('Failed to create column: ' + error.message);
@@ -537,7 +406,7 @@ async function createColumn(name, position) {
 async function updateColumn(columnId, name) {
     try {
         await apiCall(`/columns/${columnId}`, 'PUT', { name });
-        await loadBoard(currentBoard.id);
+        await loadBoard(window.currentBoard.id);
     } catch (error) {
         console.error('Failed to update column:', error);
         alert('Failed to update column: ' + error.message);
@@ -549,79 +418,10 @@ async function deleteColumn(columnId) {
 
     try {
         await apiCall(`/columns/${columnId}`, 'DELETE');
-        await loadBoard(currentBoard.id);
+        await loadBoard(window.currentBoard.id);
     } catch (error) {
         console.error('Failed to delete column:', error);
         alert('Failed to delete column: ' + error.message);
-    }
-}
-
-// Timer Management
-function startTimer() {
-    const minutes = parseInt(document.getElementById('timerMinutes').value) || 5;
-    timerSeconds = minutes * 60;
-
-    sendWebSocketMessage('timer_start', { seconds: timerSeconds });
-    startTimerUI(timerSeconds);
-}
-
-function startTimerUI(seconds) {
-    timerSeconds = seconds;
-    document.getElementById('startTimerBtn').style.display = 'none';
-    document.getElementById('stopTimerBtn').style.display = 'inline-block';
-
-    if (timerInterval) clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-        timerSeconds--;
-        updateTimerDisplay(timerSeconds);
-        sendWebSocketMessage('timer_update', { seconds: timerSeconds });
-
-        if (timerSeconds <= 0) {
-            stopTimer();
-        }
-    }, 1000);
-}
-
-function stopTimer() {
-    sendWebSocketMessage('timer_stop', {});
-    stopTimerUI();
-}
-
-function stopTimerUI() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    document.getElementById('startTimerBtn').style.display = 'inline-block';
-    document.getElementById('stopTimerBtn').style.display = 'none';
-    timerSeconds = 0;
-    updateTimerDisplay(0);
-}
-
-function updateTimerDisplay(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    document.getElementById('timerDisplay').textContent =
-        `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-function switchPhase() {
-    currentPhase = currentPhase === 'input' ? 'voting' : 'input';
-    updatePhase(currentPhase);
-    sendWebSocketMessage('phase_change', { phase: currentPhase });
-}
-
-function updatePhase(phase) {
-    currentPhase = phase;
-    const phaseLabel = phase === 'input' ? 'Input Phase' : 'Voting Phase';
-    document.getElementById('currentPhase').textContent = phaseLabel;
-    document.getElementById('switchPhaseBtn').textContent =
-        phase === 'input' ? 'Switch to Voting' : 'Switch to Input';
-
-    if (currentBoard) {
-        loadBoard(currentBoard.id);
     }
 }
 
@@ -640,44 +440,19 @@ function openEditColumnModal(columnId, currentName) {
     document.getElementById('columnNameEdit').focus();
 }
 
-function closeModals() {
-    document.querySelectorAll('.modal').forEach(modal => {
-        if (modal.id === 'userModal' && !currentUser) return;
-        modal.style.display = 'none';
-    });
-}
-
-// Utility Functions
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // CSV Export Function
 async function exportBoardToCSV(boardId) {
     try {
         const board = await apiCall(`/boards/${boardId}`);
-
-        const rows = [
-            ['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']
-        ];
+        const rows = [['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']];
 
         board.columns.forEach(column => {
-            const cards = column.cards.filter(c => !c.merged_with_id);
-
+            const cards = (column.cards || []).filter(c => !c.merged_with_id);
             cards.forEach(card => {
                 const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
                 const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
                 const mergedCount = card.merged_cards?.length || 0;
-
-                rows.push([
-                    column.name,
-                    card.content,
-                    likes,
-                    dislikes,
-                    mergedCount
-                ]);
+                rows.push([column.name, card.content, likes, dislikes, mergedCount]);
             });
         });
 
@@ -687,8 +462,7 @@ async function exportBoardToCSV(boardId) {
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
+        link.setAttribute('href', URL.createObjectURL(blob));
         link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
@@ -710,149 +484,5 @@ window.exportBoardToCSV = exportBoardToCSV;
 window.openUnmergeModal = openUnmergeModal;
 window.unmergeCard = unmergeCard;
 window.selectCard = selectCard;
-document.getElementById('createFirstBoard').addEventListener('click', () => {
-    document.getElementById('newBoardModal').style.display = 'block';
-});
-
-document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('boardName').value;
-    const columnsText = document.getElementById('columnNames').value.trim();
-    const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
-
-    await createBoard(name, columns);
-    closeModals();
-});
-
-document.getElementById('newCardForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const columnId = document.getElementById('cardColumnId').value;
-    const content = document.getElementById('cardContent').value;
-
-    await createCard(columnId, content);
-    closeModals();
-});
-
-document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const columnId = document.getElementById('editColumnId').value;
-    const name = document.getElementById('columnNameEdit').value;
-
-    await updateColumn(columnId, name);
-    closeModals();
-});
-
-document.getElementById('addColumnBtn').addEventListener('click', async () => {
-    const name = prompt('Enter column name:');
-    if (name) {
-        const position = currentBoard.columns.length;
-        await createColumn(name, position);
-    }
-});
-
-document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
-
-document.getElementById('finishRetroBtn').addEventListener('click', () => {
-    if (currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
-        updateBoardStatus(currentBoard.id, 'finished');
-    }
-});
-
-document.getElementById('reopenRetroBtn').addEventListener('click', () => {
-    if (currentBoard && confirm('Re-open this retrospective?')) {
-        updateBoardStatus(currentBoard.id, 'active');
-    }
-});
-
-document.querySelectorAll('.close').forEach(closeBtn => {
-    closeBtn.addEventListener('click', closeModals);
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-        closeModals();
-    }
-});
-
-
-
-// BenTro v0.2.0 Features
-
-// Update initApp to show returning user modal
-const originalInitApp = initApp;
-function initApp() {
-    initWebSocket();
-    if (!currentUser) {
-        document.getElementById('userModal').style.display = 'block';
-    } else {
-        showReturningUserModal(currentUser);
-    }
-}
-
-function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
-    document.getElementById('returningUserModal').style.display = 'block';
-}
-
-function confirmReturningUser() {
-    document.getElementById('returningUserModal').style.display = 'none';
-    updateUserDisplay();
-    document.getElementById('editUserBtn').style.display = 'inline-block';
-    showDashboard();
-}
-
-function openEditUserModal() {
-    const modal = document.getElementById('userModal');
-    document.getElementById('userNameInput').value = currentUser;
-    modal.style.display = 'block';
-}
-
-async function exportBoardToCSV(boardId) {
-    try {
-        const board = await apiCall(/boards/);
-        const rows = [['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']];
-        board.columns.forEach(column => {
-            const cards = column.cards.filter(c => !c.merged_with_id);
-            cards.forEach(card => {
-                const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
-                const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
-                const mergedCount = card.merged_cards?.length || 0;
-                rows.push([column.name, card.content, likes, dislikes, mergedCount]);
-            });
-        });
-        const csvContent = rows.map(row => row.map(cell => "").join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.setAttribute('href', URL.createObjectURL(blob));
-        link.setAttribute('download', ${board.name}_.csv);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch (error) {
-        console.error('Failed to export CSV:', error);
-        alert('Failed to export: ' + error.message);
-    }
-}
-
-window.exportBoardToCSV = exportBoardToCSV;
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
-    document.getElementById('changeUserBtn')?.addEventListener('click', () => {
-        document.getElementById('returningUserModal').style.display = 'none';
-        currentUser = null;
-        localStorage.removeItem('retroUser');
-        document.getElementById('userModal').style.display = 'block';
-    });
-    document.getElementById('editUserBtn')?.addEventListener('click', openEditUserModal);
-    document.getElementById('helpBtn')?.addEventListener('click', () => {
-        document.getElementById('helpModal').style.display = 'block';
-    });
-    document.getElementById('exportBoardBtn')?.addEventListener('click', () => {
-        if (currentBoard) exportBoardToCSV(currentBoard.id);
-    });
-});
-
+window.cancelSelection = cancelSelection;
+window.mergeCard = mergeCard;
