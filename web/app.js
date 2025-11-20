@@ -114,6 +114,7 @@ function showReturningUserModal(username) {
 
     console.log('📍 returningUserName element:', nameElement);
     console.log('📍 returningUserModal element:', modalElement);
+    document.getElementById('userModal').style.display = 'none';
 
     if (nameElement) nameElement.textContent = username;
     if (modalElement) modalElement.style.display = 'block';
