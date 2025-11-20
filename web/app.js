@@ -95,13 +95,31 @@ function initApp() {
     if (!currentUser) {
         document.getElementById('userModal').style.display = 'block';
     } else {
-        updateUserDisplay();
-        showDashboard();
+        showReturningUserModal(currentUser);
     }
+}
+
+function showReturningUserModal(username) {
+    document.getElementById('returningUserName').textContent = username;
+    document.getElementById('returningUserModal').style.display = 'block';
+}
+
+function confirmReturningUser() {
+    document.getElementById('returningUserModal').style.display = 'none';
+    updateUserDisplay();
+    document.getElementById('editUserBtn').style.display = 'inline-block';
+    showDashboard();
+}
+
+function openEditUserModal() {
+    const modal = document.getElementById('userModal');
+    document.getElementById('userNameInput').value = currentUser;
+    modal.style.display = 'block';
 }
 
 function updateUserDisplay() {
     document.getElementById('userDisplay').textContent = `👤 ${currentUser}`;
+    document.getElementById('editUserBtn').style.display = 'inline-block';
 }
 
 function showDashboard() {
@@ -636,103 +654,205 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// CSV Export Function
+async function exportBoardToCSV(boardId) {
+    try {
+        const board = await apiCall(`/boards/${boardId}`);
+
+        const rows = [
+            ['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']
+        ];
+
+        board.columns.forEach(column => {
+            const cards = column.cards.filter(c => !c.merged_with_id);
+
+            cards.forEach(card => {
+                const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
+                const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
+                const mergedCount = card.merged_cards?.length || 0;
+
+                rows.push([
+                    column.name,
+                    card.content,
+                    likes,
+                    dislikes,
+                    mergedCount
+                ]);
+            });
+        });
+
+        const csvContent = rows.map(row =>
+            row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${board.name}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Failed to export CSV:', error);
+        alert('Failed to export: ' + error.message);
+    }
+}
+
 // Make functions global for onclick handlers
 window.loadBoard = loadBoard;
 window.deleteBoard = deleteBoard;
 window.updateBoardStatus = updateBoardStatus;
 window.voteCard = voteCard;
 window.deleteCard = deleteCard;
+window.exportBoardToCSV = exportBoardToCSV;
 window.openUnmergeModal = openUnmergeModal;
 window.unmergeCard = unmergeCard;
 window.selectCard = selectCard;
-window.cancelSelection = cancelSelection;
-window.mergeCard = mergeCard;
+document.getElementById('createFirstBoard').addEventListener('click', () => {
+    document.getElementById('newBoardModal').style.display = 'block';
+});
 
-// Event Listeners
+document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('boardName').value;
+    const columnsText = document.getElementById('columnNames').value.trim();
+    const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
+
+    await createBoard(name, columns);
+    closeModals();
+});
+
+document.getElementById('newCardForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const columnId = document.getElementById('cardColumnId').value;
+    const content = document.getElementById('cardContent').value;
+
+    await createCard(columnId, content);
+    closeModals();
+});
+
+document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const columnId = document.getElementById('editColumnId').value;
+    const name = document.getElementById('columnNameEdit').value;
+
+    await updateColumn(columnId, name);
+    closeModals();
+});
+
+document.getElementById('addColumnBtn').addEventListener('click', async () => {
+    const name = prompt('Enter column name:');
+    if (name) {
+        const position = currentBoard.columns.length;
+        await createColumn(name, position);
+    }
+});
+
+document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
+document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
+
+document.getElementById('finishRetroBtn').addEventListener('click', () => {
+    if (currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
+        updateBoardStatus(currentBoard.id, 'finished');
+    }
+});
+
+document.getElementById('reopenRetroBtn').addEventListener('click', () => {
+    if (currentBoard && confirm('Re-open this retrospective?')) {
+        updateBoardStatus(currentBoard.id, 'active');
+    }
+});
+
+document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', closeModals);
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        closeModals();
+    }
+});
+
+
+
+// BenTro v0.2.0 Features
+
+// Update initApp to show returning user modal
+const originalInitApp = initApp;
+function initApp() {
+    initWebSocket();
+    if (!currentUser) {
+        document.getElementById('userModal').style.display = 'block';
+    } else {
+        showReturningUserModal(currentUser);
+    }
+}
+
+function showReturningUserModal(username) {
+    document.getElementById('returningUserName').textContent = username;
+    document.getElementById('returningUserModal').style.display = 'block';
+}
+
+function confirmReturningUser() {
+    document.getElementById('returningUserModal').style.display = 'none';
+    updateUserDisplay();
+    document.getElementById('editUserBtn').style.display = 'inline-block';
+    showDashboard();
+}
+
+function openEditUserModal() {
+    const modal = document.getElementById('userModal');
+    document.getElementById('userNameInput').value = currentUser;
+    modal.style.display = 'block';
+}
+
+async function exportBoardToCSV(boardId) {
+    try {
+        const board = await apiCall(/boards/);
+        const rows = [['Column', 'Card Content', 'Likes', 'Dislikes', 'Merged Cards']];
+        board.columns.forEach(column => {
+            const cards = column.cards.filter(c => !c.merged_with_id);
+            cards.forEach(card => {
+                const likes = card.votes?.filter(v => v.vote_type === 'like').length || 0;
+                const dislikes = card.votes?.filter(v => v.vote_type === 'dislike').length || 0;
+                const mergedCount = card.merged_cards?.length || 0;
+                rows.push([column.name, card.content, likes, dislikes, mergedCount]);
+            });
+        });
+        const csvContent = rows.map(row => row.map(cell => "").join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.setAttribute('href', URL.createObjectURL(blob));
+        link.setAttribute('download', ${board.name}_.csv);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Failed to export CSV:', error);
+        alert('Failed to export: ' + error.message);
+    }
+}
+
+window.exportBoardToCSV = exportBoardToCSV;
+
 document.addEventListener('DOMContentLoaded', () => {
-    initApp();
-
-    document.getElementById('userForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('userNameInput').value.trim();
-        if (name) {
-            currentUser = name;
-            localStorage.setItem('retroUser', name);
-            closeModals();
-            updateUserDisplay();
-            showDashboard();
-        }
+    document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
+    document.getElementById('changeUserBtn')?.addEventListener('click', () => {
+        document.getElementById('returningUserModal').style.display = 'none';
+        currentUser = null;
+        localStorage.removeItem('retroUser');
+        document.getElementById('userModal').style.display = 'block';
     });
-
-    document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
-
-    document.getElementById('newBoardBtn').addEventListener('click', () => {
-        document.getElementById('newBoardModal').style.display = 'block';
+    document.getElementById('editUserBtn')?.addEventListener('click', openEditUserModal);
+    document.getElementById('helpBtn')?.addEventListener('click', () => {
+        document.getElementById('helpModal').style.display = 'block';
     });
-
-    document.getElementById('createFirstBoard').addEventListener('click', () => {
-        document.getElementById('newBoardModal').style.display = 'block';
-    });
-
-    document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('boardName').value;
-        const columnsText = document.getElementById('columnNames').value.trim();
-        const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
-
-        await createBoard(name, columns);
-        closeModals();
-    });
-
-    document.getElementById('newCardForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const columnId = document.getElementById('cardColumnId').value;
-        const content = document.getElementById('cardContent').value;
-
-        await createCard(columnId, content);
-        closeModals();
-    });
-
-    document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const columnId = document.getElementById('editColumnId').value;
-        const name = document.getElementById('columnNameEdit').value;
-
-        await updateColumn(columnId, name);
-        closeModals();
-    });
-
-    document.getElementById('addColumnBtn').addEventListener('click', async () => {
-        const name = prompt('Enter column name:');
-        if (name) {
-            const position = currentBoard.columns.length;
-            await createColumn(name, position);
-        }
-    });
-
-    document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-    document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-    document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
-
-    document.getElementById('finishRetroBtn').addEventListener('click', () => {
-        if (currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
-            updateBoardStatus(currentBoard.id, 'finished');
-        }
-    });
-
-    document.getElementById('reopenRetroBtn').addEventListener('click', () => {
-        if (currentBoard && confirm('Re-open this retrospective?')) {
-            updateBoardStatus(currentBoard.id, 'active');
-        }
-    });
-
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', closeModals);
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModals();
-        }
+    document.getElementById('exportBoardBtn')?.addEventListener('click', () => {
+        if (currentBoard) exportBoardToCSV(currentBoard.id);
     });
 });
+
