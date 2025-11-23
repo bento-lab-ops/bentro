@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: retro-app
-  namespace: default
+  name: bentro-app
+  namespace: bentro
   labels:
-    app: retro-app
+    app: bentro-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: retro-app
+      app: bentro-app
   template:
     metadata:
       labels:
-        app: retro-app
+        app: bentro-app
     spec:
       containers:
       - name: retro-app
-        image: dnlouko/retro-app:latest
+        image: dnlouko/bentro-app:v0.2.3-revert
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -26,27 +26,27 @@ spec:
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_HOST
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_PORT
         - name: DB_USER
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_USER
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: retro-app-secret
+              name: bentro-app-secret
               key: DB_PASSWORD
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_NAME
         resources:
           requests:
