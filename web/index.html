@@ -131,6 +131,18 @@
                     <li>Export your retrospective data as CSV</li>
                 </ul>
                 <hr>
+                <h3>Customizing Templates</h3>
+                <p>Want to add your own board templates? Edit <code>web/board-templates.json</code> to add or modify
+                    templates with custom column names!</p>
+                <p><strong>Example:</strong></p>
+                <pre
+                    style="background: var(--bg-light); padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; overflow-x: auto;">{
+  "my-template": {
+    "name": "My Custom Template",
+    "columns": ["Column 1", "Column 2"]
+  }
+}</pre>
+                <hr>
                 <p><small>Version: <span id="appVersion"></span></small></p>
                 <script>document.getElementById('appVersion').textContent = window.BENTRO_VERSION || 'unknown';</script>
             </div>
@@ -151,11 +163,7 @@
                     <label for="boardTemplate">Template</label>
                     <select id="boardTemplate" class="form-input">
                         <option value="custom">Custom (Manual Entry)</option>
-                        <option value="start-stop-continue">Start, Stop, Continue</option>
-                        <option value="mad-sad-glad">Mad, Sad, Glad</option>
-                        <option value="4ls">4Ls (Liked, Learned, Lacked, Longed For)</option>
-                        <option value="wwn-action">What Went Well / Needs Attention / Action Items</option>
-                        <option value="sailboat">Sailboat (Wind, Anchor, Rocks, Island)</option>
+                        <!-- Templates loaded dynamically from board-templates.json -->
                     </select>
                     <small>Choose a template or enter custom columns below</small>
                 </div>

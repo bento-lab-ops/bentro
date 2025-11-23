@@ -3,6 +3,9 @@ function initApp() {
     console.log('%c🎯 BenTro v0.2.0 ', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
     console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
 
+    // Load board templates from JSON
+    loadBoardTemplates();
+
     initWebSocket();
 
     if (!window.currentUser) {
@@ -46,14 +49,54 @@ function showDashboard() {
     loadBoards();
 }
 
-// Board Templates
-const BOARD_TEMPLATES = {
-    'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
-    'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
-    '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
-    'wwn-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
-    'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
-};
+// Board Templates - Loaded from JSON
+let BOARD_TEMPLATES = {};
+
+// Load templates from JSON file
+async function loadBoardTemplates() {
+    try {
+        const response = await fetch('/static/board-templates.json');
+        const templates = await response.json();
+
+        // Convert to old format for backward compatibility
+        BOARD_TEMPLATES = {};
+        for (const [key, value] of Object.entries(templates)) {
+            BOARD_TEMPLATES[key] = value.columns;
+        }
+
+        // Populate template dropdown
+        populateTemplateDropdown(templates);
+
+        console.log('%c✅ Board templates loaded', 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
+    } catch (error) {
+        console.error('Failed to load board templates:', error);
+        // Fallback to default templates
+        BOARD_TEMPLATES = {
+            'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
+            'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
+            '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
+            'wwn-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
+            'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
+        };
+    }
+}
+
+// Populate template dropdown dynamically
+function populateTemplateDropdown(templates) {
+    const select = document.getElementById('boardTemplate');
+    if (!select) return;
+
+    // Clear existing options except "Custom"
+    select.innerHTML = '<option value="custom">Custom</option>';
+
+    // Add templates from JSON
+    for (const [key, value] of Object.entries(templates)) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = value.name;
+        select.appendChild(option);
+    }
+}
 
 // Event Listeners - Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

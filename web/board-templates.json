@@ -1,0 +1,45 @@
+{
+    "start-stop-continue": {
+        "name": "Start / Stop / Continue",
+        "columns": [
+            "Start Doing",
+            "Stop Doing",
+            "Continue Doing"
+        ]
+    },
+    "mad-sad-glad": {
+        "name": "Mad / Sad / Glad",
+        "columns": [
+            "Mad 😠",
+            "Sad 😢",
+            "Glad 😊"
+        ]
+    },
+    "4ls": {
+        "name": "4 L's (Liked, Learned, Lacked, Longed For)",
+        "columns": [
+            "Liked 👍",
+            "Learned 💡",
+            "Lacked 🤔",
+            "Longed For 🌟"
+        ]
+    },
+    "wwn-badly-action": {
+        "name": "What Went Well/Badly / Needs Attention / Action Items",
+        "columns": [
+            "What Went Well ✅",
+            "What Went Badly ❌",
+            "Needs Attention ⚠️",
+            "Action Items 🎯"
+        ]
+    },
+    "sailboat": {
+        "name": "Sailboat Retrospective",
+        "columns": [
+            "Wind 💨",
+            "Anchor ⚓",
+            "Rocks 🪨",
+            "Island 🏝️"
+        ]
+    }
+}
