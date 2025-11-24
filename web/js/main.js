@@ -127,9 +127,7 @@ function setupEventListeners() {
         document.getElementById('newBoardModal').style.display = 'block';
     });
 
-    document.getElementById('createFirstBoard')?.addEventListener('click', () => {
-        document.getElementById('newBoardModal').style.display = 'block';
-    });
+
 
     // Board Template Selector
     document.getElementById('boardTemplate')?.addEventListener('change', (e) => {

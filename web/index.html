@@ -1,110 +1,3 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BenTro - Retrospectives, packed perfectly!</title>
-    <link rel="icon" type="image/png" href="/static/favicon.png">
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/bentro-v0.2.0.css">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-</head>
-
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="header-brand">
-                <h2>About BenTro 🎯</h2>
-                <div class="help-content">
-                    <p><strong>BenTro</strong> = <em>Bento</em> + <em>Retrospective</em></p>
-                    <p class="tagline-help">Retrospectives, packed perfectly!</p>
-                    <p>A friendly retrospective tool created to make team collaboration effortless!</p>
-                    <hr>
-                    <h3>Quick Start</h3>
-                    <ul>
-                        <li>Create a board with custom columns</li>
-                        <li>Add cards during Input Phase</li>
-                        <li>Switch to Voting Phase to vote on cards</li>
-                        <li>Click "Select" on a card, then "Merge Here" on another to combine similar ideas</li>
-                        <li>Export your retrospective data as CSV</li>
-                    </ul>
-                    <hr>
-                    <p><small>Version: 0.2.0-beta.1</small></p>
-                </div>
-            </div>
-    </div>
-
-    <!-- Modal for New Board -->
-    <div id="newBoardModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Create New Board</h2>
-            <form id="newBoardForm">
-                <div class="form-group">
-                    <label for="boardName">Board Name</label>
-                    <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective" required>
-                </div>
-                <div class="form-group">
-                    <label>Column Names (one per line)</label>
-                    <textarea id="columnNames" class="form-textarea" rows="4"
-                        placeholder="What Went Well&#10;Needs Attention&#10;What Went Badly&#10;Action Items"></textarea>
-                    <small>Leave empty for default columns</small>
-                </div>
-                <button type="submit" class="btn btn-primary">Create Board</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for New Card -->
-    <div id="newCardModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add New Card</h2>
-            <form id="newCardForm">
-                <div class="form-group">
-                    <label for="cardContent">Card Content</label>
-                    <textarea id="cardContent" class="form-textarea" rows="3" placeholder="Enter your thoughts..."
-                        required></textarea>
-                </div>
-                <input type="hidden" id="cardColumnId">
-                <button type="submit" class="btn btn-primary">Add Card</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for Edit Column -->
-    <div id="editColumnModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Edit Column Name</h2>
-            <form id="editColumnForm">
-                <div class="form-group">
-                    <label for="columnNameEdit">Column Name</label>
-                    <input type="text" id="columnNameEdit" class="form-input" required>
-                </div>
-                <input type="hidden" id="editColumnId">
-                <button type="submit" class="btn btn-primary">Update Column</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal for Unmerge Cards -->
-    <div id="unmergeModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Merged Cards</h2>
-            <div id="mergedCardsList" class="merged-cards-list">
-                <!-- Merged cards will be listed here -->
-            </div>
-        </div>
-    </div>
-
-    <script src="/static/app.js"></script>
-</body>
-
-=======
 <!DOCTYPE html>
 <html lang="en">
 
@@ -146,9 +39,9 @@
 
             <div id="emptyDashboard" class="welcome-screen" style="display: none;">
                 <div class="welcome-content">
-                    <h2>Welcome to BenTro</h2>
-                    <p>Create a new board to get started.</p>
-                    <button id="createFirstBoard" class="btn btn-primary btn-large">Create Your First Board</button>
+                    <h2>No Boards Yet</h2>
+                    <p>Click "+ New Board" in the header to create your first retrospective.</p>
+                    
                 </div>
             </div>
         </div>
@@ -205,5 +98,4 @@
     <script src="/static/js/main.js"></script>
 </body>
 
->>>>>>> migration/bentro-namespace
 </html>

@@ -38,16 +38,12 @@ func main() {
 	api := router.Group("/api")
 	{
 		// Board routes
+		log.Println("Registering board routes...")
 		api.POST("/boards", handlers.CreateBoard)
 		api.GET("/boards/:id", handlers.GetBoard)
 		api.GET("/boards", handlers.ListBoards)
 		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
-
-		// Team routes
-		api.POST("/teams", handlers.CreateTeam)
-		api.GET("/teams", handlers.ListTeams)
-		api.POST("/teams/:id/join", handlers.JoinTeam)
 
 		// Column routes
 		api.POST("/boards/:boardId/columns", handlers.CreateColumn)
