@@ -19,7 +19,7 @@ function initApp() {
     // Set version in Help Modal
     const versionSpan = document.getElementById('appVersion');
     if (versionSpan) {
-        versionSpan.textContent = 'v0.2.5';
+        versionSpan.textContent = 'v0.2.6';
     }
 }
 

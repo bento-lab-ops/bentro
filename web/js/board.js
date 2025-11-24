@@ -102,10 +102,32 @@ async function deleteBoard(boardId) {
 function updateBoardStatusUI(status) {
     const isFinished = status === 'finished';
     const container = document.getElementById('boardContainer');
+    const switchPhaseBtn = document.getElementById('switchPhaseBtn');
+    const startTimerBtn = document.getElementById('startTimerBtn');
+    const stopTimerBtn = document.getElementById('stopTimerBtn');
 
     document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
     document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
     document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
+
+    // Disable phase switching button when finished
+    if (switchPhaseBtn) {
+        switchPhaseBtn.disabled = isFinished;
+        switchPhaseBtn.style.opacity = isFinished ? '0.5' : '1';
+        switchPhaseBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+    }
+
+    // Disable timer buttons when finished
+    if (startTimerBtn) {
+        startTimerBtn.disabled = isFinished;
+        startTimerBtn.style.opacity = isFinished ? '0.5' : '1';
+        startTimerBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+    }
+    if (stopTimerBtn) {
+        stopTimerBtn.disabled = isFinished;
+        stopTimerBtn.style.opacity = isFinished ? '0.5' : '1';
+        stopTimerBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+    }
 
     if (isFinished) {
         container.classList.add('read-only');
