@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bentro-app-ingress
+  namespace: bentro
+  labels:
+    app: bentro-app
+  annotations:
+    # --- Configurações do NGINX ---
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # --- HTTPS (Cert-Manager) ---
+    # Instrui o cert-manager a usar sua CA local para assinar o certificado
+    cert-manager.io/cluster-issuer: "bento-ca-issuer"
+
+    # --- Integração com Homepage ---
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Bentro App"
+    gethomepage.dev/description: "App Retro"
+    gethomepage.dev/group: "Meus Projetos"
+    gethomepage.dev/icon: "/icons/bentrologo.png" # Seu ícone customizado
+    
+    # Importante para as métricas (CPU/RAM) funcionarem:
+    gethomepage.dev/namespace: "bentro"
+    gethomepage.dev/pod-selector: "app=bentro-app" 
+
+spec:
+  ingressClassName: nginx
+  
+  # --- Configuração do Certificado (Cadeado Verde) ---
+  tls:
+  - hosts:
+    - bentro.bento.lab
+    secretName: bentro-app-tls # O cert-manager vai criar este secret aqui
+  # ---------------------------------------------------
+
+  rules:
+  - host: bentro.bento.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: bentro-app-service
+            port:
+              number: 80

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: default
+  namespace: bentro
   labels:
     app: postgres
 spec:
@@ -25,17 +25,17 @@ spec:
         - name: POSTGRES_USER
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: retro-app-secret
+              name: bentro-app-secret
               key: DB_PASSWORD
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
-              name: retro-app-config
+              name: bentro-app-config
               key: DB_NAME
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
