@@ -1,4 +1,6 @@
 // Application Configuration
-const APP_VERSION = 'v0.2.5';
+const APP_VERSION = 'v0.2.7';
 const API_BASE = '/api';
-const WS_URL = `ws://${window.location.host}/ws`;
+// Auto-detect WebSocket protocol based on page protocol (ws:// for HTTP, wss:// for HTTPS)
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = `${WS_PROTOCOL}//${window.location.host}/ws`;

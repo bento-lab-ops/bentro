@@ -1,6 +1,6 @@
 // App Initialization
 function initApp() {
-    console.log('%c🎯 BenTro v0.2.5 ', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
+    console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
     console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
 
     // Load board templates from JSON
@@ -19,7 +19,7 @@ function initApp() {
     // Set version in Help Modal
     const versionSpan = document.getElementById('appVersion');
     if (versionSpan) {
-        versionSpan.textContent = 'v0.2.6';
+        versionSpan.textContent = APP_VERSION;
     }
 }
 

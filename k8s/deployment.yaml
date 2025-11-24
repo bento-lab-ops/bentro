@@ -2,6 +2,34 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bentro-app
+  namespace: bentro
+  labels:
+    app: bentro-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bentro-app
+  template:
+    metadata:
+      labels:
+        app: bentro-app
+    spec:
+      containers:
+      - name: bentro-app
+        image: dnlouko/bentro-app:v0.2.7
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: bentro-app-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
               name: bentro-app-config
               key: DB_PORT
         - name: DB_USER
