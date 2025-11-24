@@ -99,10 +99,8 @@ function populateTemplateDropdown(templates) {
 }
 
 // Event Listeners - Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the app
-    initApp();
-
+// Note: DOMContentLoaded is already handled at the top of the file to call loadModals()
+function setupEventListeners() {
     // User Form Handler
     document.getElementById('userForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -110,7 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (name) {
             window.currentUser = name;
             localStorage.setItem('retroUser', name);
-            closeModals();
+            // closeModals(); // Modals are managed by display property now
+            document.getElementById('userModal').style.display = 'none';
             updateUserDisplay();
             showDashboard();
         }

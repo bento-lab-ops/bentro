@@ -10,20 +10,6 @@ spec:
   selector:
     matchLabels:
       app: bentro-app
-  template:
-    metadata:
-      labels:
-        app: bentro-app
-    spec:
-      containers:
-      - name: retro-app
-        image: dnlouko/bentro-app:v0.2.3-revert
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
-          name: http
-        env:
-        - name: DB_HOST
           valueFrom:
             configMapKeyRef:
               name: bentro-app-config

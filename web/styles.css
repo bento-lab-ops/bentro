@@ -22,28 +22,6 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, var(--bg-dark) 0%, hsl(262, 40%, 12%) 100%);
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-border: 1px solid var(--border);
-border-radius: 8px;
-color: var(--text-primary);
-font-size: 0.95rem;
-cursor: pointer;
-transition: all 0.3s ease;
-min-width: 200px;
-}
-
-.board-select:hover {
-    border-color: var(--primary);
-    background: var(--bg-medium);
-}
-
 /* Buttons */
 .btn {
     padding: 0.75rem 1.5rem;
@@ -368,25 +346,6 @@ min-width: 200px;
 /* Welcome Screen */
 .welcome-screen {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-}
-
-.welcome-content {
-    text-align: center;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 3rem;
-    box-shadow: 0 8px 32px var(--shadow);
-}
-
-.welcome-content h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -594,22 +553,6 @@ min-width: 200px;
     color: black;
     text-align: center;
     padding: 0.5rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-weight: bold;
-}
-
-.read-only .add-card-btn,
-.read-only .delete-card-btn,
-.read-only .edit-column-btn,
-background: rgba(0, 0, 0, 0.7);
-backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    background: var(--bg-medium);
-    margin: 10% auto;
-    padding: 2rem;
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     width: 90%;
