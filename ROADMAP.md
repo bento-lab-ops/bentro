@@ -7,6 +7,9 @@
 - [ ] **Help modal responsiveness** - Make help modal scrollable and responsive
 - [ ] **Simplify help modal content** - Remove detailed examples
 
+### ✨ Feature Enhancements
+- [ ] **Disable phase switching on finished retros** - When a retrospective is marked as finished, disable "Switch to Voting/Input" buttons (read-only mode should prevent phase changes)
+
 ### 📚 Documentation
 - [ ] **GitHub repository setup** - Create public repository for BenTro
 - [ ] **GitHub documentation link** - Add link in help modal

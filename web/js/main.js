@@ -1,6 +1,6 @@
 // App Initialization
 function initApp() {
-    console.log('%c🎯 BenTro v0.2.0 ', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
+    console.log('%c🎯 BenTro v0.2.5 ', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
     console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
 
     // Load board templates from JSON
@@ -14,6 +14,12 @@ function initApp() {
     } else {
         console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
         showReturningUserModal(window.currentUser);
+    }
+
+    // Set version in Help Modal
+    const versionSpan = document.getElementById('appVersion');
+    if (versionSpan) {
+        versionSpan.textContent = 'v0.2.5';
     }
 }
 
@@ -218,4 +224,24 @@ function setupEventListeners() {
             closeModals();
         }
     });
+}
+
+// Load Modals dynamically
+async function loadModals() {
+    try {
+        const response = await fetch('/static/modals.html');
+        if (!response.ok) throw new Error('Failed to load modals');
+        const html = await response.text();
+        document.getElementById('modals-container').innerHTML = html;
+        console.log('Modals loaded successfully');
+    } catch (error) {
+        console.error('Error loading modals:', error);
+    }
+}
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadModals();
+    setupEventListeners();
+    initApp();
 });
