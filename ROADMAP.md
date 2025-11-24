@@ -109,7 +109,13 @@
 
 ## ✅ Completed Features
 
-### v0.2.7 (Latest)
+### v0.2.11 (Latest)
+- [x] **Merge Conflict Resolution** - Fixed critical syntax errors in `board.js` caused by merge conflicts
+- [x] **Restored Missing Functions** - Restored `initializeDragAndDrop`, `voteCard`, `createCard` and other functions that were accidentally removed
+- [x] **Git Repository Cleanup** - Synchronized `main` branch and removed obsolete `migration/bentro-namespace` branch
+- [x] **Frontend Stability** - Verified board creation and card interaction functionality
+
+### v0.2.7
 - [x] **WebSocket HTTPS support** - Fixed Mixed Content error by auto-detecting protocol (ws:// for HTTP, wss:// for HTTPS)
 - [x] **Username prompt restored** - Fixed critical bug where username prompt disappeared with HTTPS
 - [x] **Centralized version management** - Version now managed from single source in config.js
