@@ -1,31 +1,7 @@
-// App Initialization
-function initApp() {
-    console.log('%c🎯 BenTro v0.2.5 ', 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
-    console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
+initWebSocket();
 
-    // Load board templates from JSON
-    loadBoardTemplates();
-
-    initWebSocket();
-
-    if (!window.currentUser) {
-        console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
-        document.getElementById('userModal').style.display = 'block';
-    } else {
-        console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
-        showReturningUserModal(window.currentUser);
-    }
-
-    // Set version in Help Modal
-    const versionSpan = document.getElementById('appVersion');
-    if (versionSpan) {
-        versionSpan.textContent = 'v0.2.5';
-    }
-}
-
-function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
-    document.getElementById('returningUserModal').style.display = 'block';
+if (!window.currentUser) {
+    console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
 }
 
 function confirmReturningUser() {

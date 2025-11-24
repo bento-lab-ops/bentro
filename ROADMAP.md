@@ -7,15 +7,19 @@
 - [ ] **Help modal responsiveness** - Make help modal scrollable and responsive
 - [ ] **Simplify help modal content** - Remove detailed examples
 
-### ✨ Feature Enhancements
-- [ ] **Disable phase switching on finished retros** - When a retrospective is marked as finished, disable "Switch to Voting/Input" buttons (read-only mode should prevent phase changes)
-
 ### 📚 Documentation
 - [ ] **GitHub repository setup** - Create public repository for BenTro
 - [ ] **GitHub documentation link** - Add link in help modal
 - [ ] **README with usage examples** - Comprehensive guide
 
 ## Completed ✅
+
+### v0.2.5
+- [x] **Disable phase switching on finished retros** - Phase switching button is now disabled when board is finished
+- [x] **Version display in Help Modal** - Shows v0.2.5
+- [x] **Help Modal improvements** - Added logo, removed customizing templates section
+- [x] **README logo fix** - Corrected path to bentrologo.png
+- [x] **CSS corruption fix** - Fixed critical UI breaking bug
 
 ### Infrastructure (v0.3.0-ready)
 - [x] **Namespace migration** - Moved to `bentro` namespace
