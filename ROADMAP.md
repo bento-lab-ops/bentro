@@ -1,21 +1,31 @@
 # BenTro Roadmap 🗺️
 
-## Immediate Priorities (v0.2.4 - Re-attempt)
+## Immediate Priorities (v0.2.7)
+
+### ✨ Feature Enhancements
+- [ ] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) to prepare for future "active participants" feature
+- [ ] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto`
+
+### 🧹 Repository Cleanup
+- [ ] **Remove temporary deployment scripts** - Delete `deploy-fix-v0.2.5.sh`, `deploy-rollback-v0.2.3.sh`, `deploy-v0.2.4.sh`, `deploy-v0.2.5.sh`
+- [ ] **Consolidate roadmap files** - Move or remove `FUTURE_FEATURES.md` (keep only `ROADMAP.md`)
+- [ ] **Move setup script to docs** - Move `setup_wsl_env.sh` to `/docs` folder or remove if obsolete
 
 ### 🐛 Bug Fixes
-- [ ] **Version display showing "unknown"** - Needs fix (reverted)
-- [ ] **Help modal responsiveness** - Make help modal scrollable and responsive
-- [ ] **Simplify help modal content** - Remove detailed examples
+- [x] **Version display showing "unknown"** - Fixed in v0.2.5/v0.2.6 ✅
 
 ### 📚 Documentation
-- [ ] **GitHub repository setup** - Create public repository for BenTro
-- [ ] **GitHub documentation link** - Add link in help modal
-- [ ] **README with usage examples** - Comprehensive guide
+- [ ] **GitHub documentation link** - Already exists in Help modal (verify)
+- [ ] **README with usage examples** - Enhance with screenshots and better examples
 
 ## Completed ✅
 
+### v0.2.6
+- [x] **Disable timer buttons on finished retros** - Start/Stop Timer buttons now disabled when board is finished
+- [x] **Disable phase switching on finished retros** - Phase switching button disabled when board is finished
+- [x] **Improved read-only mode consistency** - All interactive controls properly disabled
+
 ### v0.2.5
-- [x] **Disable phase switching on finished retros** - Phase switching button is now disabled when board is finished
 - [x] **Version display in Help Modal** - Shows v0.2.5
 - [x] **Help Modal improvements** - Added logo, removed customizing templates section
 - [x] **README logo fix** - Corrected path to bentrologo.png
@@ -64,11 +74,13 @@
 
 ## Next Steps
 
-**Recommended next task**: Fix help modal responsiveness (Small effort, High priority)
+**Recommended next task**: Disable edit username button in board view (Small effort, Medium priority)
 
-1. Add `max-height` and `overflow-y: auto` to modal content
-2. Test on mobile devices
-3. Simplify help content (remove code examples)
-4. Add GitHub link placeholder
+1. Hide `editUserBtn` when entering a board
+2. Show `editUserBtn` when returning to dashboard
+3. Update `loadBoard()` and `showDashboard()` functions
 
-**Estimated time**: 30-60 minutes
+**Estimated time**: 10-15 minutes
+
+**Alternative**: Repository cleanup (Small effort, Low priority) - Quick wins to clean up the codebase
+
