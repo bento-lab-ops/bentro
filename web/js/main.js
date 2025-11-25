@@ -32,7 +32,8 @@ function initApp() {
 }
 
 function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
+    const avatar = getUserAvatar();
+    document.getElementById('returningUserName').textContent = `${avatar} ${username}`;
     document.getElementById('returningUserModal').style.display = 'block';
 }
 
@@ -46,17 +47,9 @@ function confirmReturningUser() {
 function openEditUserModal() {
     const modal = document.getElementById('userModal');
     document.getElementById('userNameInput').value = window.currentUser || '';
-    modal.style.display = 'block';
-    document.getElementById('userNameInput').focus();
-}
 
-function updateUserDisplay() {
-    document.getElementById('userDisplay').textContent = `≡ƒæñ ${window.currentUser}`;
-    document.getElementById('editUserBtn').style.display = 'inline-block';
-}
-
-function showDashboard() {
-    document.getElementById('dashboardView').style.display = 'block';
+    // Repopulate avatar selector with current selection
+    populateAvatarSelector();
     document.getElementById('boardContainer').style.display = 'none';
     document.getElementById('dashboardBtn').style.display = 'none';
     document.getElementById('editUserBtn').style.display = 'inline-block';
