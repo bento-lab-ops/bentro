@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.13
+## Current Version: v0.2.15
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.13)
+## 🎯 Immediate Priorities (v0.2.15)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -46,6 +46,7 @@
 - [x] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto` ✅ Completed in v0.2.13
 - [x] **Timer sound notifications** - Play sound when timer ends, with browser notification permission ✅ Completed in v0.2.13
 - [x] **Complete read-only mode for finished boards** - Disable all interactive features (merge/unmerge/select/delete/vote/add) except CSV export ✅ Completed in v0.2.13
+- [x] **Avatar Selection** - Choose emoji avatar for user profile ✅ Completed in v0.2.15
 
 #### 🟡 Medium Effort (3-8 hours)
 - [ ] **Anonymous mode toggle** - Board-level setting to hide usernames on cards for honest feedback
@@ -69,6 +70,7 @@
 
 ## 🐛 Bug Fixes
 - [x] **Version display showing "unknown"** - Fixed in v0.2.5/v0.2.6 ✅
+- [x] **Avatar display encoding issues** - Fixed in v0.2.15 ✅
 
 ---
 
@@ -113,7 +115,13 @@
 
 ## ✅ Completed Features
 
-### v0.2.13 (Latest)
+### v0.2.15 (Latest)
+- [x] **Avatar Selection** - Users can choose from 30+ emoji avatars for their profile
+- [x] **Avatar Persistence** - Selected avatar is saved to localStorage and persists across sessions
+- [x] **Avatar Display** - Avatar shown in header, welcome modal, and edit user modal
+- [x] **Encoding Fixes** - Resolved UTF-8 encoding issues for emojis
+
+### v0.2.13
 - [x] **Complete Read-Only Mode for Finished Boards** - All interactive features (merge/unmerge/select/delete/vote/add card/column) are disabled when a board is finished, except CSV export
 - [x] **Timer Sound Notifications** - Plays beep sound when timer reaches zero, with optional browser notification
 - [x] **Help Modal Responsiveness** - Help modal is now scrollable and mobile-friendly with max-height and responsive media queries
