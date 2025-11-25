@@ -32,11 +32,15 @@ function initApp() {
 }
 
 function showReturningUserModal(username) {
-    document.getElementById('returningUserName').textContent = username;
+    const avatar = getUserAvatar();
+    document.getElementById('returningUserName').textContent = `${avatar} ${username}`;
     document.getElementById('returningUserModal').style.display = 'block';
 }
 
 function confirmReturningUser() {
+    // Ensure avatar is loaded from localStorage
+    window.currentUserAvatar = getUserAvatar();
+
     document.getElementById('returningUserModal').style.display = 'none';
     updateUserDisplay();
     document.getElementById('editUserBtn').style.display = 'inline-block';
@@ -46,12 +50,17 @@ function confirmReturningUser() {
 function openEditUserModal() {
     const modal = document.getElementById('userModal');
     document.getElementById('userNameInput').value = window.currentUser || '';
+
+    // Repopulate avatar selector with current selection
+    populateAvatarSelector();
+
     modal.style.display = 'block';
     document.getElementById('userNameInput').focus();
 }
 
 function updateUserDisplay() {
-    document.getElementById('userDisplay').textContent = `👤 ${window.currentUser}`;
+    const avatar = window.currentUserAvatar || getUserAvatar();
+    document.getElementById('userDisplay').textContent = `${avatar} ${window.currentUser}`;
     document.getElementById('editUserBtn').style.display = 'inline-block';
 }
 
@@ -120,9 +129,13 @@ function setupEventListeners() {
     document.getElementById('userForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('userNameInput').value.trim();
+        const avatar = document.getElementById('selectedAvatar').value;
+
         if (name) {
             window.currentUser = name;
+            window.currentUserAvatar = avatar;
             localStorage.setItem('retroUser', name);
+            localStorage.setItem('retroUserAvatar', avatar);
             // closeModals(); // Modals are managed by display property now
             document.getElementById('userModal').style.display = 'none';
             updateUserDisplay();
@@ -257,9 +270,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 function populateAvatarSelector() {
     const selector = document.getElementById('avatarSelector');
     if (!selector) return;
-    
+
     const currentAvatar = getUserAvatar();
-    
+
     selector.innerHTML = AVAILABLE_AVATARS.map(avatar => `
         <div class="avatar-option ${avatar === currentAvatar ? 'selected' : ''}" 
              data-avatar="${avatar}"
@@ -274,13 +287,13 @@ function selectAvatar(avatar) {
     document.querySelectorAll('.avatar-option').forEach(el => {
         el.classList.remove('selected');
     });
-    
+
     // Add selection to clicked avatar
     const clickedElement = document.querySelector(`[data-avatar="${avatar}"]`);
     if (clickedElement) {
         clickedElement.classList.add('selected');
     }
-    
+
     // Update hidden input
     document.getElementById('selectedAvatar').value = avatar;
     setUserAvatar(avatar);
