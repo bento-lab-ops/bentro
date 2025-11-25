@@ -4,7 +4,7 @@
 
 **BenTro** (Bento + Retro) is a lightweight, real-time retrospective tool designed for agile teams. It combines the simplicity of a bento box with powerful collaboration features.
 
-![BenTro Dashboard](https://github.com/dnlouko/bentro/raw/main/docs/dashboard-preview.png)
+![BenTro Dashboard](https://github.com/bento-lab-ops/bentro/raw/main/docs/dashboard-preview.png)
 *(Note: Add a screenshot to `docs/dashboard-preview.png` in your repo)*
 
 ## 🚀 Features
@@ -44,7 +44,7 @@
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/dnlouko/bentro.git
+    git clone https://github.com/bento-lab-ops/bentro.git
     cd bentro
     ```
 
