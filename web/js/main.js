@@ -11,6 +11,9 @@ function initApp() {
         requestNotificationPermission();
     }
 
+    // Populate avatar selector
+    populateAvatarSelector();
+
     initWebSocket();
 
     if (!window.currentUser) {
