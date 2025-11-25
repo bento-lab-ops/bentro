@@ -111,6 +111,7 @@ function updateBoardStatusUI(status) {
     const switchPhaseBtn = document.getElementById('switchPhaseBtn');
     const startTimerBtn = document.getElementById('startTimerBtn');
     const stopTimerBtn = document.getElementById('stopTimerBtn');
+    const addColumnBtn = document.getElementById('addColumnBtn');
 
     document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
     document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
@@ -133,6 +134,13 @@ function updateBoardStatusUI(status) {
         stopTimerBtn.disabled = isFinished;
         stopTimerBtn.style.opacity = isFinished ? '0.5' : '1';
         stopTimerBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+    }
+
+    // Disable add column button when finished
+    if (addColumnBtn) {
+        addColumnBtn.disabled = isFinished;
+        addColumnBtn.style.opacity = isFinished ? '0.5' : '1';
+        addColumnBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
     }
 
     if (isFinished) {
@@ -165,26 +173,44 @@ function createColumnElement(column) {
     const columnDiv = document.createElement('div');
     columnDiv.className = 'column';
     columnDiv.dataset.columnId = column.id;
+    const isFinished = window.currentBoard?.status === 'finished';
 
     columnDiv.innerHTML = `
         <div class="column-header">
             <h3 class="column-title">${escapeHtml(column.name)}</h3>
             <div class="column-actions">
                 <button class="icon-btn sort-column-btn" data-column-id="${column.id}" title="Sort by Votes">🔃</button>
-                <button class="icon-btn edit-column-btn" data-column-id="${column.id}" title="Edit column">✏️</button>
-                <button class="icon-btn delete-column-btn" data-column-id="${column.id}" title="Delete column">🗑️</button>
+                ${!isFinished ? `
+                    <button class="icon-btn edit-column-btn" data-column-id="${column.id}" title="Edit column">✏️</button>
+                    <button class="icon-btn delete-column-btn" data-column-id="${column.id}" title="Delete column">🗑️</button>
+                ` : ''}
             </div>
         </div>
         <div class="cards-list" data-column-id="${column.id}">
             ${column.cards ? column.cards.map(card => createCardHTML(card)).join('') : ''}
         </div>
-        <button class="add-card-btn" data-column-id="${column.id}">+ Add Card</button>
+        ${!isFinished ? `<button class="add-card-btn" data-column-id="${column.id}">+ Add Card</button>` : ''}
     `;
 
-    columnDiv.querySelector('.add-card-btn').addEventListener('click', () => openNewCardModal(column.id));
-    columnDiv.querySelector('.sort-column-btn').addEventListener('click', () => sortColumnByVotes(column.id));
-    columnDiv.querySelector('.edit-column-btn').addEventListener('click', () => openEditColumnModal(column.id, column.name));
-    columnDiv.querySelector('.delete-column-btn').addEventListener('click', () => deleteColumn(column.id));
+    if (!isFinished) {
+        const addCardBtn = columnDiv.querySelector('.add-card-btn');
+        if (addCardBtn) {
+            addCardBtn.addEventListener('click', () => openNewCardModal(column.id));
+        }
+        const editBtn = columnDiv.querySelector('.edit-column-btn');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => openEditColumnModal(column.id, column.name));
+        }
+        const deleteBtn = columnDiv.querySelector('.delete-column-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => deleteColumn(column.id));
+        }
+    }
+
+    const sortBtn = columnDiv.querySelector('.sort-column-btn');
+    if (sortBtn) {
+        sortBtn.addEventListener('click', () => sortColumnByVotes(column.id));
+    }
 
     return columnDiv;
 }
@@ -195,6 +221,7 @@ function createCardHTML(card) {
     const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
     const isSelected = window.selectedCardId === card.id ? 'selected' : '';
     const userVoted = votes.some(v => v.user_name === window.currentUser);
+    const isFinished = window.currentBoard?.status === 'finished';
 
     let mergedContentHTML = '';
     if (card.merged_cards && card.merged_cards.length > 0) {
@@ -210,14 +237,16 @@ function createCardHTML(card) {
     }
 
     let mergeActionHTML = '';
-    if (window.selectedCardId) {
-        if (window.selectedCardId === card.id) {
-            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
+    if (!isFinished) {
+        if (window.selectedCardId) {
+            if (window.selectedCardId === card.id) {
+                mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
+            } else {
+                mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
+            }
         } else {
-            mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
+            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">Select</button>`;
         }
-    } else {
-        mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">Select</button>`;
     }
 
     return `
@@ -227,7 +256,7 @@ function createCardHTML(card) {
             ${card.merged_cards && card.merged_cards.length > 0 ? `
                 <div class="merged-indicator">
                     🔗 ${card.merged_cards.length} merged card(s)
-                    <button class="btn-link" onclick="openUnmergeModal('${card.id}')">Unmerge</button>
+                    ${!isFinished ? `<button class="btn-link" onclick="openUnmergeModal('${card.id}')">Unmerge</button>` : ''}
                 </div>
             ` : ''}
             <div class="card-footer">
@@ -237,11 +266,11 @@ function createCardHTML(card) {
                 </div>
                 <div class="card-actions">
                     ${mergeActionHTML}
-                    ${window.currentPhase === 'voting' && !userVoted ? `
+                    ${!isFinished && window.currentPhase === 'voting' && !userVoted ? `
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'like')">👍</button>
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'dislike')">👎</button>
                     ` : ''}
-                    <button class="delete-card-btn" onclick="deleteCard('${card.id}')">🗑️</button>
+                    ${!isFinished ? `<button class="delete-card-btn" onclick="deleteCard('${card.id}')">🗑️</button>` : ''}
                 </div>
             </div>
         </div>

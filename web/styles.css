@@ -605,3 +605,8 @@ body {
     align-items: center;
     padding: 1rem;
 }
+/* Help Modal Responsiveness */
+.modal-content { max-height: 85vh; overflow-y: auto; }
+.help-content { overflow-y: auto; max-height: calc(85vh - 120px); }
+@media (max-height: 700px) { .modal-content { margin: 2% auto; padding: 1.5rem; max-height: 95vh; } .help-content { max-height: calc(95vh - 100px); } }
+@media (max-width: 600px) { .modal-content { width: 95%; padding: 1rem; } }

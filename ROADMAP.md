@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.12
+## Current Version: v0.2.13
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.12)
+## 🎯 Immediate Priorities (v0.2.13)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -43,8 +43,9 @@
 #### 🟢 Small Effort (1-2 hours)
 - [x] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) ✅ Completed in v0.2.12
 - [x] **Auto-stop timer on finish board** - Automatically stop and reset timer when finishing a retrospective ✅ Completed in v0.2.12
-- [ ] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto`
-- [ ] **Timer sound notifications** - Play sound when timer ends, with browser notification permission
+- [x] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto` ✅ Completed in v0.2.13
+- [x] **Timer sound notifications** - Play sound when timer ends, with browser notification permission ✅ Completed in v0.2.13
+- [x] **Complete read-only mode for finished boards** - Disable all interactive features (merge/unmerge/select/delete/vote/add) except CSV export ✅ Completed in v0.2.13
 
 #### 🟡 Medium Effort (3-8 hours)
 - [ ] **Anonymous mode toggle** - Board-level setting to hide usernames on cards for honest feedback
@@ -112,7 +113,12 @@
 
 ## ✅ Completed Features
 
-### v0.2.12 (Latest)
+### v0.2.13 (Latest)
+- [x] **Complete Read-Only Mode for Finished Boards** - All interactive features (merge/unmerge/select/delete/vote/add card/column) are disabled when a board is finished, except CSV export
+- [x] **Timer Sound Notifications** - Plays beep sound when timer reaches zero, with optional browser notification
+- [x] **Help Modal Responsiveness** - Help modal is now scrollable and mobile-friendly with max-height and responsive media queries
+
+### v0.2.12
 - [x] **Username Edit Button Control** - Hide username edit button in board view, show only in dashboard
 - [x] **Auto-Stop Timer on Finish** - Timer automatically stops and resets when finishing a retrospective
 

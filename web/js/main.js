@@ -6,6 +6,11 @@ function initApp() {
     // Load board templates from JSON
     loadBoardTemplates();
 
+    // Request notification permission for timer sounds
+    if (typeof requestNotificationPermission === 'function') {
+        requestNotificationPermission();
+    }
+
     initWebSocket();
 
     if (!window.currentUser) {

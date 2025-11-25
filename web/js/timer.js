@@ -21,6 +21,7 @@ function startTimerUI(seconds) {
         sendWebSocketMessage('timer_update', { seconds: window.timerSeconds });
 
         if (window.timerSeconds <= 0) {
+            playTimerSound();
             stopTimer();
         }
     }, 1000);
@@ -65,5 +66,44 @@ function updatePhase(phase) {
 
     if (window.currentBoard) {
         loadBoard(window.currentBoard.id);
+    }
+}
+
+// Timer Sound Notification
+function playTimerSound() {
+    try {
+        // Create audio context for beep sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Configure beep sound (800Hz, 0.3s duration)
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+
+        // Show browser notification if permission granted
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('BenTro Timer', {
+                body: 'Time is up!',
+                icon: '/static/bentrologo.png'
+            });
+        }
+    } catch (error) {
+        console.error('Failed to play timer sound:', error);
+    }
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
     }
 }
