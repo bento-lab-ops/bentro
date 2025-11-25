@@ -51,6 +51,7 @@ function showDashboard() {
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
     document.getElementById('dashboardBtn').style.display = 'none';
+    document.getElementById('editUserBtn').style.display = 'inline-block';
     window.currentBoard = null;
     loadBoards();
 }

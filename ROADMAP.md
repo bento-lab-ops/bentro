@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.7
+## Current Version: v0.2.12
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.7)
+## 🎯 Immediate Priorities (v0.2.12)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -41,7 +41,8 @@
 ### ✨ Feature Enhancements (Ordered by Difficulty)
 
 #### 🟢 Small Effort (1-2 hours)
-- [ ] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) to prepare for future "active participants" feature
+- [x] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) ✅ Completed in v0.2.12
+- [x] **Auto-stop timer on finish board** - Automatically stop and reset timer when finishing a retrospective ✅ Completed in v0.2.12
 - [ ] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto`
 - [ ] **Timer sound notifications** - Play sound when timer ends, with browser notification permission
 
@@ -111,7 +112,11 @@
 
 ## ✅ Completed Features
 
-### v0.2.11 (Latest)
+### v0.2.12 (Latest)
+- [x] **Username Edit Button Control** - Hide username edit button in board view, show only in dashboard
+- [x] **Auto-Stop Timer on Finish** - Timer automatically stops and resets when finishing a retrospective
+
+### v0.2.11
 - [x] **Merge Conflict Resolution** - Fixed critical syntax errors in `board.js` caused by merge conflicts
 - [x] **Restored Missing Functions** - Restored `initializeDragAndDrop`, `voteCard`, `createCard` and other functions that were accidentally removed
 - [x] **Git Repository Cleanup** - Synchronized `main` branch and removed obsolete `migration/bentro-namespace` branch

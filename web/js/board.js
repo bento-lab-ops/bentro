@@ -63,6 +63,7 @@ async function loadBoard(boardId) {
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'block';
         document.getElementById('dashboardBtn').style.display = 'inline-block';
+        document.getElementById('editUserBtn').style.display = 'none';
 
         renderBoard(board);
         updateBoardStatusUI(board.status);
@@ -75,6 +76,11 @@ async function loadBoard(boardId) {
 
 async function updateBoardStatus(boardId, status) {
     try {
+        // Stop timer if finishing the board
+        if (status === 'finished' && window.timerInterval) {
+            stopTimer();
+        }
+
         await apiCall(`/boards/${boardId}/status`, 'PUT', { status });
         if (window.currentBoard && window.currentBoard.id === boardId) {
             loadBoard(boardId);
