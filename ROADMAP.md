@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.17
+## Current Version: v0.2.19
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.17)
+## 🎯 Immediate Priorities (v0.2.19)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -115,7 +115,13 @@
 
 ## ✅ Completed Features
 
-### v0.2.17 (Latest)
+### v0.2.19 (Latest)
+- [x] **Bug Fix** - Fixed corrupted HTML file causing frontend loading issues
+
+### v0.2.18
+- [x] **Bug Fix** - Resolved crash loop caused by duplicate route registration
+
+### v0.2.17
 - [x] **Participant Polling** - Automatic 5-second refresh for participant list reliability
 
 ### v0.2.16
