@@ -560,16 +560,41 @@ window.selectCard = selectCard;
 window.cancelSelection = cancelSelection;
 window.mergeCard = mergeCard;
 
+let lastParticipantsHash = '';
+
 function updateParticipantsDisplay(participants) {
     const container = document.getElementById('participantsContainer');
     if (!container) return;
 
-    if (!participants || participants.length === 0) {
+    // Optimistic update: Ensure current user is always in the list if logged in
+    // This prevents "Waiting..." flash if backend returns empty momentarily
+    let displayParticipants = participants || [];
+    if (window.currentUser && window.currentUserAvatar) {
+        const currentUserInList = displayParticipants.some(p => p.username === window.currentUser);
+        if (!currentUserInList) {
+            displayParticipants.push({
+                username: window.currentUser,
+                avatar: window.currentUserAvatar
+            });
+        }
+    }
+
+    // Sort by username for consistent comparison
+    displayParticipants.sort((a, b) => a.username.localeCompare(b.username));
+
+    // Check if content changed
+    const currentHash = JSON.stringify(displayParticipants);
+    if (currentHash === lastParticipantsHash) {
+        return; // No changes, skip DOM update
+    }
+    lastParticipantsHash = currentHash;
+
+    if (displayParticipants.length === 0) {
         container.innerHTML = '<span class="no-participants">Waiting for participants...</span>';
         return;
     }
 
-    container.innerHTML = participants.map(p => `
+    container.innerHTML = displayParticipants.map(p => `
         <div class="participant-avatar" title="${escapeHtml(p.username)}">
             ${p.avatar || '👤'}
         </div>
