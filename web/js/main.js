@@ -65,6 +65,11 @@ function updateUserDisplay() {
 }
 
 function showDashboard() {
+    // Leave current board if viewing one
+    if (window.currentBoard && window.currentUser) {
+        leaveBoard(window.currentBoard.id, window.currentUser);
+    }
+
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
     document.getElementById('dashboardBtn').style.display = 'none';

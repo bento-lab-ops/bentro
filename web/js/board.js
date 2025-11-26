@@ -65,8 +65,20 @@ async function loadBoard(boardId) {
         document.getElementById('dashboardBtn').style.display = 'inline-block';
         document.getElementById('editUserBtn').style.display = 'none';
 
+        document.getElementById('boardTitle').textContent = board.name;
+
         renderBoard(board);
         updateBoardStatusUI(board.status);
+
+        // Join board for participant tracking if active
+        if (board.status === 'active' && window.currentUser) {
+            joinBoard(boardId, window.currentUser, window.currentUserAvatar);
+        }
+
+        // Show participants history if finished
+        if (board.status === 'finished' && board.participants) {
+            updateParticipantsDisplay(board.participants);
+        }
     } catch (error) {
         console.error('Failed to load board:', error);
         alert('Failed to load board: ' + error.message);
@@ -543,3 +555,20 @@ window.unmergeCard = unmergeCard;
 window.selectCard = selectCard;
 window.cancelSelection = cancelSelection;
 window.mergeCard = mergeCard;
+
+function updateParticipantsDisplay(participants) {
+    const container = document.getElementById('participantsContainer');
+    if (!container) return;
+
+    if (!participants || participants.length === 0) {
+        container.innerHTML = '<span class="no-participants">Waiting for participants...</span>';
+        return;
+    }
+
+    container.innerHTML = participants.map(p => `
+        <div class="participant-avatar" title="${escapeHtml(p.username)}">
+            ${p.avatar || '👤'}
+        </div>
+    `).join('');
+}
+window.updateParticipantsDisplay = updateParticipantsDisplay;

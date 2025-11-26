@@ -41,7 +41,7 @@
                 <div class="welcome-content">
                     <h2>No Boards Yet</h2>
                     <p>Click "+ New Board" in the header to create your first retrospective.</p>
-                    
+
                 </div>
             </div>
         </div>
@@ -50,6 +50,14 @@
         <div id="boardContainer" class="board-container" style="display: none;">
             <div id="readOnlyBanner" class="read-only-banner" style="display: none;">
                 ⚠️ This board is finished (Read Only)
+            </div>
+
+            <div class="board-header-section">
+                <h2 id="boardTitle"></h2>
+                <div class="participants-wrapper">
+                    <span class="participants-label">Active:</span>
+                    <div id="participantsContainer" class="participants-container"></div>
+                </div>
             </div>
 
             <!-- Timer Section -->

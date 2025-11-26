@@ -45,12 +45,38 @@ function handleWebSocketMessage(message) {
                 loadBoard(window.currentBoard.id);
             }
             break;
+        case 'participants_update':
+            if (window.currentBoard && window.currentBoard.id === message.data.board_id) {
+                updateParticipantsDisplay(message.data.participants);
+            }
+            break;
     }
 }
 
 function sendWebSocketMessage(type, data) {
     if (window.ws && window.ws.readyState === WebSocket.OPEN) {
         window.ws.send(JSON.stringify({ type, data }));
+    }
+}
+
+function joinBoard(boardId, username, avatar) {
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
+            type: 'join_board',
+            board_id: boardId,
+            username: username,
+            avatar: avatar || getUserAvatar()
+        }));
+    }
+}
+
+function leaveBoard(boardId, username) {
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        window.ws.send(JSON.stringify({
+            type: 'leave_board',
+            board_id: boardId,
+            username: username
+        }));
     }
 }
 

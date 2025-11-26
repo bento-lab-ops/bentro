@@ -7,14 +7,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// Participant represents a user in a board
+type Participant struct {
+	Username string `json:"username"`
+	Avatar   string `json:"avatar"`
+}
+
 // Board represents a retrospective board
 type Board struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	Name      string    `gorm:"not null" json:"name"`
-	Status    string    `gorm:"default:'active'" json:"status"` // active, finished
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Columns   []Column  `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
+	ID           uuid.UUID     `gorm:"type:uuid;primary_key" json:"id"`
+	Name         string        `gorm:"not null" json:"name"`
+	Status       string        `gorm:"default:'active'" json:"status"` // active, finished
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	Columns      []Column      `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
+	Participants []Participant `gorm:"type:jsonb;serializer:json" json:"participants"`
 }
 
 // BeforeCreate hook to generate UUID

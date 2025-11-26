@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -86,6 +85,13 @@ func UpdateBoardStatus(c *gin.Context) {
 	}
 
 	board.Status = input.Status
+
+	// If finishing board, save participants
+	if input.Status == "finished" {
+		participants := hub.GetBoardParticipants(id.String())
+		board.Participants = participants
+	}
+
 	if err := database.DB.Save(&board).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update board status"})
 		return

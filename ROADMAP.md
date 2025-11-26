@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.15
+## Current Version: v0.2.16
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.15)
+## 🎯 Immediate Priorities (v0.2.16)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -49,6 +49,7 @@
 - [x] **Avatar Selection** - Choose emoji avatar for user profile ✅ Completed in v0.2.15
 
 #### 🟡 Medium Effort (3-8 hours)
+- [x] **Active Participants Display** - Show who is currently viewing the board with real-time updates ✅ Completed in v0.2.16
 - [ ] **Anonymous mode toggle** - Board-level setting to hide usernames on cards for honest feedback
 - [ ] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help)
 - [ ] **Dark/Light theme toggle** - Add light theme option with theme switcher in header
@@ -93,7 +94,6 @@
 ### Phase 2: Advanced Collaboration (v0.4.0)
 **Effort:** L (3-5 days)
 
-- [ ] **Active participants display** - Show who is currently viewing/editing a board
 - [ ] **Real-time cursor tracking** - See where other users are clicking/typing
 - [ ] **Card comments** - Add threaded comments to cards for discussion
 
@@ -115,7 +115,12 @@
 
 ## ✅ Completed Features
 
-### v0.2.15 (Latest)
+### v0.2.16 (Latest)
+- [x] **Active Participants Display** - Real-time list of users currently viewing the board
+- [x] **Participant History** - Saves list of participants when board is finished
+- [x] **Board Header** - Added board title and participant list to board view
+
+### v0.2.15
 - [x] **Avatar Selection** - Users can choose from 30+ emoji avatars for their profile
 - [x] **Avatar Persistence** - Selected avatar is saved to localStorage and persists across sessions
 - [x] **Avatar Display** - Avatar shown in header, welcome modal, and edit user modal
