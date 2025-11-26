@@ -66,6 +66,7 @@ async function loadBoard(boardId) {
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'block';
         document.getElementById('dashboardBtn').style.display = 'inline-block';
+        document.getElementById('leaveBoardBtn').style.display = 'inline-block';
         document.getElementById('editUserBtn').style.display = 'none';
 
         document.getElementById('boardTitle').textContent = board.name;

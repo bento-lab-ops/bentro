@@ -111,9 +111,14 @@ body {
     color: white;
 }
 
-.btn-large {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
+.btn-danger-outline {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.btn-danger-outline:hover {
+    background: var(--danger);
+    color: white;
 }
 
 .btn-small {
@@ -267,7 +272,7 @@ body {
     position: relative;
 }
 
-.card:hover {}
+
 
 .card-footer {
     display: flex;

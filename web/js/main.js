@@ -74,6 +74,7 @@ function showDashboard() {
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
     document.getElementById('dashboardBtn').style.display = 'none';
+    document.getElementById('leaveBoardBtn').style.display = 'none';
     document.getElementById('editUserBtn').style.display = 'inline-block';
     window.currentBoard = null;
     loadBoards();
@@ -150,6 +151,11 @@ function setupEventListeners() {
     });
 
     document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+    document.getElementById('leaveBoardBtn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to leave this board? You will be removed from the participant list.')) {
+            showDashboard();
+        }
+    });
 
     document.getElementById('newBoardBtn').addEventListener('click', () => {
         document.getElementById('newBoardModal').style.display = 'block';
