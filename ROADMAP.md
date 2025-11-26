@@ -50,7 +50,7 @@
 
 #### 🟡 Medium Effort (3-8 hours)
 - [x] **Active Participants Display** - Show who is currently viewing the board with real-time updates ✅ Completed in v0.2.16
-- [ ] **Anonymous mode toggle** - Board-level setting to hide usernames on cards for honest feedback
+
 - [ ] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help)
 - [ ] **Dark/Light theme toggle** - Add light theme option with theme switcher in header
 
