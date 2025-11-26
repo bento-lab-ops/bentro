@@ -146,3 +146,15 @@ func DeleteBoard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Board deleted successfully"})
 }
+
+// GetBoardParticipants retrieves the list of active participants for a board
+func GetBoardParticipants(c *gin.Context) {
+	boardID := c.Param("id")
+	if boardID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
+		return
+	}
+
+	participants := hub.GetBoardParticipants(boardID)
+	c.JSON(http.StatusOK, participants)
+}

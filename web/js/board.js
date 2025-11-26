@@ -57,6 +57,9 @@ async function createBoard(name, columns) {
 
 async function loadBoard(boardId) {
     try {
+        // Stop any existing polling
+        stopParticipantPolling();
+
         const board = await apiCall(`/boards/${boardId}`);
         window.currentBoard = board;
 
@@ -73,6 +76,7 @@ async function loadBoard(boardId) {
         // Join board for participant tracking if active
         if (board.status === 'active' && window.currentUser) {
             joinBoard(boardId, window.currentUser, window.currentUserAvatar);
+            startParticipantPolling(boardId);
         }
 
         // Show participants history if finished
@@ -572,3 +576,37 @@ function updateParticipantsDisplay(participants) {
     `).join('');
 }
 window.updateParticipantsDisplay = updateParticipantsDisplay;
+
+// Participant Polling
+let participantPollingInterval = null;
+
+function startParticipantPolling(boardId) {
+    stopParticipantPolling(); // Ensure no duplicate intervals
+
+    // Initial fetch
+    fetchParticipants(boardId);
+
+    // Poll every 5 seconds
+    participantPollingInterval = setInterval(() => {
+        fetchParticipants(boardId);
+    }, 5000);
+}
+
+function stopParticipantPolling() {
+    if (participantPollingInterval) {
+        clearInterval(participantPollingInterval);
+        participantPollingInterval = null;
+    }
+}
+
+async function fetchParticipants(boardId) {
+    try {
+        const participants = await apiCall(`/boards/${boardId}/participants`);
+        updateParticipantsDisplay(participants);
+    } catch (error) {
+        console.error('Failed to fetch participants:', error);
+    }
+}
+
+window.startParticipantPolling = startParticipantPolling;
+window.stopParticipantPolling = stopParticipantPolling;

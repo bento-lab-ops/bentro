@@ -43,7 +43,9 @@ func main() {
 		api.GET("/boards/:id", handlers.GetBoard)
 		api.GET("/boards", handlers.ListBoards)
 		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
+		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
+		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
 
 		// Column routes
 		api.POST("/boards/:boardId/columns", handlers.CreateColumn)

@@ -1,2 +1,2 @@
 // Version information
-window.BENTRO_VERSION = 'v0.2.16';
+window.BENTRO_VERSION = 'v0.2.17';

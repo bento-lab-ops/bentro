@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.16
+## Current Version: v0.2.17
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.16)
+## 🎯 Immediate Priorities (v0.2.17)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -115,7 +115,10 @@
 
 ## ✅ Completed Features
 
-### v0.2.16 (Latest)
+### v0.2.17 (Latest)
+- [x] **Participant Polling** - Automatic 5-second refresh for participant list reliability
+
+### v0.2.16
 - [x] **Active Participants Display** - Real-time list of users currently viewing the board
 - [x] **Participant History** - Saves list of participants when board is finished
 - [x] **Board Header** - Added board title and participant list to board view

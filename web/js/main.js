@@ -68,6 +68,7 @@ function showDashboard() {
     // Leave current board if viewing one
     if (window.currentBoard && window.currentUser) {
         leaveBoard(window.currentBoard.id, window.currentUser);
+        stopParticipantPolling();
     }
 
     document.getElementById('dashboardView').style.display = 'block';

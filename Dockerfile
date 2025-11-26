@@ -23,7 +23,7 @@ WORKDIR /root/
 # Copy binary from builder
 COPY --from=builder /app/main .
 
-# Copy web files (cache bust: 2025-11-25-19:15)
+# Copy web files (cache bust: 2025-11-26-07:30)
 COPY --from=builder /app/web ./web
 
 EXPOSE 8080
