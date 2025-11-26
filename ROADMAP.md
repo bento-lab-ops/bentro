@@ -227,9 +227,18 @@
 
 ## 🎯 Recommended Next Steps
 
-**Option 1: Quick Win** - Disable edit username button in board view  
-**Estimated time:** 10-15 minutes  
-**Impact:** Prepares for future "active participants" feature
+### ⌨️ Next Priority: Keyboard Shortcuts
+**Status:** Planned (See `docs/plans/001-keyboard-shortcuts.md`)
+**Goal:** Improve power user efficiency with global shortcuts.
+
+- `?`: Toggle Help
+- `Esc`: Close Modals
+- `E`: Export CSV
+- `T`: Toggle Timer
+- `V`: Switch Phase
+- `N`: New Card
+
+---
 
 **Option 2: UX Improvement** - Help modal responsiveness  
 **Estimated time:** 30-45 minutes  
