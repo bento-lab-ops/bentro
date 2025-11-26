@@ -130,9 +130,19 @@ function updateBoardStatusUI(status) {
     const stopTimerBtn = document.getElementById('stopTimerBtn');
     const addColumnBtn = document.getElementById('addColumnBtn');
 
+    const leaveBoardBtn = document.getElementById('leaveBoardBtn');
+
     document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
     document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
     document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
+
+    // Disable leave board button when finished
+    if (leaveBoardBtn) {
+        leaveBoardBtn.disabled = isFinished;
+        leaveBoardBtn.style.opacity = isFinished ? '0.5' : '1';
+        leaveBoardBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+        leaveBoardBtn.title = isFinished ? 'Cannot leave a finished board' : 'Leave board and stop participating';
+    }
 
     // Disable phase switching button when finished
     if (switchPhaseBtn) {

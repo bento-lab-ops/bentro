@@ -1,10 +1,10 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.21
+## Current Version: v0.2.22
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.21)
+## 🎯 Immediate Priorities (v0.2.22)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -115,7 +115,10 @@
 
 ## ✅ Completed Features
 
-### v0.2.21 (Latest)
+### v0.2.22 (Latest)
+- [x] **UX Improvement** - Disabled "Leave Board" button when board is finished to preserve history
+
+### v0.2.21
 - [x] **New Feature** - Added "Leave Board" button to allow users to abstain from participation
 
 ### v0.2.20
