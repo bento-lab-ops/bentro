@@ -64,6 +64,9 @@ func main() {
 		api.POST("/cards/:id/votes", handlers.AddVote)
 		api.GET("/cards/:id/votes", handlers.GetVotes)
 		api.DELETE("/votes/:id", handlers.DeleteVote)
+
+		// Reaction routes
+		api.POST("/cards/:id/reactions", handlers.ToggleReaction)
 	}
 
 	// WebSocket route

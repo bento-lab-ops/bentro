@@ -111,6 +111,7 @@ func GetBoard(c *gin.Context) {
 	var board models.Board
 	if err := database.DB.
 		Preload("Columns.Cards.Votes").
+		Preload("Columns.Cards.Reactions").
 		Preload("Columns.Cards.MergedCards").
 		First(&board, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})

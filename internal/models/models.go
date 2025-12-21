@@ -60,6 +60,7 @@ type Card struct {
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 	Votes        []Vote     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
+	Reactions    []Reaction `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
 	MergedCards  []Card     `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
 }
 
@@ -84,6 +85,23 @@ type Vote struct {
 func (v *Vote) BeforeCreate(tx *gorm.DB) error {
 	if v.ID == uuid.Nil {
 		v.ID = uuid.New()
+	}
+	return nil
+}
+
+// Reaction represents an emoji reaction on a card
+type Reaction struct {
+	ID           uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
+	CardID       uuid.UUID `gorm:"type:uuid;not null;index:idx_card_user_reaction,unique" json:"card_id"`
+	UserName     string    `gorm:"not null;index:idx_card_user_reaction,unique" json:"user_name"`
+	ReactionType string    `gorm:"not null;index:idx_card_user_reaction,unique" json:"reaction_type"` // love, celebrate, idea, action, question
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+// BeforeCreate hook to generate UUID
+func (r *Reaction) BeforeCreate(tx *gorm.DB) error {
+	if r.ID == uuid.Nil {
+		r.ID = uuid.New()
 	}
 	return nil
 }

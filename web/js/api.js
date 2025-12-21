@@ -70,6 +70,18 @@ function joinBoard(boardId, username, avatar) {
     }
 }
 
+function toggleReaction(cardId, reactionType) {
+    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+        // Optimistic update via WebSocket logic is handled by backend broadcasting 'board_update'
+        // But for this feature we use REST API primarily, similar to votes
+    }
+    // We'll use REST API for the toggle action
+    return apiCall(`/cards/${cardId}/reactions`, 'POST', {
+        user_name: window.currentUser,
+        reaction_type: reactionType
+    });
+}
+
 function leaveBoard(boardId, username) {
     if (window.ws && window.ws.readyState === WebSocket.OPEN) {
         window.ws.send(JSON.stringify({

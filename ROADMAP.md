@@ -57,7 +57,7 @@
 
 #### 🔴 Large Effort (1-3 days)
 - [ ] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion
-- [ ] **Card reactions** - Add emoji reactions beyond votes (❤️ Love, 🎉 Celebrate, 💡 Idea, 🚀 Action, 🤔 Question)
+- [x] **Card reactions** - Add emoji reactions beyond votes (❤️, 🎉, 💡, 🚀, 🤔) ✅ Completed in v0.2.26
 - [ ] **Portuguese (pt-BR) support** - Lightweight client-side i18n with language selector
 
 ---
@@ -116,7 +116,10 @@
 
 ## ✅ Completed Features
 
-### v0.2.24 (Latest)
+### v0.2.26 (Latest)
+- [x] **Card Reactions** - Emoji reactions (❤️, 🎉, 💡, 🚀, 🤔) next to card content
+
+### v0.2.24
 - [x] **Dark/Light Theme** - Added toggle for Light Mode with persistence
 
 ### v0.2.23

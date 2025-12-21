@@ -276,9 +276,68 @@ function createCardHTML(card) {
         }
     }
 
+    const AVAILABLE_REACTIONS = {
+        'love': '❤️',
+        'celebrate': '🎉',
+        'idea': '💡',
+        'action': '🚀',
+        'question': '🤔'
+    };
+
+    // Group reactions
+    const reactions = card.reactions || [];
+    const reactionCounts = {};
+    const userReactions = new Set();
+
+    reactions.forEach(r => {
+        reactionCounts[r.reaction_type] = (reactionCounts[r.reaction_type] || 0) + 1;
+        if (r.user_name === window.currentUser) {
+            userReactions.add(r.reaction_type);
+        }
+    });
+
+    let reactionsHTML = '';
+
+    // Render existing reactions as tags
+    Object.entries(reactionCounts).forEach(([type, count]) => {
+        const emoji = AVAILABLE_REACTIONS[type];
+        if (!emoji) return;
+        const isActive = userReactions.has(type) ? 'active' : '';
+        // Only allow clicking to toggle if not finished
+        const onClick = !isFinished ? `onclick="toggleCardReaction('${card.id}', '${type}')"` : '';
+
+        reactionsHTML += `
+            <div class="reaction-tag ${isActive}" ${onClick} title="${type}">
+                <span>${emoji}</span>
+                <span class="reaction-count">${count}</span>
+            </div>
+        `;
+    });
+
+    // Add Reaction Button (if not finished)
+    let addReactionHTML = '';
+    if (!isFinished) {
+        addReactionHTML = `
+            <div class="add-reaction-btn" onclick="showReactionPicker(this, '${card.id}')" title="Add Reaction">
+                +🙂
+                <div class="reaction-picker" style="display: none;" onclick="event.stopPropagation()">
+                    ${Object.entries(AVAILABLE_REACTIONS).map(([type, emoji]) => `
+                        <div class="reaction-option" onclick="toggleCardReaction('${card.id}', '${type}'); hideReactionPicker(this)">${emoji}</div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
     return `
         <div class="card ${isSelected}" data-card-id="${card.id}">
-            <div class="card-content">${escapeHtml(card.content)}</div>
+            <div class="card-content">
+                ${escapeHtml(card.content)}
+                <div class="reactions-container">
+                    ${reactionsHTML}
+                    ${addReactionHTML}
+                </div>
+            </div>
             ${mergedContentHTML}
             ${card.merged_cards && card.merged_cards.length > 0 ? `
                 <div class="merged-indicator">
@@ -303,6 +362,44 @@ function createCardHTML(card) {
         </div>
     `;
 }
+
+// Make reaction functions global
+window.toggleCardReaction = async function (cardId, type) {
+    try {
+        await toggleReaction(cardId, type);
+        // Refresh board to show changes
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+    } catch (error) {
+        console.error('Failed to toggle reaction:', error);
+        alert(error.message);
+    }
+};
+
+window.showReactionPicker = function (btn, cardId) {
+    // Hide all other pickers first
+    document.querySelectorAll('.reaction-picker').forEach(p => p.style.display = 'none');
+
+    // Show this one
+    const picker = btn.querySelector('.reaction-picker');
+    if (picker) {
+        picker.style.display = 'flex';
+
+        // Close on click outside
+        const closePicker = (e) => {
+            if (!picker.contains(e.target) && !btn.contains(e.target)) {
+                picker.style.display = 'none';
+                document.removeEventListener('click', closePicker);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closePicker), 0);
+    }
+};
+
+window.hideReactionPicker = function (el) {
+    const picker = el.closest('.reaction-picker');
+    if (picker) picker.style.display = 'none';
+};
 
 // Select-to-Merge Logic
 function selectCard(cardId) {
