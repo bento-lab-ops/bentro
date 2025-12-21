@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.22
+## Current Version: v0.2.23
 
 ---
 
@@ -41,6 +41,7 @@
 ### ✨ Feature Enhancements (Ordered by Difficulty)
 
 #### 🟢 Small Effort (1-2 hours)
+- [x] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help) ✅ Completed in v0.2.23
 - [x] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) ✅ Completed in v0.2.12
 - [x] **Auto-stop timer on finish board** - Automatically stop and reset timer when finishing a retrospective ✅ Completed in v0.2.12
 - [x] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto` ✅ Completed in v0.2.13
@@ -51,7 +52,7 @@
 #### 🟡 Medium Effort (3-8 hours)
 - [x] **Active Participants Display** - Show who is currently viewing the board with real-time updates ✅ Completed in v0.2.16
 
-- [ ] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help)
+- [x] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help) ✅ Completed in v0.2.23
 - [ ] **Dark/Light theme toggle** - Add light theme option with theme switcher in header
 
 #### 🔴 Large Effort (1-3 days)
@@ -115,7 +116,10 @@
 
 ## ✅ Completed Features
 
-### v0.2.22 (Latest)
+### v0.2.23 (Latest)
+- [x] **Keyboard shortcuts** - Added global keyboard shortcuts for power users (Help, Export, Timer, Phase, New Card)
+
+### v0.2.22
 - [x] **UX Improvement** - Disabled "Leave Board" button when board is finished to preserve history
 
 ### v0.2.21

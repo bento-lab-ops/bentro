@@ -762,3 +762,35 @@ body {
     color: var(--text-secondary);
     font-style: italic;
 }
+
+/* Keyboard Shortcuts */
+.shortcuts-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.shortcuts-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+kbd {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2), 0 2px 0 0 rgba(255,255,255,0.05) inset;
+    color: var(--text-primary);
+    display: inline-block;
+    font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    white-space: nowrap;
+}

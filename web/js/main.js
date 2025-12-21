@@ -275,8 +275,78 @@ async function loadModals() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadModals();
     setupEventListeners();
+    setupKeyboardShortcuts();
     initApp();
 });
+
+// Keyboard Shortcuts
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Ignore if user is typing in an input or textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            // Allow Esc to blur/close even in inputs
+            if (e.key === 'Escape') {
+                e.target.blur();
+                closeModals();
+            }
+            return;
+        }
+
+        // Global Shortcuts
+        if (e.key === 'Escape') {
+            closeModals();
+            if (typeof cancelSelection === 'function') cancelSelection();
+            return;
+        }
+
+        if (e.key === '?' && e.shiftKey) {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
+            return;
+        }
+
+        // Board-specific shortcuts (only if in a board)
+        if (window.currentBoard) {
+            // Export CSV (Shift + E)
+            if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
+                e.preventDefault();
+                if (typeof exportBoardToCSV === 'function') exportBoardToCSV(window.currentBoard.id);
+            }
+
+            // Toggle Timer (Shift + T)
+            if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
+                e.preventDefault();
+                const startBtn = document.getElementById('startTimerBtn');
+                const stopBtn = document.getElementById('stopTimerBtn');
+
+                if (stopBtn && stopBtn.style.display !== 'none') {
+                    if (typeof stopTimer === 'function') stopTimer();
+                } else if (startBtn && !startBtn.disabled) {
+                    if (typeof startTimer === 'function') startTimer();
+                }
+            }
+
+            // Switch Phase (Shift + V)
+            if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
+                e.preventDefault();
+                const switchBtn = document.getElementById('switchPhaseBtn');
+                if (switchBtn && !switchBtn.disabled) {
+                    if (typeof switchPhase === 'function') switchPhase();
+                }
+            }
+
+            // New Card (Shift + N)
+            if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
+                e.preventDefault();
+                // Open new card modal for the first column by default
+                if (window.currentBoard.columns && window.currentBoard.columns.length > 0) {
+                    const firstColumnId = window.currentBoard.columns[0].id;
+                    if (typeof openNewCardModal === 'function') openNewCardModal(firstColumnId);
+                }
+            }
+        }
+    });
+}
 
 // Avatar Selection Functions
 function populateAvatarSelector() {
@@ -289,7 +359,7 @@ function populateAvatarSelector() {
         <div class="avatar-option ${avatar === currentAvatar ? 'selected' : ''}" 
              data-avatar="${avatar}"
              onclick="selectAvatar('${avatar}')">
-            ${avatar}
+             ${avatar}
         </div>
     `).join('');
 }
