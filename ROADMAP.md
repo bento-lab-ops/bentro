@@ -53,7 +53,7 @@
 - [x] **Active Participants Display** - Show who is currently viewing the board with real-time updates ✅ Completed in v0.2.16
 
 - [x] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help) ✅ Completed in v0.2.23
-- [ ] **Dark/Light theme toggle** - Add light theme option with theme switcher in header
+- [x] **Dark/Light theme toggle** - Add light theme option with theme switcher in header ✅ Completed in v0.2.24
 
 #### 🔴 Large Effort (1-3 days)
 - [ ] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion
@@ -116,7 +116,10 @@
 
 ## ✅ Completed Features
 
-### v0.2.23 (Latest)
+### v0.2.24 (Latest)
+- [x] **Dark/Light Theme** - Added toggle for Light Mode with persistence
+
+### v0.2.23
 - [x] **Keyboard shortcuts** - Added global keyboard shortcuts for power users (Help, Export, Timer, Phase, New Card)
 
 ### v0.2.22

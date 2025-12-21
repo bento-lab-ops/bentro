@@ -29,6 +29,33 @@ function initApp() {
     if (versionSpan) {
         versionSpan.textContent = APP_VERSION;
     }
+
+    // Initialize Theme
+    initTheme();
+}
+
+// Theme Management
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+        btn.textContent = theme === 'dark' ? '🌞' : '🌙';
+        btn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
 }
 
 function showReturningUserModal(username) {
@@ -246,6 +273,8 @@ function setupEventListeners() {
     document.getElementById('helpBtn')?.addEventListener('click', () => {
         document.getElementById('helpModal').style.display = 'block';
     });
+
+    document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
 
     document.getElementById('exportBoardBtn')?.addEventListener('click', () => {
         if (window.currentBoard) exportBoardToCSV(window.currentBoard.id);
