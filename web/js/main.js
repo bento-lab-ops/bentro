@@ -242,18 +242,6 @@ function setupEventListeners() {
     document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
     document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
 
-    document.getElementById('finishRetroBtn').addEventListener('click', () => {
-        if (window.currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
-            updateBoardStatus(window.currentBoard.id, 'finished');
-        }
-    });
-
-    document.getElementById('reopenRetroBtn').addEventListener('click', () => {
-        if (window.currentBoard && confirm('Re-open this retrospective?')) {
-            updateBoardStatus(window.currentBoard.id, 'active');
-        }
-    });
-
     document.querySelectorAll('.close').forEach(closeBtn => {
         closeBtn.addEventListener('click', closeModals);
     });
@@ -276,16 +264,31 @@ function setupEventListeners() {
 
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
 
-    document.getElementById('exportBoardBtn')?.addEventListener('click', () => {
-        if (window.currentBoard) exportBoardToCSV(window.currentBoard.id);
-    });
-
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             closeModals();
         }
     });
 }
+
+// Global Action Wrappers (called via onclick in HTML)
+window.finishRetro = function () {
+    if (window.currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
+        updateBoardStatus(window.currentBoard.id, 'finished');
+    }
+};
+
+window.reopenRetro = function () {
+    if (window.currentBoard && confirm('Re-open this retrospective?')) {
+        updateBoardStatus(window.currentBoard.id, 'active');
+    }
+};
+
+window.exportCurrentBoard = function () {
+    if (window.currentBoard) {
+        exportBoardToCSV(window.currentBoard.id);
+    }
+};
 
 // Load Modals dynamically
 async function loadModals() {

@@ -23,8 +23,8 @@
 
 /* Light Theme Override */
 [data-theme="light"] {
-    --bg-dark: hsl(220, 20%, 97%);
-    --bg-medium: hsl(220, 20%, 92%);
+    --bg-dark: hsl(220, 14%, 94%);
+    --bg-medium: hsl(220, 14%, 89%);
     --bg-light: hsl(0, 0%, 100%);
 
     --text-primary: hsl(220, 26%, 14%);

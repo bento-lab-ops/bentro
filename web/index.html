@@ -78,9 +78,11 @@
                     <button id="startTimerBtn" class="btn btn-success">Start Timer</button>
                     <button id="stopTimerBtn" class="btn btn-danger" style="display: none;">Stop Timer</button>
                     <button id="switchPhaseBtn" class="btn btn-secondary">Switch to Voting</button>
-                    <button id="exportBoardBtn" class="btn btn-secondary">📊 Export CSV</button>
-                    <button id="finishRetroBtn" class="btn btn-danger">Finish Retro</button>
-                    <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;">Re-open Retro</button>
+                    <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()">📊 Export
+                        CSV</button>
+                    <button id="finishRetroBtn" class="btn btn-danger" onclick="finishRetro()">Finish Retro</button>
+                    <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;"
+                        onclick="reopenRetro()">Re-open Retro</button>
                 </div>
             </div>
 

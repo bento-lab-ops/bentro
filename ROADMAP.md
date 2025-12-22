@@ -4,7 +4,7 @@
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.22)
+## 🎯 Immediate Priorities (v0.2.28)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -116,7 +116,13 @@
 
 ## ✅ Completed Features
 
-### v0.2.26 (Latest)
+### v0.2.28 (Latest)
+- [x] **UI Improvement** - Darkened Light Mode background for better eye comfort
+
+### v0.2.27
+- [x] **Bug Fix** - Fixed unresponsive "Finish Retro" and "Export CSV" buttons
+
+### v0.2.26
 - [x] **Card Reactions** - Emoji reactions (❤️, 🎉, 💡, 🚀, 🤔) next to card content
 
 ### v0.2.24
