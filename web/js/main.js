@@ -16,10 +16,17 @@ function initApp() {
 
     initWebSocket();
 
+    // Handle URL Hash for persistence
+    handleUrlHash();
+
+    // Listen for back/forward navigation
+    window.addEventListener('popstate', handleUrlHash);
+
     if (!window.currentUser) {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
         document.getElementById('userModal').style.display = 'block';
-    } else {
+    } else if (!window.location.hash.startsWith('#board/')) {
+        // Only show welcome back if not directly loading a board
         console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
         showReturningUserModal(window.currentUser);
     }
@@ -32,6 +39,31 @@ function initApp() {
 
     // Initialize Theme
     initTheme();
+}
+
+// Handle URL routing based on hash
+function handleUrlHash() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#board/')) {
+        const boardId = hash.replace('#board/', '');
+        if (boardId && (!window.currentBoard || window.currentBoard.id !== boardId)) {
+            // If user is logged in, load the board
+            if (window.currentUser) {
+                // If we are already initializing (from initApp), we might need to wait or just call it.
+                // loadBoard is global from board.js
+                if (typeof loadBoard === 'function') {
+                    loadBoard(boardId);
+                    // Hide modals if they are open (like welcome back)
+                    document.getElementById('returningUserModal').style.display = 'none';
+                    document.getElementById('userModal').style.display = 'none';
+                }
+            }
+        }
+    } else if (!hash || hash === '#dashboard') {
+        if (window.currentBoard) {
+            showDashboard();
+        }
+    }
 }
 
 // Theme Management
@@ -104,6 +136,12 @@ function showDashboard() {
     document.getElementById('leaveBoardBtn').style.display = 'none';
     document.getElementById('editUserBtn').style.display = 'inline-block';
     window.currentBoard = null;
+
+    // Clear URL hash
+    if (window.location.hash.startsWith('#board/')) {
+        history.pushState(null, null, ' ');
+    }
+
     loadBoards();
 }
 

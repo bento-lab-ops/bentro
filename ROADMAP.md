@@ -58,6 +58,7 @@
 #### 🔴 Large Effort (1-3 days)
 - [ ] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion
 - [ ] **Action Items Dashboard** - Centralized view to list and filter action items by board, user, and status
+    - *Note: Requires implementing "Soft Delete" to preserve items when boards are deleted.*
 - [x] **Card reactions** - Add emoji reactions beyond votes (❤️, 🎉, 💡, 🚀, 🤔) ✅ Completed in v0.2.26
 - [ ] **Portuguese (pt-BR) support** - Lightweight client-side i18n with language selector
 

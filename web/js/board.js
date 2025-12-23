@@ -25,10 +25,25 @@ function renderDashboard(boards) {
         card.className = 'dashboard-card';
         const statusClass = board.status === 'active' ? 'status-active' : 'status-finished';
 
+        // Action Item Logic
+        const actionItemCount = board.action_item_count || 0;
+        const hasActionItems = actionItemCount > 0;
+        const actionItemBadge = hasActionItems
+            ? `<div class="action-item-dashboard-badge" title="${actionItemCount} active action items">⚡ ${actionItemCount}</div>`
+            : '';
+
+        // Delete Button Logic
+        const deleteDisabled = hasActionItems ? 'disabled' : '';
+        const deleteStyle = hasActionItems ? 'opacity: 0.5; cursor: not-allowed;' : '';
+        const deleteTitle = hasActionItems ? 'Cannot delete board with action items' : 'Delete';
+
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <h3 style="margin:0;">${escapeHtml(board.name)}</h3>
-                <span class="board-status ${statusClass}">${board.status}</span>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    ${actionItemBadge}
+                    <span class="board-status ${statusClass}">${board.status}</span>
+                </div>
             </div>
             <div class="board-meta">
                 Created: ${new Date(board.created_at).toLocaleDateString()}
@@ -37,7 +52,11 @@ function renderDashboard(boards) {
                 <button class="btn btn-primary btn-small" onclick="loadBoard('${board.id}')">Enter</button>
                 ${board.status === 'finished' ?
                 `<button class="btn btn-warning btn-small" onclick="updateBoardStatus('${board.id}', 'active')">Re-open</button>` : ''}
-                <button class="btn btn-danger btn-small" onclick="deleteBoard('${board.id}')">Delete</button>
+                <button class="btn btn-danger btn-small" 
+                    onclick="deleteBoard('${board.id}')" 
+                    ${deleteDisabled} 
+                    style="${deleteStyle}"
+                    title="${deleteTitle}">Delete</button>
             </div>
         `;
         grid.appendChild(card);
@@ -62,6 +81,11 @@ async function loadBoard(boardId) {
 
         const board = await apiCall(`/boards/${boardId}`);
         window.currentBoard = board;
+
+        // Update URL hash
+        if (window.location.hash !== `#board/${boardId}`) {
+            history.pushState(null, null, `#board/${boardId}`);
+        }
 
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'block';

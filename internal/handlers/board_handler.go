@@ -121,7 +121,7 @@ func GetBoard(c *gin.Context) {
 	c.JSON(http.StatusOK, board)
 }
 
-// ListBoards retrieves all boards
+// ListBoards retrieves all boards with action item counts
 func ListBoards(c *gin.Context) {
 	var boards []models.Board
 	if err := database.DB.Order("created_at DESC").Find(&boards).Error; err != nil {
@@ -129,7 +129,40 @@ func ListBoards(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, boards)
+	// Get action item counts grouped by board
+	type Result struct {
+		BoardID uuid.UUID
+		Count   int64
+	}
+	var results []Result
+	database.DB.Table("cards").
+		Select("columns.board_id, count(*) as count").
+		Joins("join columns on cards.column_id = columns.id").
+		Where("cards.is_action_item = ? AND cards.completed = ?", true, false).
+		Group("columns.board_id").
+		Scan(&results)
+
+	// Map counts
+	counts := make(map[uuid.UUID]int64)
+	for _, r := range results {
+		counts[r.BoardID] = r.Count
+	}
+
+	// Build response
+	type BoardResponse struct {
+		models.Board
+		ActionItemCount int64 `json:"action_item_count"`
+	}
+
+	response := make([]BoardResponse, len(boards))
+	for i, b := range boards {
+		response[i] = BoardResponse{
+			Board:           b,
+			ActionItemCount: counts[b.ID],
+		}
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // DeleteBoard deletes a board
