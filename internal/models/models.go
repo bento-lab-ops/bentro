@@ -62,6 +62,10 @@ type Card struct {
 	Votes        []Vote     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
 	Reactions    []Reaction `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
 	MergedCards  []Card     `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
+	IsActionItem bool       `gorm:"default:false" json:"is_action_item"`
+	Owner        string     `json:"owner,omitempty"`
+	DueDate      *time.Time `json:"due_date,omitempty"`
+	Completed    bool       `gorm:"default:false" json:"completed"`
 }
 
 // BeforeCreate hook to generate UUID

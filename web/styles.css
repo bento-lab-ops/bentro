@@ -912,3 +912,89 @@ kbd {
         transform: translateY(0);
     }
 }
+
+/* Action Items */
+.action-item-indicator {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    background: rgba(255, 193, 7, 0.2);
+    color: #eab308;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.card.action-item {
+    border-left: 4px solid #eab308;
+}
+
+.action-item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.action-owner {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.action-due-date {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.action-due-date.overdue {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.2rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+    opacity: 1;
+}
+
+.action-btn.active {
+    opacity: 1;
+    color: #eab308;
+}
+
+.card.completed {
+    opacity: 0.6;
+}
+
+.card.completed .card-content {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.action-completed-checkbox {
+    cursor: pointer;
+    margin-right: 0.5rem;
+    accent-color: var(--success);
+}
+
+.action-owner-input-wrapper {
+    position: relative;
+    width: 100%;
+}

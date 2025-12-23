@@ -4,7 +4,7 @@
 
 ---
 
-## 🎯 Immediate Priorities (v0.2.28)
+## 🎯 Immediate Priorities (v0.3.1)
 
 ### 🔴 Critical Infrastructure Fixes
 
@@ -57,6 +57,7 @@
 
 #### 🔴 Large Effort (1-3 days)
 - [ ] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion
+- [ ] **Action Items Dashboard** - Centralized view to list and filter action items by board, user, and status
 - [x] **Card reactions** - Add emoji reactions beyond votes (❤️, 🎉, 💡, 🚀, 🤔) ✅ Completed in v0.2.26
 - [ ] **Portuguese (pt-BR) support** - Lightweight client-side i18n with language selector
 
@@ -116,7 +117,14 @@
 
 ## ✅ Completed Features
 
-### v0.2.28 (Latest)
+### v0.3.1 (Latest)
+- [x] **Fix** - Resolved visual overlap of Action Item badge
+- [x] **Feature** - Added ability to remove Action Item status
+
+### v0.3.0
+- [x] **Action Items** - Track tasks with owners and due dates directly on cards ⚡
+
+### v0.2.28
 - [x] **UI Improvement** - Darkened Light Mode background for better eye comfort
 
 ### v0.2.27

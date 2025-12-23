@@ -329,14 +329,57 @@ function createCardHTML(card) {
         `;
     }
 
+    // Action Item Logic
+    const isActionItem = card.is_action_item;
+    let actionItemBadgeHTML = '';
+    let actionItemDetailsHTML = '';
+    let actionItemClasses = '';
+
+    if (isActionItem) {
+        actionItemClasses += ' action-item';
+        actionItemBadgeHTML = `
+            <div class="action-item-indicator">
+                ⚡ Action Item
+            </div>
+        `;
+
+        const dueDate = card.due_date ? new Date(card.due_date).toLocaleDateString() : 'No Date';
+        const isOverdue = card.due_date && new Date(card.due_date) < new Date() && !card.completed;
+
+        actionItemDetailsHTML = `
+            <div class="action-item-details">
+                <div class="action-owner" title="Owner">
+                    👤 ${escapeHtml(card.owner || 'Unassigned')}
+                </div>
+                <div class="action-due-date ${isOverdue ? 'overdue' : ''}" title="Due Date">
+                    📅 ${dueDate}
+                </div>
+                <div class="action-status">
+                    <label class="action-completed-label" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="action-completed-checkbox" 
+                            ${card.completed ? 'checked' : ''} 
+                            onchange="toggleActionItemCompletion('${card.id}', this.checked)">
+                        Done
+                    </label>
+                </div>
+            </div>
+        `;
+
+        if (card.completed) {
+            actionItemClasses += ' completed';
+        }
+    }
+
     return `
-        <div class="card ${isSelected}" data-card-id="${card.id}">
+        <div class="card ${isSelected} ${actionItemClasses}" data-card-id="${card.id}">
             <div class="card-content">
+                ${actionItemBadgeHTML}
                 ${escapeHtml(card.content)}
                 <div class="reactions-container">
                     ${reactionsHTML}
                     ${addReactionHTML}
                 </div>
+                ${actionItemDetailsHTML}
             </div>
             ${mergedContentHTML}
             ${card.merged_cards && card.merged_cards.length > 0 ? `
@@ -352,6 +395,9 @@ function createCardHTML(card) {
                 </div>
                 <div class="card-actions">
                     ${mergeActionHTML}
+                    ${!isFinished ? `
+                        <button class="action-btn ${isActionItem ? 'active' : ''}" onclick="openActionItemModal('${card.id}')" title="Action Item">⚡</button>
+                    ` : ''}
                     ${!isFinished && window.currentPhase === 'voting' && !userVoted ? `
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'like')">👍</button>
                         <button class="vote-btn" onclick="voteCard('${card.id}', 'dislike')">👎</button>
@@ -743,3 +789,114 @@ async function fetchParticipants(boardId) {
 
 window.startParticipantPolling = startParticipantPolling;
 window.stopParticipantPolling = stopParticipantPolling;
+
+// Action Item Logic
+window.openActionItemModal = function (cardId) {
+    const card = findCardById(cardId);
+    if (!card) return;
+
+    document.getElementById('actionItemCardId').value = cardId;
+
+    // Populate Owner Select
+    const ownerSelect = document.getElementById('actionItemOwner');
+    ownerSelect.innerHTML = '<option value="">Unassigned</option>';
+
+    // Get unique participants from board + current user
+    const participants = window.currentBoard.participants || [];
+    // Ensure unique usernames
+    const usernames = new Set(participants.map(p => p.username));
+
+    // Add current user if not in list
+    if (window.currentUser && !usernames.has(window.currentUser)) {
+        usernames.add(window.currentUser);
+    }
+
+    Array.from(usernames).sort().forEach(username => {
+        const option = document.createElement('option');
+        option.value = username;
+        option.textContent = username;
+        if (card.owner === username) option.selected = true;
+        ownerSelect.appendChild(option);
+    });
+
+    // Set Due Date
+    const dateInput = document.getElementById('actionItemDueDate');
+    if (card.due_date) {
+        // Format to YYYY-MM-DD for input[type=date]
+        dateInput.value = new Date(card.due_date).toISOString().split('T')[0];
+    } else {
+        dateInput.value = '';
+    }
+
+    document.getElementById('actionItemModal').style.display = 'block';
+};
+
+window.saveActionItem = async function () {
+    const cardId = document.getElementById('actionItemCardId').value;
+    const owner = document.getElementById('actionItemOwner').value;
+    const dueDate = document.getElementById('actionItemDueDate').value;
+
+    try {
+        await apiCall(`/cards/${cardId}`, 'PUT', {
+            is_action_item: true,
+            owner: owner,
+            due_date: dueDate ? new Date(dueDate).toISOString() : null
+        });
+
+        document.getElementById('actionItemModal').style.display = 'none';
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+    } catch (error) {
+        console.error('Failed to save action item:', error);
+        alert('Failed to save action item: ' + error.message);
+    }
+};
+
+window.toggleActionItemCompletion = async function (cardId, isChecked) {
+    try {
+        await apiCall(`/cards/${cardId}`, 'PUT', {
+            completed: isChecked
+        });
+        // Optimistic update handled by checkbox state, but we should reload to be safe and sync
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+    } catch (error) {
+        console.error('Failed to toggle completion:', error);
+        alert('Failed to update status: ' + error.message);
+        // Revert checkbox if failed
+        await loadBoard(window.currentBoard.id);
+    }
+};
+
+window.removeActionItem = async function () {
+    const cardId = document.getElementById('actionItemCardId').value;
+    if (!confirm('Are you sure you want to remove the Action Item status from this card?')) return;
+
+    try {
+        await apiCall(`/cards/${cardId}`, 'PUT', {
+            is_action_item: false,
+            owner: null,
+            due_date: null,
+            completed: false
+        });
+
+        document.getElementById('actionItemModal').style.display = 'none';
+        await loadBoard(window.currentBoard.id);
+        sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
+    } catch (error) {
+        console.error('Failed to remove action item:', error);
+        alert('Failed to remove action item: ' + error.message);
+    }
+};
+
+// Helper: Find card by ID in current board
+function findCardById(cardId) {
+    if (!window.currentBoard || !window.currentBoard.columns) return null;
+    for (const column of window.currentBoard.columns) {
+        if (column.cards) {
+            const card = column.cards.find(c => c.id === cardId);
+            if (card) return card;
+        }
+    }
+    return null;
+}

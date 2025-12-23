@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"retro-app/internal/database"
 	"retro-app/internal/models"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -41,7 +42,7 @@ func CreateCard(c *gin.Context) {
 	c.JSON(http.StatusCreated, card)
 }
 
-// UpdateCard updates a card's content
+// UpdateCard updates a card's content and action item details
 func UpdateCard(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -50,7 +51,11 @@ func UpdateCard(c *gin.Context) {
 	}
 
 	var input struct {
-		Content string `json:"content" binding:"required"`
+		Content      string     `json:"content"`
+		IsActionItem *bool      `json:"is_action_item"`
+		Owner        *string    `json:"owner"`
+		DueDate      *time.Time `json:"due_date"`
+		Completed    *bool      `json:"completed"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -64,7 +69,22 @@ func UpdateCard(c *gin.Context) {
 		return
 	}
 
-	card.Content = input.Content
+	if input.Content != "" {
+		card.Content = input.Content
+	}
+	if input.IsActionItem != nil {
+		card.IsActionItem = *input.IsActionItem
+	}
+	if input.Owner != nil {
+		card.Owner = *input.Owner
+	}
+	if input.DueDate != nil {
+		card.DueDate = input.DueDate
+	}
+	if input.Completed != nil {
+		card.Completed = *input.Completed
+	}
+
 	if err := database.DB.Save(&card).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update card"})
 		return

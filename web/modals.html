@@ -144,3 +144,31 @@
         </div>
     </div>
 </div>
+
+<!-- Modal for Action Item Details -->
+<div id="actionItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="modal-header">
+            <h2>⚡ Action Item Details</h2>
+        </div>
+        <div class="form-group">
+            <label for="actionItemOwner">Owner</label>
+            <div class="action-owner-input-wrapper">
+                <select id="actionItemOwner" class="form-input">
+                    <option value="">Unassigned</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="actionItemDueDate">Due Date</label>
+            <input type="date" id="actionItemDueDate" class="form-input">
+        </div>
+        <input type="hidden" id="actionItemCardId">
+        <div class="modal-actions" style="display: flex; justify-content: space-between; gap: 1rem;">
+            <button class="btn btn-danger btn-outline" onclick="removeActionItem()">Remove Action Item</button>
+            <button class="btn btn-primary" onclick="saveActionItem()">Save Details</button>
+        </div>
+    </div>
+</div>
