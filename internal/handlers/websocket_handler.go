@@ -9,6 +9,7 @@ import (
 	"retro-app/internal/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -249,4 +250,14 @@ func HandleWebSocket(c *gin.Context) {
 // InitWebSocketHub initializes and starts the WebSocket hub
 func InitWebSocketHub() {
 	go hub.Run()
+}
+
+// BroadcastBoardUpdate sends the updated board data to all connected clients
+func BroadcastBoardUpdate(boardID uuid.UUID) {
+	// Simplification: We just send a signal to reload for now
+	data := map[string]interface{}{
+		"board_id": boardID.String(),
+		"action":   "refresh_board",
+	}
+	BroadcastMessage("board_update", data)
 }

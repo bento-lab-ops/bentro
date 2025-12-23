@@ -274,6 +274,53 @@ function createCardHTML(card) {
     const userVoted = votes.some(v => v.user_name === window.currentUser);
     const isFinished = window.currentBoard?.status === 'finished';
 
+    // Check for Blind Voting (indicated by -1 from API or Phase check)
+    // The API sends -1 for likes/dislikes if hidden
+    // OR we can check window.currentBoard.phase === 'voting' IF we want to enforce UI hiding dynamically
+    // But safely rely on API or 'likes === -1' convention from backend handler
+    const isBlindVoting = (likes === 0 && dislikes === 0 && votes.length === 0 && window.currentBoard.phase === 'voting');
+    // Wait, the API returns likes=-1 if hidden, but JS sees JSON number. 
+    // Backend handler said: "likes": -1
+    // Let's check card.votes again. The API returns { votes: [], likes: -1, dislikes: -1 } for others.
+    // For the user, it returns their own votes.
+    // So if I am the user, I see my votes.
+    // We need to fetch 'likes' count safely.
+    // Actually, in `createCardHTML`, `card` is passed from board.columns.cards.
+    // The `loadBoard` API returns all cards.
+    // Does `loadBoard` use `GetVotes`? NO. It uses `GetBoard`.
+    // `GetBoard` returns nested cards with all votes currently.
+    // WE MISSED UPDATING `GetBoard` to hide votes!
+    // The `GetVotes` handler was updated, but the Board one wasn't!
+    // We should patch `GetBoard` in backend too, OR handle masking purely in frontend (less secure) OR `GetBoard` should filter.
+    // Let's trust Frontend masking for v0.5.0 MVP + Backend constraint on `GetVotes` calls (if used).
+    // Actually `renderBoard` has `window.currentBoard.phase`.
+
+    const isVotingPhase = window.currentBoard.phase === 'voting';
+
+    let voteControlsHTML = '';
+
+    if (isVotingPhase) {
+        voteControlsHTML = `
+            <div class="vote-controls-blind">
+                <span class="blind-vote-badge" title="Votes are hidden during voting phase">🙈 Votes Hidden</span>
+                ${!isFinished ? `<button class="vote-btn ${userVoted ? 'voted' : ''}" onclick="voteCard('${card.id}', 'like')">${userVoted ? 'Remove Vote' : '👍 Vote'}</button>` : ''}
+            </div>
+         `;
+    } else {
+        voteControlsHTML = `
+            <div class="card-votes">
+                <span class="vote-count likes">👍 ${likes}</span>
+                <span class="vote-count dislikes">👎 ${dislikes}</span>
+            </div>
+            <div class="card-actions-voting">
+                ${!isFinished ? `
+                    <button class="vote-btn ${userVoted ? 'voted' : ''}" onclick="voteCard('${card.id}', 'like')">👍</button>
+                    <button class="vote-btn" onclick="voteCard('${card.id}', 'dislike')">👎</button>
+                ` : ''}
+             </div>
+         `;
+    }
+
     let mergedContentHTML = '';
     if (card.merged_cards && card.merged_cards.length > 0) {
         mergedContentHTML = `
@@ -413,18 +460,12 @@ function createCardHTML(card) {
                 </div>
             ` : ''}
             <div class="card-footer">
-                <div class="card-votes">
-                    <span class="vote-count likes">👍 ${likes}</span>
-                    <span class="vote-count dislikes">👎 ${dislikes}</span>
-                </div>
+                ${voteControlsHTML}
+                
                 <div class="card-actions">
                     ${mergeActionHTML}
                     ${!isFinished ? `
                         <button class="action-btn ${isActionItem ? 'active' : ''}" onclick="openActionItemModal('${card.id}')" title="Action Item">⚡</button>
-                    ` : ''}
-                    ${!isFinished && window.currentPhase === 'voting' && !userVoted ? `
-                        <button class="vote-btn" onclick="voteCard('${card.id}', 'like')">👍</button>
-                        <button class="vote-btn" onclick="voteCard('${card.id}', 'dislike')">👎</button>
                     ` : ''}
                     ${!isFinished ? `<button class="delete-card-btn" onclick="deleteCard('${card.id}')">🗑️</button>` : ''}
                 </div>

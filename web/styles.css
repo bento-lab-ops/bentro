@@ -50,6 +50,18 @@ body {
     min-height: 100vh;
 }
 
+/* Links */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 /* Buttons */
 .btn {
     padding: 0.75rem 1.5rem;
@@ -1140,4 +1152,19 @@ kbd {
 .empty-icon {
     font-size: 3rem;
     margin-bottom: 1rem;
+}
+
+.blind-vote-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border);
+}
+
+.vote-controls-blind {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }

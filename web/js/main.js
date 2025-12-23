@@ -69,6 +69,10 @@ function handleUrlHash() {
         } else {
             console.error('loadActionItemsView not loaded');
         }
+    } else if (hash === '#admin') {
+        if (typeof loadAdminView === 'function') {
+            loadAdminView();
+        }
     }
 }
 
@@ -143,6 +147,8 @@ function showDashboard() {
     document.getElementById('boardContainer').style.display = 'none';
     const actionItemsView = document.getElementById('actionItemsView');
     if (actionItemsView) actionItemsView.style.display = 'none';
+    const adminView = document.getElementById('adminView');
+    if (adminView) adminView.style.display = 'none';
 
     document.getElementById('dashboardBtn').style.display = 'none';
     document.getElementById('actionItemsBtn').style.display = 'inline-block';

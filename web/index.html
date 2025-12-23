@@ -58,6 +58,13 @@
             </div>
         </div>
 
+        <!-- Admin View -->
+        <div id="adminView" class="dashboard-view" style="display: none;">
+            <div id="adminContent" class="admin-container">
+                <!-- Admin Content Loaded Here -->
+            </div>
+        </div>
+
         <!-- Board View -->
         <div id="boardContainer" class="board-container" style="display: none;">
             <div id="readOnlyBanner" class="read-only-banner" style="display: none;">
@@ -70,6 +77,8 @@
                     <span class="participants-label">Active:</span>
                     <div id="participantsContainer" class="participants-container"></div>
                 </div>
+                <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardConfig()"
+                    title="Admin Settings" style="display: none;">⚙️</button>
             </div>
 
             <!-- Timer Section -->
@@ -110,16 +119,17 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/config.js?v=0.4.0"></script>
-    <script src="/static/js/version.js?v=0.4.0"></script>
-    <script src="/static/js/avatars.js?v=0.4.0"></script>
-    <script src="/static/js/state.js?v=0.4.0"></script>
-    <script src="/static/js/utils.js?v=0.4.0"></script>
-    <script src="/static/js/api.js?v=0.4.0"></script>
-    <script src="/static/js/timer.js?v=0.4.0"></script>
-    <script src="/static/js/board.js?v=0.4.0"></script>
-    <script src="/static/js/action_items.js?v=0.4.0"></script>
-    <script src="/static/js/main.js?v=0.4.0"></script>
+    <script src="/static/js/config.js?v=0.5.0"></script>
+    <script src="/static/js/version.js?v=0.5.0"></script>
+    <script src="/static/js/avatars.js?v=0.5.0"></script>
+    <script src="/static/js/state.js?v=0.5.0"></script>
+    <script src="/static/js/utils.js?v=0.5.0"></script>
+    <script src="/static/js/api.js?v=0.5.0"></script>
+    <script src="/static/js/timer.js?v=0.5.0"></script>
+    <script src="/static/js/board.js?v=0.5.0"></script>
+    <script src="/static/js/action_items.js?v=0.5.0"></script>
+    <script src="/static/js/admin.js?v=0.5.0"></script>
+    <script src="/static/js/main.js?v=0.5.0"></script>
 </body>
 
 </html>

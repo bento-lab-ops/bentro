@@ -22,6 +22,8 @@ type Board struct {
 	UpdatedAt    time.Time      `json:"updated_at"`
 	Columns      []Column       `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
 	Participants []Participant  `gorm:"type:jsonb;serializer:json" json:"participants"`
+	Phase        string         `gorm:"default:'input'" json:"phase"` // input, voting, discuss
+	VoteLimit    int            `gorm:"default:0" json:"vote_limit"`  // 0 = unlimited
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 

@@ -47,6 +47,28 @@ func AddVote(c *gin.Context) {
 		return
 	}
 
+	// Check Vote Limit
+	var column models.Column
+	if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
+		var board models.Board
+		if err := database.DB.First(&board, column.BoardID).Error; err == nil {
+			if board.VoteLimit > 0 {
+				var totalUserVotes int64
+				// Get all cards in this board
+				database.DB.Model(&models.Vote{}).
+					Joins("JOIN cards ON votes.card_id = cards.id").
+					Joins("JOIN columns ON cards.column_id = columns.id").
+					Where("columns.board_id = ? AND votes.user_name = ?", board.ID, input.UserName).
+					Count(&totalUserVotes)
+
+				if totalUserVotes >= int64(board.VoteLimit) {
+					c.JSON(http.StatusForbidden, gin.H{"error": "Vote limit reached"})
+					return
+				}
+			}
+		}
+	}
+
 	if err := database.DB.Create(&vote).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add vote"})
 		return
@@ -69,15 +91,48 @@ func GetVotes(c *gin.Context) {
 		return
 	}
 
+	// Check Board Phase for Blind Voting
+	var card models.Card
+	var board models.Board
+	isBlindVoting := false
+	currentUser := c.Query("user") // Client should send ?user=username
+
+	if err := database.DB.First(&card, cardID).Error; err == nil {
+		var column models.Column
+		if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
+			if err := database.DB.First(&board, column.BoardID).Error; err == nil {
+				if board.Phase == "voting" {
+					isBlindVoting = true
+				}
+			}
+		}
+	}
+
 	// Count likes and dislikes
 	likes := 0
 	dislikes := 0
+	userVotes := []models.Vote{}
+
 	for _, vote := range votes {
 		if vote.VoteType == "like" {
 			likes++
 		} else {
 			dislikes++
 		}
+
+		if isBlindVoting && vote.UserName == currentUser {
+			userVotes = append(userVotes, vote)
+		}
+	}
+
+	if isBlindVoting {
+		// Hide count and other votes
+		c.JSON(http.StatusOK, gin.H{
+			"votes":    userVotes,
+			"likes":    -1, // Indicator for hidden
+			"dislikes": -1,
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

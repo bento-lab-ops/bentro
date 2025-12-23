@@ -70,6 +70,11 @@ func main() {
 
 		// Global Action Items
 		api.GET("/action-items", handlers.GetGlobalActionItems)
+
+		// Admin Routes
+		api.POST("/admin/login", handlers.AdminLogin)
+		api.POST("/admin/boards/:id/settings", handlers.AdminUpdateBoardSettings)
+
 	}
 
 	// WebSocket route

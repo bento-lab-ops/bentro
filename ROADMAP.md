@@ -100,11 +100,18 @@
 - [ ] **Real-time cursor tracking** - See where other users are clicking/typing
 - [ ] **Card comments** - Add threaded comments to cards for discussion
 
-### Phase 3: Analytics & Insights (v0.5.0)
+### Phase 3: Analytics & Insights (v0.6.0)
 **Effort:** L (3-5 days)
 
 - [ ] **Retrospective analytics** - Track trends across multiple retros (sentiment, participation, action item completion)
 - [ ] **Export to PDF** - Generate formatted PDF reports of retrospectives
+
+### v0.5.0 - Admin & Advanced Voting
+**Effort:** M (3-4 days)
+- [ ] **Admin Dashboard** - Secure page to manage app settings and view global data
+- [ ] **Vote Limiting** - Configurable limit on votes per user
+- [ ] **Blind Voting** - Hide votes until voting phase ends
+- [ ] **K8s Secret Auth** - Admin access secured by Kubernetes Secret
 - [ ] **Board templates marketplace** - Share and import custom board templates
 
 ### Phase 4: Integrations (v0.6.0)
