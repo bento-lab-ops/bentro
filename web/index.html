@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.3.3">
-    <link rel="stylesheet" href="/static/bentro.css?v=0.3.3">
+    <link rel="stylesheet" href="/static/styles.css?v=0.4.0">
+    <link rel="stylesheet" href="/static/bentro.css?v=0.4.0">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -27,6 +27,7 @@
                 <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme">🌞</button>
                 <button id="helpBtn" class="btn-icon" title="Help">?</button>
                 <button id="dashboardBtn" class="btn btn-outline" style="display: none;">Dashboard</button>
+                <button id="actionItemsBtn" class="btn btn-outline" title="View all action items">⚡ My Tasks</button>
                 <button id="leaveBoardBtn" class="btn btn-outline btn-danger-outline" style="display: none;"
                     title="Leave board and stop participating">🚪 Leave</button>
                 <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
@@ -46,6 +47,14 @@
                     <p>Click "+ New Board" in the header to create your first retrospective.</p>
 
                 </div>
+            </div>
+        </div>
+
+        <!-- Action Items View -->
+        <div id="actionItemsView" class="dashboard-view" style="display: none;">
+            <h2>⚡ Action Items Dashboard</h2>
+            <div id="actionItemsList" class="action-items-container">
+                <!-- Items table will be loaded here -->
             </div>
         </div>
 
@@ -101,15 +110,16 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/config.js?v=0.3.3"></script>
-    <script src="/static/js/version.js?v=0.3.3"></script>
-    <script src="/static/js/avatars.js?v=0.3.3"></script>
-    <script src="/static/js/state.js?v=0.3.3"></script>
-    <script src="/static/js/utils.js?v=0.3.3"></script>
-    <script src="/static/js/api.js?v=0.3.3"></script>
-    <script src="/static/js/timer.js?v=0.3.3"></script>
-    <script src="/static/js/board.js?v=0.3.3"></script>
-    <script src="/static/js/main.js?v=0.3.3"></script>
+    <script src="/static/js/config.js?v=0.4.0"></script>
+    <script src="/static/js/version.js?v=0.4.0"></script>
+    <script src="/static/js/avatars.js?v=0.4.0"></script>
+    <script src="/static/js/state.js?v=0.4.0"></script>
+    <script src="/static/js/utils.js?v=0.4.0"></script>
+    <script src="/static/js/api.js?v=0.4.0"></script>
+    <script src="/static/js/timer.js?v=0.4.0"></script>
+    <script src="/static/js/board.js?v=0.4.0"></script>
+    <script src="/static/js/action_items.js?v=0.4.0"></script>
+    <script src="/static/js/main.js?v=0.4.0"></script>
 </body>
 
 </html>

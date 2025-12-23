@@ -67,6 +67,9 @@ func main() {
 
 		// Reaction routes
 		api.POST("/cards/:id/reactions", handlers.ToggleReaction)
+
+		// Global Action Items
+		api.GET("/action-items", handlers.GetGlobalActionItems)
 	}
 
 	// WebSocket route

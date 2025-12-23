@@ -15,13 +15,14 @@ type Participant struct {
 
 // Board represents a retrospective board
 type Board struct {
-	ID           uuid.UUID     `gorm:"type:uuid;primary_key" json:"id"`
-	Name         string        `gorm:"not null" json:"name"`
-	Status       string        `gorm:"default:'active'" json:"status"` // active, finished
-	CreatedAt    time.Time     `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	Columns      []Column      `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
-	Participants []Participant `gorm:"type:jsonb;serializer:json" json:"participants"`
+	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	Name         string         `gorm:"not null" json:"name"`
+	Status       string         `gorm:"default:'active'" json:"status"` // active, finished
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	Columns      []Column       `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
+	Participants []Participant  `gorm:"type:jsonb;serializer:json" json:"participants"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID
@@ -34,12 +35,13 @@ func (b *Board) BeforeCreate(tx *gorm.DB) error {
 
 // Column represents a column in a board
 type Column struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	BoardID   uuid.UUID `gorm:"type:uuid;not null" json:"board_id"`
-	Name      string    `gorm:"not null" json:"name"`
-	Position  int       `gorm:"not null" json:"position"`
-	CreatedAt time.Time `json:"created_at"`
-	Cards     []Card    `gorm:"foreignKey:ColumnID;constraint:OnDelete:CASCADE" json:"cards,omitempty"`
+	ID        uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	BoardID   uuid.UUID      `gorm:"type:uuid;not null" json:"board_id"`
+	Name      string         `gorm:"not null" json:"name"`
+	Position  int            `gorm:"not null" json:"position"`
+	CreatedAt time.Time      `json:"created_at"`
+	Cards     []Card         `gorm:"foreignKey:ColumnID;constraint:OnDelete:CASCADE" json:"cards,omitempty"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID
@@ -52,20 +54,21 @@ func (c *Column) BeforeCreate(tx *gorm.DB) error {
 
 // Card represents a card in a column
 type Card struct {
-	ID           uuid.UUID  `gorm:"type:uuid;primary_key" json:"id"`
-	ColumnID     uuid.UUID  `gorm:"type:uuid;not null" json:"column_id"`
-	Content      string     `gorm:"type:text;not null" json:"content"`
-	Position     int        `gorm:"not null" json:"position"`
-	MergedWithID *uuid.UUID `gorm:"type:uuid" json:"merged_with_id,omitempty"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	Votes        []Vote     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
-	Reactions    []Reaction `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
-	MergedCards  []Card     `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
-	IsActionItem bool       `gorm:"default:false" json:"is_action_item"`
-	Owner        string     `json:"owner,omitempty"`
-	DueDate      *time.Time `json:"due_date,omitempty"`
-	Completed    bool       `gorm:"default:false" json:"completed"`
+	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	ColumnID     uuid.UUID      `gorm:"type:uuid;not null" json:"column_id"`
+	Content      string         `gorm:"type:text;not null" json:"content"`
+	Position     int            `gorm:"not null" json:"position"`
+	MergedWithID *uuid.UUID     `gorm:"type:uuid" json:"merged_with_id,omitempty"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	Votes        []Vote         `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
+	Reactions    []Reaction     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
+	MergedCards  []Card         `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
+	IsActionItem bool           `gorm:"default:false" json:"is_action_item"`
+	Owner        string         `json:"owner,omitempty"`
+	DueDate      *time.Time     `json:"due_date,omitempty"`
+	Completed    bool           `gorm:"default:false" json:"completed"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID
@@ -78,11 +81,12 @@ func (c *Card) BeforeCreate(tx *gorm.DB) error {
 
 // Vote represents a vote on a card
 type Vote struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	CardID    uuid.UUID `gorm:"type:uuid;not null;index:idx_card_user,unique" json:"card_id"`
-	UserName  string    `gorm:"not null;index:idx_card_user,unique" json:"user_name"`
-	VoteType  string    `gorm:"not null;check:vote_type IN ('like', 'dislike')" json:"vote_type"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	CardID    uuid.UUID      `gorm:"type:uuid;not null;index:idx_card_user,unique" json:"card_id"`
+	UserName  string         `gorm:"not null;index:idx_card_user,unique" json:"user_name"`
+	VoteType  string         `gorm:"not null;check:vote_type IN ('like', 'dislike')" json:"vote_type"`
+	CreatedAt time.Time      `json:"created_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID
@@ -95,11 +99,12 @@ func (v *Vote) BeforeCreate(tx *gorm.DB) error {
 
 // Reaction represents an emoji reaction on a card
 type Reaction struct {
-	ID           uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	CardID       uuid.UUID `gorm:"type:uuid;not null;index:idx_card_user_reaction,unique" json:"card_id"`
-	UserName     string    `gorm:"not null;index:idx_card_user_reaction,unique" json:"user_name"`
-	ReactionType string    `gorm:"not null;index:idx_card_user_reaction,unique" json:"reaction_type"` // love, celebrate, idea, action, question
-	CreatedAt    time.Time `json:"created_at"`
+	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	CardID       uuid.UUID      `gorm:"type:uuid;not null;index:idx_card_user_reaction,unique" json:"card_id"`
+	UserName     string         `gorm:"not null;index:idx_card_user_reaction,unique" json:"user_name"`
+	ReactionType string         `gorm:"not null;index:idx_card_user_reaction,unique" json:"reaction_type"` // love, celebrate, idea, action, question
+	CreatedAt    time.Time      `json:"created_at"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID

@@ -63,8 +63,17 @@ function handleUrlHash() {
         if (window.currentBoard) {
             showDashboard();
         }
+    } else if (hash === '#action-items') {
+        if (typeof loadActionItemsView === 'function') {
+            loadActionItemsView();
+        } else {
+            console.error('loadActionItemsView not loaded');
+        }
     }
 }
+
+
+
 
 // Theme Management
 function initTheme() {
@@ -132,7 +141,11 @@ function showDashboard() {
 
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
+    const actionItemsView = document.getElementById('actionItemsView');
+    if (actionItemsView) actionItemsView.style.display = 'none';
+
     document.getElementById('dashboardBtn').style.display = 'none';
+    document.getElementById('actionItemsBtn').style.display = 'inline-block';
     document.getElementById('leaveBoardBtn').style.display = 'none';
     document.getElementById('editUserBtn').style.display = 'inline-block';
     window.currentBoard = null;
@@ -216,6 +229,12 @@ function setupEventListeners() {
     });
 
     document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+    document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
+        if (typeof loadActionItemsView === 'function') {
+            loadActionItemsView();
+        }
+    });
+
     document.getElementById('leaveBoardBtn').addEventListener('click', () => {
         if (confirm('Are you sure you want to leave this board? You will be removed from the participant list.')) {
             showDashboard();
