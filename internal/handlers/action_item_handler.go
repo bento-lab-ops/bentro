@@ -27,16 +27,24 @@ func GetGlobalActionItems(c *gin.Context) {
 		CreatedAt      time.Time  `json:"created_at"`
 		BoardName      string     `json:"board_name"`
 		BoardID        uuid.UUID  `json:"board_id"`
+		BoardDeleted   bool       `json:"board_deleted"`
 	}
 
 	results := []ActionItemResult{}
 
+	// Query with Unscoped() to include soft-deleted boards
 	query := database.DB.Table("cards").
-		Select("cards.id, cards.content, cards.is_action_item, cards.owner, cards.due_date, cards.completed, cards.completion_date, cards.completion_link, cards.completion_desc, cards.created_at, boards.name as board_name, boards.id as board_id").
+		Select("cards.id, cards.content, cards.is_action_item, cards.owner, cards.due_date, cards.completed, cards.completion_date, cards.completion_link, cards.completion_desc, cards.created_at, boards.name as board_name, boards.id as board_id, boards.deleted_at IS NOT NULL as board_deleted").
 		Joins("JOIN columns ON cards.column_id = columns.id").
 		Joins("JOIN boards ON columns.board_id = boards.id").
-		Where("cards.is_action_item = ?", true).
-		Where("boards.deleted_at IS NULL") // Explicitly ignore deleted boards (though GORM usually handles this on join if models have DeletedAt, but raw joins might not)
+		Where("cards.is_action_item = ?", true)
+
+	// Since we are using manual joins, GORM might not automatically apply DeletedAt check for boards table if we don't use model structs in joins.
+	// But usually `DeletedAt` is handled by GORM when querying Models.
+	// Here we are querying Table("cards"), so we explicitly control the query.
+	// By default, a manual JOIN on a table with soft delete (boards) WILL include deleted rows unless filtered.
+	// In the previous version we HAD explicit .Where("boards.deleted_at IS NULL").
+	// NOW we remove it to INCLUDE them.
 
 	if completedParam != "" {
 		query = query.Where("cards.completed = ?", completedParam == "true")

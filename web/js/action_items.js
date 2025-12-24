@@ -107,6 +107,12 @@ function renderActionItemsTable(items, currentFilter) {
         const statusClass = item.completed ? 'status-done' : (isOverdue ? 'status-overdue' : 'status-pending');
         const statusText = item.completed ? i18n.t('action.status_done') : (isOverdue ? i18n.t('action.status_overdue') : i18n.t('action.status_pending'));
 
+        // Handle deleted boards
+        let boardLink = `<a href="#board/${item.board_id}">${escapeHtml(item.board_name)}</a>`;
+        if (item.board_deleted) {
+            boardLink = `<span class="text-muted" title="${i18n.t('action.board_deleted_tooltip') || 'Board has been deleted'}">${escapeHtml(item.board_name)} <span class="badge badge-warning" style="font-size: 0.7em;">${i18n.t('action.deleted') || 'DELETED'}</span></span>`;
+        }
+
         html += `
             <tr class="action-item-row ${item.completed ? 'completed' : ''}">
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -119,7 +125,7 @@ function renderActionItemsTable(items, currentFilter) {
                          </div>`
                 : ''}
                 </td>
-                <td><a href="#board/${item.board_id}">${escapeHtml(item.board_name)}</a></td>
+                <td>${boardLink}</td>
                 <td><div class="owner-badge">👤 ${escapeHtml(item.owner || i18n.t('action.unassigned'))}</div></td>
                 <td class="${isOverdue ? 'text-danger' : ''}">${dueDate}</td>
                 <td class="text-muted">${doneDate}</td>

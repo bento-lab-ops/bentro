@@ -1,250 +1,70 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.6.9
+## Current Version: v0.7.0
 
 ---
 
-## 🎯 Immediate Priorities (v0.7.0)
+## 🎯 Immediate Priorities (v0.8.0)
 
-### 🌍 Internalization (i18n)
-
-#### 🟡 **Portuguese (pt-BR) support**
-**Effort:** 1-3 days
-**Priority:** High - User Request
-
-- [ ] Create language selection UI
-- [ ] Extract hardcoded strings to translation files
-- [ ] Implement translation logic
-
-
-#### ✅ **Username Prompt Missing with HTTPS** (COMPLETED)
-**Effort:** 2-4 hours (investigation + fix)  
-**Priority:** Critical - Blocks user login with HTTPS
-
-- [x] Investigate browser console errors with HTTPS
-- [x] Test localStorage access with self-signed certificate
-- [x] Implement fix (localStorage fallback, error handling, or CSP headers)
-- [x] Verify username prompt works with HTTPS certificate
-
-> **Issue:** After configuring Ingress for HTTPS with TLS certificate, the username prompt and edit button completely disappeared, preventing users from logging in.
-> 
-> **Resolution:** Fixed in v0.2.7 by implementing auto-detection of WebSocket protocol (ws:// vs wss://)
-
----
-
-#### ✅ **PostgreSQL Data Persistence** (COMPLETED)
-**Effort:** 30 minutes  
-**Priority:** Critical - Data loss on reboot
-
-- [x] Update PersistentVolume path from `/tmp/postgres-data` to `/var/lib/postgres-data`
-- [x] Create directory with correct permissions on Raspberry Pi
-- [x] Recreate PV and restart PostgreSQL deployment
-- [x] Verify data persists after pod restart
-
-> **Issue:** Current configuration uses `/tmp` which is cleared on system reboot, causing data loss after power outages.
-> 
-> **Resolution:** Fixed by adopting `rancher-local-path-provisioner` for automatic persistent volume provisioning.
-
----
-
-### ✨ Feature Enhancements (Ordered by Difficulty)
-
-#### 🟢 Small Effort (1-2 hours)
-- [x] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help) ✅ Completed in v0.2.23
-- [x] **Disable edit username button in board view** - Hide/disable edit username button when viewing a board (only show in dashboard) ✅ Completed in v0.2.12
-- [x] **Auto-stop timer on finish board** - Automatically stop and reset timer when finishing a retrospective ✅ Completed in v0.2.12
-- [x] **Help modal responsiveness** - Make help modal scrollable and responsive with `max-height` and `overflow-y: auto` ✅ Completed in v0.2.13
-- [x] **Timer sound notifications** - Play sound when timer ends, with browser notification permission ✅ Completed in v0.2.13
-- [x] **Complete read-only mode for finished boards** - Disable all interactive features (merge/unmerge/select/delete/vote/add) except CSV export ✅ Completed in v0.2.13
-- [x] **Avatar Selection** - Choose emoji avatar for user profile ✅ Completed in v0.2.15
-
-#### 🟡 Medium Effort (3-8 hours)
-- [x] **Active Participants Display** - Show who is currently viewing the board with real-time updates ✅ Completed in v0.2.16
-
-- [x] **Keyboard shortcuts** - Add shortcuts (N=new card, V=voting, T=timer, E=export, Esc=close, ?=help) ✅ Completed in v0.2.23
-- [x] **Dark/Light theme toggle** - Add light theme option with theme switcher in header ✅ Completed in v0.2.24
-
-#### 🔴 Large Effort (1-3 days)
-- [x] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion ✅ Completed in v0.3.0
-- [ ] **Action Items Dashboard** - Centralized view to list and filter action items by board, user, and status
-    - *Note: Requires implementing "Soft Delete" to preserve items when boards are deleted.*
-- [x] **Card reactions** - Add emoji reactions beyond votes (❤️, 🎉, 💡, 🚀, 🤔) ✅ Completed in v0.2.26
-
-
----
-
-## 🧹 Repository Cleanup ✅ COMPLETED
-- [x] **Remove temporary deployment scripts** - Deleted all temporary deploy-*.sh files ✅
-- [x] **Consolidate roadmap files** - Removed `FUTURE_FEATURES.md` ✅
-- [x] **Remove retro-app.exe** - Removed 20MB binary from repository ✅
-- [x] **Move setup script to docs** - Moved `setup_wsl_env.sh` to `/docs` ✅
-
----
-
-## 🐛 Bug Fixes
-- [x] **Version display showing "unknown"** - Fixed in v0.2.5/v0.2.6 ✅
-- [x] **Avatar display encoding issues** - Fixed in v0.2.15 ✅
-
----
-
-## 📚 Documentation
-- [ ] **README enhancements** - Add screenshots, better usage examples, and quick start guide
-- [ ] **API documentation** - Document REST endpoints and WebSocket events
-- [ ] **Deployment guide** - Comprehensive guide for Docker and Kubernetes deployment
-
----
-
-## 🚀 Future Features (v0.3.0+)
-
-### Phase 1: Multi-Team Support (v0.3.0)
-**Effort:** XL (1-2 weeks)
-
-- [ ] **Team/Squad management** - Allow multiple teams to use the app simultaneously
-- [ ] **Team-filtered dashboard** - Filter boards by team
-- [ ] **User roles** - Admin, facilitator, participant roles with different permissions
-
-### Phase 2: Advanced Collaboration (v0.4.0)
-**Effort:** L (3-5 days)
-
-- [ ] **Real-time cursor tracking** - See where other users are clicking/typing
-- [ ] **Card comments** - Add threaded comments to cards for discussion
-
-### Phase 3: Analytics & Insights (v0.6.0)
-**Effort:** L (3-5 days)
-
-- [ ] **Retrospective analytics** - Track trends across multiple retros (sentiment, participation, action item completion)
-- [ ] **Export to PDF** - Generate formatted PDF reports of retrospectives
-
-### v0.5.0 - Admin & Advanced Voting
+### 🛡️ Admin, Security & Improved Tracking
 **Effort:** M (3-4 days)
-- [ ] **Admin Dashboard** - Secure page to manage app settings and view global data
-- [ ] **Vote Limiting** - Configurable limit on votes per user
-- [ ] **Blind Voting** - Hide votes until voting phase ends
-- [ ] **K8s Secret Auth** - Admin access secured by Kubernetes Secret
-- [ ] **Board templates marketplace** - Share and import custom board templates
+- [ ] **Advanced Action Items Filtering** - Filter by Period, Team/Board, or Owner in the Action Items Dashboard.
+- [ ] **Admin Dashboard** - Secure page to manage app settings and view global data.
+- [ ] **Vote Limiting** - Configurable limit on votes per user.
+- [ ] **Blind Voting** - Hide votes until voting phase ends.
+- [ ] **K8s Secret Auth** - Admin access secured by Kubernetes Secret.
 
-### Phase 4: Integrations (v0.6.0)
+### v0.9.0 - Multi-Team Support Phase 1
 **Effort:** XL (1-2 weeks)
+- [ ] **Team/Squad management** - Allow multiple teams to use the app simultaneously.
+- [ ] **Team-filtered dashboard** - Filter boards by team.
+- [ ] **User roles** - Admin, facilitator, participant roles.
 
-- [ ] **Jira integration** - Create Jira tickets from action items
-- [ ] **Slack notifications** - Send retro summaries to Slack channels
-- [ ] **Calendar integration** - Schedule recurring retrospectives
+### v1.0.0 - Integrations & Release Candidate
+**Effort:** XL (1-2 weeks)
+- [ ] **Jira integration** - Create Jira tickets from action items.
+- [ ] **Slack notifications** - Send retro summaries to Slack channels.
+- [ ] **Calendar integration** - Schedule recurring retrospectives.
+
+---
+
+### Phase 2: Advanced Collaboration (v1.1.0+)
+**Effort:** L (3-5 days)
+- [ ] **Real-time cursor tracking** - See where other users are clicking/typing.
+- [ ] **Card comments** - Add threaded comments to cards for discussion.
+- [ ] **Retrospective analytics** - Track trends across multiple retros.
 
 ---
 
 ## ✅ Completed Features
 
-### v0.3.1 (Latest)
-- [x] **Fix** - Resolved visual overlap of Action Item badge
-- [x] **Feature** - Added ability to remove Action Item status
+### v0.7.0 (Latest)
+- [x] **Soft Delete for Action Items** - Backend and Frontend support to preserve items from deleted boards.
+- [x] **Safe Delete** - Prevent deleting active boards to avoid accidental data loss.
 
-### v0.3.0
-- [x] **Action Items** - Track tasks with owners and due dates directly on cards ⚡
+### v0.6.17
+- [x] **Fix** - Fixed navigation to Dashboard and Action Items not updating URL hash.
+- [x] **Fix** - Page refresh on Action Items/Admin view now persists correctly.
 
-### v0.2.28
-- [x] **UI Improvement** - Darkened Light Mode background for better eye comfort
+### v0.6.10 - v0.6.15
+- [x] **Internationalization (i18n)** - Added complete Portuguese (pt-BR) support.
+- [x] **New Retro Modal** - Translated and polished UI.
+- [x] **Board Templates** - Templates and columns now dynamically translated.
 
-### v0.2.27
-- [x] **Bug Fix** - Fixed unresponsive "Finish Retro" and "Export CSV" buttons
+### v0.3.1 - v0.6.9
+- [x] **Action Items** - Track tasks with owners and due dates.
+- [x] **HTTPS Support** - Fixed Username Prompt disappearing on HTTPS (wss://).
+- [x] **Data Persistence** - PostgreSQL fixes for local-path-provisioner.
+- [x] **Card Reactions** - Emoji reactions on cards.
+- [x] **Keyboard Shortcuts** - Global shortcuts added.
+- [x] **Dark/Light Theme** - Theme toggle implemented.
 
-### v0.2.26
-- [x] **Card Reactions** - Emoji reactions (❤️, 🎉, 💡, 🚀, 🤔) next to card content
-
-### v0.2.24
-- [x] **Dark/Light Theme** - Added toggle for Light Mode with persistence
-
-### v0.2.23
-- [x] **Keyboard shortcuts** - Added global keyboard shortcuts for power users (Help, Export, Timer, Phase, New Card)
-
-### v0.2.22
-- [x] **UX Improvement** - Disabled "Leave Board" button when board is finished to preserve history
-
-### v0.2.21
-- [x] **New Feature** - Added "Leave Board" button to allow users to abstain from participation
-
-### v0.2.20
-- [x] **UX Improvement** - Smoother participant polling with diff check and optimistic updates
-
-### v0.2.19
-- [x] **Bug Fix** - Fixed corrupted HTML file causing frontend loading issues
-
-### v0.2.18
-- [x] **Bug Fix** - Resolved crash loop caused by duplicate route registration
-
-### v0.2.17
-- [x] **Participant Polling** - Automatic 5-second refresh for participant list reliability
-
-### v0.2.16
-- [x] **Active Participants Display** - Real-time list of users currently viewing the board
-- [x] **Participant History** - Saves list of participants when board is finished
-- [x] **Board Header** - Added board title and participant list to board view
-
-### v0.2.15
-- [x] **Avatar Selection** - Users can choose from 30+ emoji avatars for their profile
-- [x] **Avatar Persistence** - Selected avatar is saved to localStorage and persists across sessions
-- [x] **Avatar Display** - Avatar shown in header, welcome modal, and edit user modal
-- [x] **Encoding Fixes** - Resolved UTF-8 encoding issues for emojis
-
-### v0.2.13
-- [x] **Complete Read-Only Mode for Finished Boards** - All interactive features (merge/unmerge/select/delete/vote/add card/column) are disabled when a board is finished, except CSV export
-- [x] **Timer Sound Notifications** - Plays beep sound when timer reaches zero, with optional browser notification
-- [x] **Help Modal Responsiveness** - Help modal is now scrollable and mobile-friendly with max-height and responsive media queries
-
-### v0.2.12
-- [x] **Username Edit Button Control** - Hide username edit button in board view, show only in dashboard
-- [x] **Auto-Stop Timer on Finish** - Timer automatically stops and resets when finishing a retrospective
-
-### v0.2.11
-- [x] **Merge Conflict Resolution** - Fixed critical syntax errors in `board.js` caused by merge conflicts
-- [x] **Restored Missing Functions** - Restored `initializeDragAndDrop`, `voteCard`, `createCard` and other functions that were accidentally removed
-- [x] **Git Repository Cleanup** - Synchronized `main` branch and removed obsolete `migration/bentro-namespace` branch
-- [x] **Frontend Stability** - Verified board creation and card interaction functionality
-
-### v0.2.7
-- [x] **WebSocket HTTPS support** - Fixed Mixed Content error by auto-detecting protocol (ws:// for HTTP, wss:// for HTTPS)
-- [x] **Username prompt restored** - Fixed critical bug where username prompt disappeared with HTTPS
-- [x] **Centralized version management** - Version now managed from single source in config.js
-- [x] **Deployment.yaml restored** - Fixed corrupted Kubernetes deployment configuration
-
-### v0.2.6
-- [x] **Disable timer buttons on finished retros** - Start/Stop Timer buttons now disabled when board is finished
-- [x] **Disable phase switching on finished retros** - Phase switching button disabled when board is finished
-- [x] **Improved read-only mode consistency** - All interactive controls properly disabled
-
-### v0.2.5
-- [x] **Version display in Help Modal** - Shows current version
-- [x] **Help Modal improvements** - Added logo, removed customizing templates section
-- [x] **README logo fix** - Corrected path to bentrologo.png
-- [x] **CSS corruption fix** - Fixed critical UI breaking bug
-
-### v0.2.4
-- [x] **HTML modularization** - Separated modals into modals.html
-- [x] **Help modal fixes** - Improved content and styling
-
-### v0.2.3
-- [x] **JSON-based template configuration** - Dynamic board templates
-- [x] **New 4-column template** - What Went Well/Badly template
-- [x] **Ingress support** - Kubernetes ingress configuration
-
-### v0.2.2
-- [x] **Template configuration system** - Customizable board templates
-- [x] **Help modal** - About and quick start guide
-
-### v0.2.1
-- [x] **Card merging** - Combine similar ideas
-- [x] **Voting system** - Like/dislike cards
-- [x] **CSV export** - Export retrospective data
-
-### v0.2.0
-- [x] **Multiple boards** - Create and manage multiple retrospectives
-- [x] **Real-time WebSocket sync** - Live collaboration
-- [x] **Timer functionality** - Timebox retrospective phases
-- [x] **Drag and drop** - Reorder cards within columns
-
-### Infrastructure
-- [x] **Namespace migration** - Moved to `bentro` namespace
-- [x] **App renaming** - Renamed to `bentro-app`
-- [x] **Kubernetes manifests** - Full K8s deployment support
+### v0.2.x Series
+- [x] **Active Participants Display** - Real-time list of users.
+- [x] **Avatar Selection** - Emoji avatars for users.
+- [x] **Read-Only Mode** - For finished boards.
+- [x] **Timer Sound** - Audio notifications.
+- [x] **Leaving Boards** - Ability to leave a retrospective.
 
 ---
 
@@ -263,30 +83,3 @@
 - **Medium (M)** - 3-8 hours  
 - **Large (L)** - 1-3 days
 - **Extra Large (XL)** - 1+ weeks
-
----
-
-## 🎯 Recommended Next Steps
-
-### ⌨️ Next Priority: Keyboard Shortcuts
-**Status:** Planned (See `docs/plans/001-keyboard-shortcuts.md`)
-**Goal:** Improve power user efficiency with global shortcuts.
-
-- `?`: Toggle Help
-- `Esc`: Close Modals
-- `E`: Export CSV
-- `T`: Toggle Timer
-- `V`: Switch Phase
-- `N`: New Card
-
----
-
-**Option 2: UX Improvement** - Help modal responsiveness  
-**Estimated time:** 30-45 minutes  
-**Impact:** Better mobile experience
-
-**Option 3: User Delight** - Timer sound notifications  
-**Estimated time:** 1-2 hours  
-**Impact:** Better time management during retros
-
-

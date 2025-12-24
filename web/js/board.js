@@ -50,9 +50,17 @@ function renderDashboard(boards) {
             : '';
 
         // Delete Button Logic
-        const deleteDisabled = hasActionItems ? 'disabled' : '';
-        const deleteStyle = hasActionItems ? 'opacity: 0.5; cursor: not-allowed;' : '';
-        const deleteTitle = hasActionItems ? i18n.t('alert.cannot_delete_items') : i18n.t('modal.delete');
+        // Disable delete if has action items OR if board is active
+        const isActive = board.status === 'active';
+        const deleteDisabled = (hasActionItems || isActive) ? 'disabled' : '';
+        const deleteStyle = (hasActionItems || isActive) ? 'opacity: 0.5; cursor: not-allowed;' : '';
+
+        let deleteTitle = i18n.t('modal.delete');
+        if (hasActionItems) {
+            deleteTitle = i18n.t('alert.cannot_delete_items');
+        } else if (isActive) {
+            deleteTitle = i18n.t('alert.cannot_delete_active') || 'Finish board to delete';
+        }
 
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">

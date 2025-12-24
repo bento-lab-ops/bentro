@@ -86,6 +86,7 @@ const translations = {
 
         'alert.failed_create_board': 'Failed to create board',
         'alert.cannot_delete_items': 'Cannot delete board with action items',
+        'alert.cannot_delete_active': 'Finish board to enable delete',
         'alert.failed_save_action_item': 'Failed to save action item',
         'alert.failed_remove_action_item': 'Failed to remove action item',
 
@@ -126,6 +127,8 @@ const translations = {
         'action.status_overdue': 'Overdue',
         'action.status_pending': 'Pending',
         'action.unassigned': 'Unassigned',
+        'action.board_deleted_tooltip': 'Board has been deleted',
+        'action.deleted': 'DELETED',
 
         // Admin
         'admin.title': 'Admin Access',
@@ -281,6 +284,7 @@ const translations = {
 
         'alert.failed_create_board': 'Falha ao criar retro',
         'alert.cannot_delete_items': 'Não é possível excluir retro com action items',
+        'alert.cannot_delete_active': 'Finalize a retro para excluir',
         'alert.failed_save_action_item': 'Falha ao salvar action item',
         'alert.failed_remove_action_item': 'Falha ao remover action item',
 
@@ -321,6 +325,8 @@ const translations = {
         'action.status_overdue': 'Atrasado',
         'action.status_pending': 'Pendente',
         'action.unassigned': 'Não atribuído',
+        'action.board_deleted_tooltip': 'Retrospectiva foi excluída',
+        'action.deleted': 'EXCLUÍDA',
 
         // Admin
         'admin.title': 'Acesso Admin',
