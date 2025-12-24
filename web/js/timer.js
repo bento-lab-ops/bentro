@@ -59,10 +59,18 @@ function switchPhase() {
 
 function updatePhase(phase) {
     window.currentPhase = phase;
-    const phaseLabel = phase === 'input' ? 'Input Phase' : 'Voting Phase';
+    const phaseLabel = phase === 'input' ? i18n.t('phase.input') : (phase === 'voting' ? i18n.t('phase.voting') : (i18n.t('phase.' + phase) || phase));
     document.getElementById('currentPhase').textContent = phaseLabel;
-    document.getElementById('switchPhaseBtn').textContent =
-        phase === 'input' ? 'Switch to Voting' : 'Switch to Input';
+
+    // Update button text
+    const switchBtn = document.getElementById('switchPhaseBtn');
+    if (switchBtn) {
+        if (phase === 'input') {
+            switchBtn.textContent = i18n.t('btn.switch_voting') || 'Switch to Voting';
+        } else {
+            switchBtn.textContent = i18n.t('btn.switch_input') || 'Switch to Input';
+        }
+    }
 
     if (window.currentBoard) {
         loadBoard(window.currentBoard.id);

@@ -1,12 +1,21 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.2.23
+## Current Version: v0.6.9
 
 ---
 
-## 🎯 Immediate Priorities (v0.3.1)
+## 🎯 Immediate Priorities (v0.7.0)
 
-### 🔴 Critical Infrastructure Fixes
+### 🌍 Internalization (i18n)
+
+#### 🟡 **Portuguese (pt-BR) support**
+**Effort:** 1-3 days
+**Priority:** High - User Request
+
+- [ ] Create language selection UI
+- [ ] Extract hardcoded strings to translation files
+- [ ] Implement translation logic
+
 
 #### ✅ **Username Prompt Missing with HTTPS** (COMPLETED)
 **Effort:** 2-4 hours (investigation + fix)  
@@ -56,11 +65,11 @@
 - [x] **Dark/Light theme toggle** - Add light theme option with theme switcher in header ✅ Completed in v0.2.24
 
 #### 🔴 Large Effort (1-3 days)
-- [ ] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion
+- [x] **Action items tracking** - Mark cards as action items, assign owners, set due dates, track completion ✅ Completed in v0.3.0
 - [ ] **Action Items Dashboard** - Centralized view to list and filter action items by board, user, and status
     - *Note: Requires implementing "Soft Delete" to preserve items when boards are deleted.*
 - [x] **Card reactions** - Add emoji reactions beyond votes (❤️, 🎉, 💡, 🚀, 🤔) ✅ Completed in v0.2.26
-- [ ] **Portuguese (pt-BR) support** - Lightweight client-side i18n with language selector
+
 
 ---
 

@@ -31,11 +31,11 @@ function showAdminLogin() {
     const container = document.getElementById('adminContent');
     container.innerHTML = `
         <div class="admin-login-card">
-            <h3>Admin Access</h3>
-            <p>Please enter the administrator password to continue.</p>
+            <h3>${i18n.t('admin.title')}</h3>
+            <p>${i18n.t('admin.enter_pass')}</p>
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
-                <input type="password" id="adminPassword" placeholder="Password" class="form-input" required>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <input type="password" id="adminPassword" placeholder="${i18n.t('label.password') || 'Password'}" class="form-input" required>
+                <button type="submit" class="btn btn-primary">${i18n.t('btn.login') || 'Login'}</button>
             </form>
         </div>
     `;
@@ -57,10 +57,10 @@ async function handleAdminLogin(e) {
             localStorage.setItem('adminToken', data.token);
             showAdminDashboard();
         } else {
-            alert('Invalid password');
+            alert(i18n.t('admin.invalid_pass'));
         }
     } catch (error) {
-        alert('Login failed: ' + error.message);
+        alert(i18n.t('admin.login_failed') + ': ' + error.message);
     }
 }
 
@@ -75,19 +75,19 @@ async function showAdminDashboard() {
     container.innerHTML = `
         <div class="admin-dashboard">
             <div class="admin-header">
-                <h3>Admin Dashboard</h3>
-                <button onclick="logoutAdmin()" class="btn btn-outline btn-sm">Logout</button>
+                <h3>${i18n.t('admin.dashboard')}</h3>
+                <button onclick="logoutAdmin()" class="btn btn-outline btn-sm">${i18n.t('menu.logout')}</button>
             </div>
             
             <div class="admin-section">
                 <h4>Verified Access</h4>
                 <p>You are logged in as Administrator.</p>
-                <div class="alert alert-success">Connection Secure</div>
+                <div class="alert alert-success">${i18n.t('admin.connection_secure')}</div>
             </div>
 
             <div class="admin-section">
-                <h4>Board Management (Beta)</h4>
-                <p>To manage a board's settings (Vote Limits, Phases), navigate to the board as a user, then open the Admin Settings modal.</p>
+                <h4>${i18n.t('admin.board_management')}</h4>
+                <p>${i18n.t('admin.board_management_desc')}</p>
                 <!-- This is a placeholder for global settings -->
             </div>
         </div>

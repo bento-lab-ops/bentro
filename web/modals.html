@@ -1,11 +1,13 @@
 <!-- Modal for Returning User Confirmation -->
 <div id="returningUserModal" class="modal">
     <div class="modal-content">
-        <h2>Welcome Back! 👋</h2>
-        <p>Continue as <strong id="returningUserName"></strong>?</p>
+        <h2 data-i18n="modal.welcome_back">Welcome Back! 👋</h2>
+        <p><span data-i18n="modal.continue_as">Continue as</span> <strong id="returningUserName"></strong>?</p>
         <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-            <button id="continueAsUserBtn" class="btn btn-primary" style="flex: 1;">Continue</button>
-            <button id="changeUserBtn" class="btn btn-outline" style="flex: 1;">Change Name</button>
+            <button id="continueAsUserBtn" class="btn btn-primary" style="flex: 1;"
+                data-i18n="modal.confirm">Continue</button>
+            <button id="changeUserBtn" class="btn btn-outline" style="flex: 1;" data-i18n="modal.change_name">Change
+                Name</button>
         </div>
     </div>
 </div>
@@ -13,12 +15,12 @@
 <!-- Modal for User Identity -->
 <div id="userModal" class="modal">
     <div class="modal-content">
-        <h2>Welcome!</h2>
-        <p>Please enter your name and choose an avatar.</p>
+        <h2 data-i18n="modal.welcome">Welcome!</h2>
+        <p data-i18n="modal.enter_name">Please enter your name and choose an avatar.</p>
         <form id="userForm">
             <!-- Avatar Selection -->
             <div class="form-group">
-                <label>Choose Your Avatar</label>
+                <label data-i18n="label.choose_avatar">Choose Your Avatar</label>
                 <div id="avatarSelector" class="avatar-selector">
                     <!-- Populated by JavaScript -->
                 </div>
@@ -26,10 +28,11 @@
             </div>
 
             <div class="form-group">
-                <label for="userNameInput">Your Name</label>
+                <label for="userNameInput" data-i18n="label.your_name">Your Name</label>
                 <input type="text" id="userNameInput" class="form-input" required>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Join Retrospective</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.join_retro">Join
+                Retrospective</button>
         </form>
     </div>
 </div>
@@ -38,14 +41,15 @@
 <div id="helpModal" class="modal">
     <div class="modal-content help-modal-content">
         <span class="close">&times;</span>
-        <h2>About BenTro <img src="/static/bentrologo.png" alt="BenTro Logo"
+        <h2><span data-i18n="help.title">About BenTro</span> <img src="/static/bentrologo.png" alt="BenTro Logo"
                 style="height: 32px; vertical-align: bottom;"></h2>
         <div class="help-content">
             <p><strong>BenTro</strong> = <em>Bento</em> + <em>Retrospective</em></p>
-            <p class="tagline-help">Retrospectives, packed perfectly!</p>
-            <p>A friendly retrospective tool created to make team collaboration effortless!</p>
+            <p class="tagline-help" data-i18n="help.tagline">Retrospectives, packed perfectly!</p>
+            <p data-i18n="help.desc_full">A friendly retrospective tool created to make team collaboration effortless!
+            </p>
             <hr>
-            <h3>Quick Start</h3>
+            <h3 data-i18n="help.quick_start">Quick Start</h3>
             <ul>
                 <li>Create a board with custom columns</li>
                 <li>Add cards during Input Phase</li>
@@ -54,7 +58,7 @@
                 <li>Export your retrospective data as CSV</li>
             </ul>
             <hr>
-            <h3>Keyboard Shortcuts</h3>
+            <h3 data-i18n="help.shortcuts">Keyboard Shortcuts</h3>
             <ul class="shortcuts-list">
                 <li><kbd>?</kbd> Toggle Help</li>
                 <li><kbd>Esc</kbd> Close Modals</li>
@@ -64,7 +68,8 @@
                 <li><kbd>Shift</kbd> + <kbd>N</kbd> New Card</li>
             </ul>
             <hr>
-            <p><a href="https://github.com/bento-lab-ops/bentro" id="githubLink" target="_blank">View Documentation on
+            <p><a href="https://github.com/bento-lab-ops/bentro" id="githubLink" target="_blank"
+                    data-i18n="help.view_docs">View Documentation on
                     GitHub</a></p>
             <hr>
             <p><small>Version: <span id="appVersion"></span></small></p>
@@ -76,27 +81,28 @@
 <div id="newBoardModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Create New Board</h2>
+        <h2 data-i18n="heading.create_new_board">Create New Board</h2>
         <form id="newBoardForm">
             <div class="form-group">
-                <label for="boardName">Board Name</label>
-                <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective" required>
+                <label for="boardName" data-i18n="label.board_name">Board Name</label>
+                <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective"
+                    data-i18n="placeholder.board_name" data-i18n-target="placeholder" required>
             </div>
             <div class="form-group">
-                <label for="boardTemplate">Template</label>
+                <label for="boardTemplate" data-i18n="label.template">Template</label>
                 <select id="boardTemplate" class="form-input">
-                    <option value="custom">Custom (Manual Entry)</option>
+                    <option value="custom" data-i18n="template.custom">Custom (Manual Entry)</option>
                     <!-- Templates loaded dynamically from board-templates.json -->
                 </select>
-                <small>Choose a template or enter custom columns below</small>
+                <small data-i18n="small.template_help">Choose a template or enter custom columns below</small>
             </div>
             <div class="form-group">
-                <label>Column Names (one per line)</label>
+                <label data-i18n="label.column_names">Column Names (one per line)</label>
                 <textarea id="columnNames" class="form-textarea" rows="4"
                     placeholder="Select a template above or enter custom columns"></textarea>
-                <small>Leave empty for default columns</small>
+                <small data-i18n="small.columns_help">Leave empty for default columns</small>
             </div>
-            <button type="submit" class="btn btn-primary">Create Board</button>
+            <button type="submit" class="btn btn-primary" data-i18n="btn.create_board">Create Board</button>
         </form>
     </div>
 </div>
@@ -108,12 +114,12 @@
         <h2>Add New Card</h2>
         <form id="newCardForm">
             <div class="form-group">
-                <label for="cardContent">Card Content</label>
+                <label for="cardContent" data-i18n="label.card_content">Card Content</label>
                 <textarea id="cardContent" class="form-textarea" rows="3" placeholder="Enter your thoughts..."
-                    required></textarea>
+                    data-i18n="placeholder.card_content" data-i18n-target="placeholder" required></textarea>
             </div>
             <input type="hidden" id="cardColumnId">
-            <button type="submit" class="btn btn-primary">Add Card</button>
+            <button type="submit" class="btn btn-primary" data-i18n="btn.add_card">Add Card</button>
         </form>
     </div>
 </div>
@@ -122,14 +128,14 @@
 <div id="editColumnModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Edit Column Name</h2>
+        <h2 data-i18n="heading.edit_column">Edit Column Name</h2>
         <form id="editColumnForm">
             <div class="form-group">
-                <label for="columnNameEdit">Column Name</label>
+                <label for="columnNameEdit" data-i18n="label.column_name">Column Name</label>
                 <input type="text" id="columnNameEdit" class="form-input" required>
             </div>
             <input type="hidden" id="editColumnId">
-            <button type="submit" class="btn btn-primary">Update Column</button>
+            <button type="submit" class="btn btn-primary" data-i18n="btn.update_column">Update Column</button>
         </form>
     </div>
 </div>
@@ -150,25 +156,27 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <div class="modal-header">
-            <h2>⚡ Action Item Details</h2>
+            <h2 data-i18n="heading.action_details">⚡ Action Item Details</h2>
         </div>
         <div class="form-group">
-            <label for="actionItemOwner">Owner</label>
+            <label for="actionItemOwner" data-i18n="action.owner">Owner</label>
             <div class="action-owner-input-wrapper">
                 <select id="actionItemOwner" class="form-input">
-                    <option value="">Unassigned</option>
+                    <option value="" data-i18n="action.unassigned">Unassigned</option>
                     <!-- Populated dynamically -->
                 </select>
             </div>
         </div>
         <div class="form-group">
-            <label for="actionItemDueDate">Due Date</label>
+            <label for="actionItemDueDate" data-i18n="action.due_date">Due Date</label>
             <input type="date" id="actionItemDueDate" class="form-input">
         </div>
         <input type="hidden" id="actionItemCardId">
         <div class="modal-actions" style="display: flex; justify-content: space-between; gap: 1rem;">
-            <button class="btn btn-danger btn-outline" onclick="removeActionItem()">Remove Action Item</button>
-            <button class="btn btn-primary" onclick="saveActionItem()">Save Details</button>
+            <button class="btn btn-danger btn-outline" onclick="removeActionItem()"
+                data-i18n="btn.remove_action_item">Remove Action Item</button>
+            <button class="btn btn-primary" onclick="saveActionItem()" data-i18n="btn.save_details">Save
+                Details</button>
         </div>
     </div>
 </div>
@@ -188,29 +196,31 @@
 <div id="completeActionItemModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeCompleteActionItemModal()">&times;</span>
-        <h2>✅ Complete Action Item</h2>
-        <p>Add details about the resolution.</p>
+        <h2 data-i18n="heading.complete_action">✅ Complete Action Item</h2>
+        <p data-i18n="text.resolution_details">Add details about the resolution.</p>
         <form id="completeActionItemForm" onsubmit="submitActionItemCompletion(event)">
             <input type="hidden" id="completeActionItemId">
 
             <div class="form-group">
-                <label>Completion Date</label>
+                <label data-i18n="label.completion_date">Completion Date</label>
                 <input type="date" id="completeActionItemDate" class="form-input" required>
             </div>
 
             <div class="form-group">
-                <label>Link / PR (Optional)</label>
+                <label data-i18n="label.link_optional">Link / PR (Optional)</label>
                 <input type="url" id="completeActionItemLink" class="form-input" placeholder="https://github.com/...">
             </div>
 
             <div class="form-group">
-                <label>Description / Notes (Optional)</label>
-                <textarea id="completeActionItemDesc" class="form-textarea" placeholder="What was done..."></textarea>
+                <label data-i18n="label.desc_optional">Description / Notes (Optional)</label>
+                <textarea id="completeActionItemDesc" class="form-textarea" placeholder="What was done..."
+                    data-i18n="placeholder.what_done" data-i18n-target="placeholder"></textarea>
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeCompleteActionItemModal()">Cancel</button>
-                <button type="submit" class="btn btn-success">Complete Item</button>
+                <button type="button" class="btn btn-secondary" onclick="closeCompleteActionItemModal()"
+                    data-i18n="modal.cancel">Cancel</button>
+                <button type="submit" class="btn btn-success" data-i18n="btn.complete_item">Complete Item</button>
             </div>
         </form>
     </div>
@@ -230,7 +240,7 @@
         </div>
 
         <div class="form-group">
-            <label>Description / Notes</label>
+            <label data-i18n="label.desc_notes">Description / Notes</label>
             <div id="detailsDesc"
                 style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px; white-space: pre-wrap; min-height: 50px;">
                 No description provided.

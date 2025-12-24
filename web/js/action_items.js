@@ -39,7 +39,8 @@ async function loadActionItemsView() {
 
 async function fetchAndRenderActionItems(filter = 'pending') {
     const container = document.getElementById('actionItemsList');
-    container.innerHTML = '<div class="loading-spinner">Loading...</div>';
+    container.innerHTML = '<div class="loading-spinner">Loading...</div>'; // Can translate "Loading..." if needed, but it's transient
+
 
     try {
         // Build query
@@ -61,9 +62,9 @@ function renderActionItemsTable(items, currentFilter) {
         <div class="action-items-controls">
             <div class="filter-tabs">
                 <button class="filter-tab ${currentFilter === 'pending' ? 'active' : ''}" 
-                    onclick="fetchAndRenderActionItems('pending')">Pending</button>
+                    onclick="fetchAndRenderActionItems('pending')">${i18n.t('action.pending')}</button>
                 <button class="filter-tab ${currentFilter === 'completed' ? 'active' : ''}" 
-                    onclick="fetchAndRenderActionItems('completed')">Completed</button>
+                    onclick="fetchAndRenderActionItems('completed')">${i18n.t('action.completed')}</button>
             </div>
         </div>
     `;
@@ -72,8 +73,8 @@ function renderActionItemsTable(items, currentFilter) {
         html += `
             <div class="empty-state">
                 <div class="empty-icon">🎉</div>
-                <h3>No Action Items Found</h3>
-                <p>You're all caught up!</p>
+                <h3>${i18n.t('action.empty_title')}</h3>
+                <p>${i18n.t('action.empty_desc')}</p>
             </div>
         `;
         container.innerHTML = html;
@@ -85,14 +86,14 @@ function renderActionItemsTable(items, currentFilter) {
             <table class="action-items-table">
                 <thead>
                     <tr>
-                        <th>Status</th>
-                        <th>Task</th>
-                        <th>Board</th>
-                        <th>Owner</th>
-                        <th>Due Date</th>
-                        <th>Done Date</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>${i18n.t('action.status')}</th>
+                        <th>${i18n.t('action.task')}</th>
+                        <th>${i18n.t('action.board')}</th>
+                        <th>${i18n.t('action.owner')}</th>
+                        <th>${i18n.t('action.due_date')}</th>
+                        <th>${i18n.t('action.done_date')}</th>
+                        <th>${i18n.t('action.created')}</th>
+                        <th>${i18n.t('action.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,7 +105,7 @@ function renderActionItemsTable(items, currentFilter) {
         const createdDate = new Date(item.created_at).toLocaleDateString();
         const isOverdue = item.due_date && new Date(item.due_date) < new Date() && !item.completed;
         const statusClass = item.completed ? 'status-done' : (isOverdue ? 'status-overdue' : 'status-pending');
-        const statusText = item.completed ? 'Done' : (isOverdue ? 'Overdue' : 'Pending');
+        const statusText = item.completed ? i18n.t('action.status_done') : (isOverdue ? i18n.t('action.status_overdue') : i18n.t('action.status_pending'));
 
         html += `
             <tr class="action-item-row ${item.completed ? 'completed' : ''}">
@@ -113,23 +114,23 @@ function renderActionItemsTable(items, currentFilter) {
                     ${escapeHtml(item.content)}
                     ${item.completed && (item.completion_link || item.completion_desc) ?
                 `<div class="completion-info">
-                            ${item.completion_link ? `<a href="${item.completion_link}" target="_blank">🔗 Link</a>` : ''}
-                            ${item.completion_desc ? `<span title="${escapeHtml(item.completion_desc)}">📝 Note</span>` : ''}
+                            ${item.completion_link ? `<a href="${item.completion_link}" target="_blank">🔗 ${i18n.t('action.link')}</a>` : ''}
+                            ${item.completion_desc ? `<span title="${escapeHtml(item.completion_desc)}">📝 ${i18n.t('action.note')}</span>` : ''}
                          </div>`
                 : ''}
                 </td>
                 <td><a href="#board/${item.board_id}">${escapeHtml(item.board_name)}</a></td>
-                <td><div class="owner-badge">👤 ${escapeHtml(item.owner || 'Unassigned')}</div></td>
+                <td><div class="owner-badge">👤 ${escapeHtml(item.owner || i18n.t('action.unassigned'))}</div></td>
                 <td class="${isOverdue ? 'text-danger' : ''}">${dueDate}</td>
                 <td class="text-muted">${doneDate}</td>
                 <td class="text-muted">${createdDate}</td>
                 <td>
                     ${!item.completed ?
-                `<button class="btn btn-small btn-success" onclick="markActionItemDone('${item.id}', '${currentFilter}')">Mark Done</button>` :
+                `<button class="btn btn-small btn-success" onclick="markActionItemDone('${item.id}', '${currentFilter}')">${i18n.t('action.mark_done')}</button>` :
                 `<div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-small btn-secondary" onclick="markActionItemUndone('${item.id}', '${currentFilter}')">Reopen</button>
+                            <button class="btn btn-small btn-secondary" onclick="markActionItemUndone('${item.id}', '${currentFilter}')">${i18n.t('action.reopen')}</button>
                             ${(item.completion_link || item.completion_desc) ?
-                    `<button class="btn btn-small btn-outline" onclick="openActionItemDetails('${item.id}', '${escapeHtml(item.completion_link || '')}', '${escapeHtml(item.completion_desc || '')}')">Details</button>`
+                    `<button class="btn btn-small btn-outline" onclick="openActionItemDetails('${item.id}', '${escapeHtml(item.completion_link || '')}', '${escapeHtml(item.completion_desc || '')}')">${i18n.t('action.details')}</button>`
                     : ''}
                         </div>`
             }

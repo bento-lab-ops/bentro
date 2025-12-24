@@ -52,28 +52,28 @@ function renderDashboard(boards) {
         // Delete Button Logic
         const deleteDisabled = hasActionItems ? 'disabled' : '';
         const deleteStyle = hasActionItems ? 'opacity: 0.5; cursor: not-allowed;' : '';
-        const deleteTitle = hasActionItems ? 'Cannot delete board with action items' : 'Delete';
+        const deleteTitle = hasActionItems ? i18n.t('alert.cannot_delete_items') : i18n.t('modal.delete');
 
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <h3 style="margin:0;">${escapeHtml(board.name)}</h3>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
                     ${actionItemBadge}
-                    <span class="board-status ${statusClass}">${board.status}</span>
+                    <span class="board-status ${statusClass}">${i18n.t('status.' + board.status) || board.status}</span>
                 </div>
             </div>
             <div class="board-meta">
                 Created: ${new Date(board.created_at).toLocaleDateString()}
             </div>
             <div class="dashboard-actions">
-                <button class="btn btn-primary btn-small" onclick="loadBoard('${board.id}')">Enter</button>
+                <button class="btn btn-primary btn-small" onclick="loadBoard('${board.id}')">${i18n.t('btn.enter')}</button>
                 ${board.status === 'finished' ?
-                `<button class="btn btn-warning btn-small" onclick="updateBoardStatus('${board.id}', 'active')">Re-open</button>` : ''}
+                `<button class="btn btn-warning btn-small" onclick="updateBoardStatus('${board.id}', 'active')">${i18n.t('btn.reopen')}</button>` : ''}
                 <button class="btn btn-danger btn-small" 
                     onclick="deleteBoard('${board.id}')" 
                     ${deleteDisabled} 
                     style="${deleteStyle}"
-                    title="${deleteTitle}">Delete</button>
+                    title="${deleteTitle}">${i18n.t('modal.delete')}</button>
             </div>
         `;
         grid.appendChild(card);
@@ -87,7 +87,7 @@ async function createBoard(name, columns) {
         return board;
     } catch (error) {
         console.error('Failed to create board:', error);
-        alert('Failed to create board: ' + error.message);
+        alert(i18n.t('alert.failed_create_board') + ': ' + error.message);
     }
 }
 
@@ -159,7 +159,7 @@ async function updateBoardStatus(boardId, status) {
 }
 
 async function deleteBoard(id) {
-    if (confirm('Are you sure you want to delete this board? This cannot be undone.')) {
+    if (confirm(i18n.t('confirm.delete_board'))) {
         apiCall(`/boards/${id}`, 'DELETE')
             .then(() => loadBoards())
             .catch(err => alert('Failed to delete board: ' + err.message));
@@ -169,7 +169,7 @@ async function deleteBoard(id) {
 // Manager Actions
 async function claimManagerAction() {
     if (!window.currentBoard) return;
-    if (!confirm('Claim this board? You will be responsible for its settings.')) return;
+    if (!confirm(i18n.t('confirm.claim_board'))) return;
 
     try {
         await claimBoardManager(window.currentBoard.id, window.currentUser);
@@ -349,8 +349,8 @@ function createCardHTML(card) {
     if (isVotingPhase) {
         voteControlsHTML = `
             <div class="vote-controls-blind">
-                <span class="blind-vote-badge" title="Votes are hidden during voting phase">🙈 Votes Hidden</span>
-                ${!isFinished ? `<button class="vote-btn ${userVoted ? 'voted' : ''}" onclick="voteCard('${card.id}', 'like')">${userVoted ? 'Remove Vote' : '👍 Vote'}</button>` : ''}
+                <span class="blind-vote-badge" title="${i18n.t('card.votes_hidden')}">${i18n.t('card.votes_hidden')}</span>
+                ${!isFinished ? `<button class="vote-btn ${userVoted ? 'voted' : ''}" onclick="voteCard('${card.id}', 'like')">${userVoted ? i18n.t('card.remove_vote') : '👍 ' + i18n.t('card.vote')}</button>` : ''}
             </div>
          `;
     } else {
@@ -385,12 +385,12 @@ function createCardHTML(card) {
     if (!isFinished) {
         if (window.selectedCardId) {
             if (window.selectedCardId === card.id) {
-                mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">Cancel</button>`;
+                mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="cancelSelection()">${i18n.t('btn.cancel')}</button>`;
             } else {
-                mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">Merge Here</button>`;
+                mergeActionHTML = `<button class="btn btn-primary btn-small" onclick="mergeCard('${card.id}')">${i18n.t('btn.merge_here')}</button>`;
             }
         } else {
-            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">Select</button>`;
+            mergeActionHTML = `<button class="btn btn-outline btn-small" onclick="selectCard('${card.id}')">${i18n.t('btn.select')}</button>`;
         }
     }
 
@@ -466,10 +466,10 @@ function createCardHTML(card) {
 
         actionItemDetailsHTML = `
             <div class="action-item-details">
-                <div class="action-owner" title="Owner">
-                    👤 ${escapeHtml(card.owner || 'Unassigned')}
+                <div class="action-owner" title="${i18n.t('action.owner')}">
+                    👤 ${escapeHtml(card.owner || i18n.t('action.unassigned'))}
                 </div>
-                <div class="action-due-date ${isOverdue ? 'overdue' : ''}" title="Due Date">
+                <div class="action-due-date ${isOverdue ? 'overdue' : ''}" title="${i18n.t('action.due_date')}">
                     📅 ${dueDate}
                 </div>
                 <div class="action-status">
@@ -477,12 +477,12 @@ function createCardHTML(card) {
                         <input type="checkbox" class="action-completed-checkbox" 
                             ${card.completed ? 'checked' : ''} 
                             onchange="this.checked ? markActionItemDone('${card.id}', false) : toggleActionItemCompletion('${card.id}', false)">
-                        Done
+                        ${i18n.t('action.status_done')}
                     </label>
                 </div>
                 ${card.completed && (card.completion_link || card.completion_desc) ? `
                     <div class="action-completion-info" style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
-                        ${card.completion_link ? `<div style="margin-bottom:4px;"><a href="${escapeHtml(card.completion_link)}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500;">🔗 Open Link</a></div>` : ''}
+                        ${card.completion_link ? `<div style="margin-bottom:4px;"><a href="${escapeHtml(card.completion_link)}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500;">🔗 ${i18n.t('action.link')}</a></div>` : ''}
                         ${card.completion_desc ? `<div style="color: var(--text-primary);">📝 ${escapeHtml(card.completion_desc)}</div>` : ''}
                     </div>
                 ` : ''}
@@ -711,7 +711,7 @@ async function createCard(columnId, content) {
 }
 
 async function deleteCard(cardId) {
-    if (!confirm('Are you sure you want to delete this card?')) return;
+    if (!confirm(i18n.t('confirm.delete_card'))) return;
 
     try {
         await apiCall(`/cards/${cardId}`, 'DELETE');
@@ -759,7 +759,7 @@ async function updateColumn(columnId, name) {
 }
 
 async function deleteColumn(columnId) {
-    if (!confirm('Are you sure you want to delete this column? All cards will be deleted.')) return;
+    if (!confirm(i18n.t('confirm.delete_column'))) return;
 
     try {
         await apiCall(`/columns/${columnId}`, 'DELETE');
@@ -973,7 +973,7 @@ window.saveActionItem = async function () {
 
 window.toggleActionItemCompletion = async function (cardId, isChecked) {
     if (!isChecked) {
-        if (!confirm('Are you sure you want to re-open this item?\nThis will clear the completion details (date, link, notes).')) {
+        if (!confirm(i18n.t('confirm.reopen_action_item'))) {
             // Revert checkbox state immediately
             const checkbox = document.querySelector(`.card[data-card-id="${cardId}"] .action-completed-checkbox`);
             if (checkbox) checkbox.checked = true;
@@ -993,7 +993,7 @@ window.toggleActionItemCompletion = async function (cardId, isChecked) {
         sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
     } catch (error) {
         console.error('Failed to toggle completion:', error);
-        alert('Failed to update status: ' + error.message);
+        alert(i18n.t('alert.update_status_failed') || 'Failed to update status: ' + error.message);
         // Revert checkbox if failed
         await loadBoard(window.currentBoard.id);
     }
@@ -1001,7 +1001,7 @@ window.toggleActionItemCompletion = async function (cardId, isChecked) {
 
 window.removeActionItem = async function () {
     const cardId = document.getElementById('actionItemCardId').value;
-    if (!confirm('Are you sure you want to remove the Action Item status from this card?')) return;
+    if (!confirm(i18n.t('confirm.remove_action_item'))) return;
 
     try {
         await apiCall(`/cards/${cardId}`, 'PUT', {

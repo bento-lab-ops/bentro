@@ -49,21 +49,21 @@ function renderMenuLinks() {
     // 🏠 Home / Dashboard
     html += `
         <li onclick="navigateTo(''); closeMenu()">
-            <span class="menu-icon">🏠</span> Dashboard
+            <span class="menu-icon">🏠</span> ${i18n.t('menu.dashboard')}
         </li>
     `;
 
     // ⚡ My Tasks
     html += `
         <li onclick="navigateTo('action-items'); closeMenu()">
-            <span class="menu-icon">⚡</span> My Tasks
+            <span class="menu-icon">⚡</span> ${i18n.t('menu.my_tasks')}
         </li>
     `;
 
     // ⚙️ Settings (Theme + Admin)
     html += `
         <li onclick="openSettingsModal(); closeMenu()">
-            <span class="menu-icon">⚙️</span> Settings
+            <span class="menu-icon">⚙️</span> ${i18n.t('menu.settings')}
         </li>
     `;
 
@@ -71,7 +71,7 @@ function renderMenuLinks() {
     if (adminToken) {
         html += `
             <li onclick="navigateTo('admin'); closeMenu()" class="admin-item">
-                <span class="menu-icon">🛡️</span> Admin Dashboard
+                <span class="menu-icon">🛡️</span> ${i18n.t('menu.admin')}
             </li>
         `;
     }
@@ -79,7 +79,7 @@ function renderMenuLinks() {
     // ❓ Help
     html += `
         <li onclick="openHelpModal(); closeMenu()">
-            <span class="menu-icon">❓</span> Help
+            <span class="menu-icon">❓</span> ${i18n.t('menu.help')}
         </li>
     `;
 
@@ -123,9 +123,9 @@ function renderSettingsContent() {
 
     let html = `
         <div class="settings-section">
-            <h4>🎨 Appearance</h4>
+            <h4>🎨 ${i18n.t('settings.appearance')}</h4>
             <div class="theme-toggle-row">
-                <span>Dark Mode</span>
+                <span>${i18n.t('settings.dark_mode')}</span>
                 <label class="switch">
                     <input type="checkbox" id="themeToggleOutput" ${currentTheme === 'dark' ? 'checked' : ''} onchange="toggleThemeFromSettings(this.checked)">
                     <span class="slider round"></span>
@@ -134,25 +134,25 @@ function renderSettingsContent() {
         </div>
         
         <div class="settings-section">
-            <h4>🛡️ Administration</h4>
+            <h4>🛡️ ${i18n.t('settings.administration')}</h4>
     `;
 
     if (adminToken) {
         html += `
-            <div class="alert alert-success">✅ Verified Admin Access</div>
-            <p>You have full control over board settings.</p>
+            <div class="alert alert-success">✅ ${i18n.t('menu.verified')}</div>
+            <p>${i18n.t('admin.board_management_desc')}</p>
             <div class="settings-actions">
-                <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">Go to Dashboard</button>
-                <button class="btn btn-outline btn-sm" onclick="logoutAdminInSettings()">Logout</button>
+                <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
+                <button class="btn btn-outline btn-sm" onclick="logoutAdminInSettings()">${i18n.t('menu.logout')}</button>
             </div>
         `;
     } else {
         html += `
-            <p class="text-secondary">Enter admin password to unlock features.</p>
+            <p class="text-secondary">${i18n.t('menu.enter_password')}</p>
             <form id="settingsAdminLogin" onsubmit="handleSettingsAdminLogin(event)">
                 <div class="input-group">
-                    <input type="password" id="settingsAdminPass" placeholder="Password" class="form-input">
-                    <button type="submit" class="btn btn-primary">Unlock</button>
+                    <input type="password" id="settingsAdminPass" placeholder="${i18n.t('label.password') || 'Password'}" class="form-input">
+                    <button type="submit" class="btn btn-primary">${i18n.t('menu.unlock')}</button>
                 </div>
             </form>
         `;
@@ -189,10 +189,10 @@ async function handleSettingsAdminLogin(e) {
                 loadBoard(window.currentBoard.id);
             }
         } else {
-            alert('Invalid password');
+            alert(i18n.t('admin.invalid_pass'));
         }
     } catch (error) {
-        alert('Login failed');
+        alert(i18n.t('admin.login_failed'));
     }
 }
 

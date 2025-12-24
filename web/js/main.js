@@ -56,6 +56,11 @@ function initApp() {
 
     // Initialize Theme
     initTheme();
+
+    // Initialize i18n
+    if (window.i18n) {
+        window.i18n.init();
+    }
 }
 
 // Handle URL routing based on hash
@@ -132,7 +137,9 @@ function confirmReturningUser() {
     updateUserDisplay();
     const editBtn = document.getElementById('editUserBtn');
     if (editBtn) editBtn.style.display = 'inline-block';
-    showDashboard();
+
+    // Check URL hash to determine where to go
+    handleUrlHash();
 }
 
 function openEditUserModal() {
@@ -182,7 +189,8 @@ function showDashboard() {
     window.currentBoard = null;
 
     // Clear URL hash
-    if (window.location.hash.startsWith('#board/')) {
+    // Clear URL hash
+    if (window.location.hash && window.location.hash !== '#dashboard') {
         history.pushState(null, null, ' ');
     }
 
@@ -191,12 +199,16 @@ function showDashboard() {
 
 // Board Templates - Loaded from JSON
 let BOARD_TEMPLATES = {};
+let RAW_TEMPLATES = {}; // Stores full template objects for UI
 
 // Load templates from JSON file
 async function loadBoardTemplates() {
     try {
         const response = await fetch('/static/board-templates.json');
         const templates = await response.json();
+
+        // Store raw templates for UI updates
+        RAW_TEMPLATES = templates;
 
         // Convert to old format for backward compatibility
         BOARD_TEMPLATES = {};
@@ -205,7 +217,7 @@ async function loadBoardTemplates() {
         }
 
         // Populate template dropdown
-        populateTemplateDropdown(templates);
+        populateTemplateDropdown();
 
         console.log('%c✅ Board templates loaded', 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
     } catch (error) {
@@ -215,28 +227,63 @@ async function loadBoardTemplates() {
             'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
             'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
             '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
-            'wwn-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
+            'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
             'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
         };
+        // Also populate RAW for fallback
+        RAW_TEMPLATES = {};
+        for (const [key, cols] of Object.entries(BOARD_TEMPLATES)) {
+            RAW_TEMPLATES[key] = { name: key, columns: cols };
+        }
+        populateTemplateDropdown();
     }
 }
 
 // Populate template dropdown dynamically
-function populateTemplateDropdown(templates) {
+function populateTemplateDropdown() {
     const select = document.getElementById('boardTemplate');
     if (!select) return;
 
+    // Save current selection if any
+    const currentSelection = select.value;
+
     // Clear existing options except "Custom"
-    select.innerHTML = '<option value="custom">Custom</option>';
+    // We need to keep the "Custom" option which is hardcoded in HTML or we can re-create it
+    // The HTML has it. Let's rebuild it to be safe and translated
+    select.innerHTML = '';
+
+    const customOption = document.createElement('option');
+    customOption.value = 'custom';
+    customOption.textContent = i18n.t('template.custom') || 'Custom (Manual Entry)';
+    select.appendChild(customOption);
 
     // Add templates from JSON
-    for (const [key, value] of Object.entries(templates)) {
+    for (const [key, value] of Object.entries(RAW_TEMPLATES)) {
         const option = document.createElement('option');
         option.value = key;
-        option.textContent = value.name;
+
+        const nameKey = `template.${key}.name`;
+        const translatedName = i18n.t(nameKey);
+        // Use translated name if exists and not same as key (fallback)
+        option.textContent = (translatedName && translatedName !== nameKey) ? translatedName : value.name;
+
         select.appendChild(option);
     }
+
+    if (currentSelection && (RAW_TEMPLATES[currentSelection] || currentSelection === 'custom')) {
+        select.value = currentSelection;
+    }
 }
+
+// Add listener for language changes
+document.addEventListener('languageChanged', () => {
+    populateTemplateDropdown();
+    // Also update the textarea if a template is selected
+    const select = document.getElementById('boardTemplate');
+    if (select && select.value !== 'custom' && BOARD_TEMPLATES[select.value]) {
+        select.dispatchEvent(new Event('change'));
+    }
+});
 
 // Event Listeners - Initialize app when DOM is ready
 // Note: DOMContentLoaded is already handled at the top of the file to call loadModals()
@@ -255,19 +302,19 @@ function setupEventListeners() {
             // closeModals(); // Modals are managed by display property now
             document.getElementById('userModal').style.display = 'none';
             updateUserDisplay();
-            showDashboard();
+            handleUrlHash();
         }
     });
 
-    document.getElementById('dashboardBtn')?.addEventListener('click', showDashboard);
+    document.getElementById('dashboardBtn')?.addEventListener('click', () => {
+        window.location.hash = 'dashboard';
+    });
     document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
-        if (typeof loadActionItemsView === 'function') {
-            loadActionItemsView();
-        }
+        window.location.hash = 'action-items';
     });
 
     document.getElementById('leaveBoardBtn')?.addEventListener('click', () => {
-        if (confirm('Are you sure you want to leave this board? You will be removed from the participant list.')) {
+        if (confirm(i18n.t('confirm.leave_board') || 'Are you sure you want to leave this board?')) {
             showDashboard();
         }
     });
@@ -285,8 +332,15 @@ function setupEventListeners() {
 
         if (template === 'custom') {
             columnNamesTextarea.value = '';
+            columnNamesTextarea.placeholder = i18n.t('template.custom_placeholder') || "Enter column names, one per line";
         } else if (BOARD_TEMPLATES[template]) {
-            columnNamesTextarea.value = BOARD_TEMPLATES[template].join('\n');
+            // Translate columns
+            const cols = BOARD_TEMPLATES[template].map((col, index) => {
+                const colKey = `template.${template}.col${index + 1}`;
+                const translatedCol = i18n.t(colKey);
+                return (translatedCol && translatedCol !== colKey) ? translatedCol : col;
+            });
+            columnNamesTextarea.value = cols.join('\n');
         }
     });
 
@@ -361,13 +415,13 @@ function setupEventListeners() {
 
 // Global Action Wrappers (called via onclick in HTML)
 window.finishRetro = function () {
-    if (window.currentBoard && confirm('Finish this retrospective? It will become read-only.')) {
+    if (window.currentBoard && confirm(i18n.t('confirm.finish_retro'))) {
         updateBoardStatus(window.currentBoard.id, 'finished');
     }
 };
 
 window.reopenRetro = function () {
-    if (window.currentBoard && confirm('Re-open this retrospective?')) {
+    if (window.currentBoard && confirm(i18n.t('confirm.reopen_retro'))) {
         updateBoardStatus(window.currentBoard.id, 'active');
     }
 };
@@ -386,6 +440,7 @@ async function loadModals() {
         if (!response.ok) throw new Error('Failed to load modals');
         const html = await response.text();
         document.getElementById('modals-container').innerHTML = html;
+        if (window.i18n) window.i18n.updatePage(); // Update translations for loaded modals
         console.log('Modals loaded successfully');
     } catch (error) {
         console.error('Error loading modals:', error);
