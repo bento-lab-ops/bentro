@@ -6,37 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.4.0">
+    <link rel="stylesheet" href="/static/styles.css?v=0.5.9">
     <link rel="stylesheet" href="/static/bentro.css?v=0.4.0">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container mobile-container-fix">
         <header class="header">
-            <div class="header-brand">
+            <div class="header-left">
                 <div class="brand-logo-title">
                     <img src="/static/bentrologo.png" alt="BenTro Logo" class="header-logo">
                     <h1 class="title">BenTro</h1>
                 </div>
-                <p class="tagline">Retrospectives, packed perfectly!</p>
             </div>
-            <div class="header-controls">
-                <span id="userDisplay" class="user-display"></span>
-                <button id="editUserBtn" class="btn-icon" title="Edit Name" style="display: none;">✏️</button>
-                <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme">🌞</button>
-                <button id="helpBtn" class="btn-icon" title="Help">?</button>
-                <button id="dashboardBtn" class="btn btn-outline" style="display: none;">Dashboard</button>
-                <button id="actionItemsBtn" class="btn btn-outline" title="View all action items">⚡ My Tasks</button>
-                <button id="leaveBoardBtn" class="btn btn-outline btn-danger-outline" style="display: none;"
-                    title="Leave board and stop participating">🚪 Leave</button>
-                <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
+
+            <div class="header-right">
+                <div id="headerControls" class="header-controls"
+                    style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button id="dashboardBtn" class="btn btn-outline btn-small" onclick="showDashboard()"
+                        style="display: none;">Dashboard</button>
+
+                    <button id="leaveBoardBtn" class="btn btn-danger btn-small" onclick="leaveBoardAction()"
+                        style="display: none;">Leave</button>
+                </div>
+                <!-- Avatar Only -->
+                <span id="userDisplay" class="user-display" onclick="openEditUserModal()"></span>
+                <button class="hamburger-btn" onclick="toggleMenu()" title="Menu">☰</button>
             </div>
         </header>
 
         <!-- Dashboard View -->
         <div id="dashboardView" class="dashboard-view">
-            <h2>Your Boards</h2>
+            <div class="dashboard-header">
+                <h2>Board List</h2>
+                <div class="board-filters">
+                    <button class="filter-tab active" onclick="filterBoards('active')"
+                        id="filterActiveBtn">Active</button>
+                    <button class="filter-tab" onclick="filterBoards('finished')"
+                        id="filterFinishedBtn">Finalized</button>
+                </div>
+            </div>
             <div id="dashboardGrid" class="dashboard-grid">
                 <!-- Boards will be loaded here -->
             </div>
@@ -52,7 +62,9 @@
 
         <!-- Action Items View -->
         <div id="actionItemsView" class="dashboard-view" style="display: none;">
-            <h2>⚡ Action Items Dashboard</h2>
+            <div class="view-header">
+                <h2>⚡ My Action Items</h2>
+            </div>
             <div id="actionItemsList" class="action-items-container">
                 <!-- Items table will be loaded here -->
             </div>
@@ -114,22 +126,31 @@
                 <button id="addColumnBtn" class="btn btn-outline">+ Add Column</button>
             </div>
         </div>
+    </div> <!-- End .container -->
+
+    <div id="appSidebar" class="app-sidebar">
+        <ul id="menuList" class="menu-list"></ul>
+        <div class="sidebar-footer">
+            <small>BenTro v0.5.4</small>
+        </div>
     </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/config.js?v=0.5.0"></script>
-    <script src="/static/js/version.js?v=0.5.0"></script>
-    <script src="/static/js/avatars.js?v=0.5.0"></script>
-    <script src="/static/js/state.js?v=0.5.0"></script>
-    <script src="/static/js/utils.js?v=0.5.0"></script>
-    <script src="/static/js/api.js?v=0.5.0"></script>
-    <script src="/static/js/timer.js?v=0.5.0"></script>
-    <script src="/static/js/board.js?v=0.5.0"></script>
-    <script src="/static/js/action_items.js?v=0.5.0"></script>
-    <script src="/static/js/admin.js?v=0.5.0"></script>
-    <script src="/static/js/main.js?v=0.5.0"></script>
+    <script src="/static/js/config.js?v=0.5.9"></script>
+    <script src="/static/js/version.js?v=0.5.9"></script>
+    <script src="/static/js/avatars.js?v=0.5.9"></script>
+    <script src="/static/js/state.js?v=0.5.9"></script>
+    <script src="/static/js/utils.js?v=0.5.9"></script>
+    <script src="/static/js/api.js?v=0.5.9"></script>
+    <script src="/static/js/timer.js?v=0.5.9"></script>
+    <script src="/static/js/board.js?v=0.5.9"></script>
+    <script src="/static/js/action_items.js?v=0.5.9"></script>
+    <script src="/static/js/admin.js?v=0.5.9"></script>
+    <script src="/static/js/menu.js?v=0.5.9"></script>
+    <script src="/static/js/main.js?v=0.5.9"></script>
 </body>
 
 </html>

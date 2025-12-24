@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bentro-app
-        image: dnlouko/bentro-app:v0.5.0
+        image: dnlouko/bentro-app:v0.5.10
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

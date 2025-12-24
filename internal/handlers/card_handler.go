@@ -75,14 +75,14 @@ func UpdateCard(c *gin.Context) {
 	if input.IsActionItem != nil {
 		card.IsActionItem = *input.IsActionItem
 	}
+	if input.Completed != nil {
+		card.Completed = *input.Completed
+	}
 	if input.Owner != nil {
 		card.Owner = *input.Owner
 	}
 	if input.DueDate != nil {
 		card.DueDate = input.DueDate
-	}
-	if input.Completed != nil {
-		card.Completed = *input.Completed
 	}
 
 	if err := database.DB.Save(&card).Error; err != nil {

@@ -19,8 +19,11 @@ async function loadActionItemsView() {
         container.style.display = 'block';
 
         // Update Header Buttons
-        document.getElementById('dashboardBtn').style.display = 'inline-block';
-        document.getElementById('leaveBoardBtn').style.display = 'none';
+        const dashboardBtn = document.getElementById('dashboardBtn');
+        if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+
+        const leaveBoardBtn = document.getElementById('leaveBoardBtn');
+        if (leaveBoardBtn) leaveBoardBtn.style.display = 'none';
 
         // Update URL hash
         if (window.location.hash !== '#action-items') {
@@ -99,7 +102,15 @@ function renderActionItemsTable(items, currentFilter) {
         html += `
             <tr class="action-item-row ${item.completed ? 'completed' : ''}">
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td class="task-content" title="${escapeHtml(item.content)}">${escapeHtml(item.content)}</td>
+                <td class="task-content" title="${escapeHtml(item.content)}">
+                    ${escapeHtml(item.content)}
+                    ${item.completed && (item.completion_link || item.completion_desc) ?
+                `<div class="completion-info">
+                            ${item.completion_link ? `<a href="${item.completion_link}" target="_blank">🔗 Link</a>` : ''}
+                            ${item.completion_desc ? `<span title="${escapeHtml(item.completion_desc)}">📝 Note</span>` : ''}
+                         </div>`
+                : ''}
+                </td>
                 <td><a href="#board/${item.board_id}" onclick="loadBoard('${item.board_id}')">${escapeHtml(item.board_name)}</a></td>
                 <td><div class="owner-badge">👤 ${escapeHtml(item.owner || 'Unassigned')}</div></td>
                 <td class="${isOverdue ? 'text-danger' : ''}">${dueDate}</td>
@@ -119,15 +130,19 @@ function renderActionItemsTable(items, currentFilter) {
 }
 
 // Helper to toggle status from dashboard
-async function markActionItemDone(cardId, currentFilter) {
-    try {
-        await apiCall(`/cards/${cardId}`, 'PUT', { completed: true });
-        // Refresh list
-        fetchAndRenderActionItems(currentFilter);
-    } catch (error) {
-        alert('Failed to update item: ' + error.message);
-    }
+// Helper to toggle status from dashboard
+function markActionItemDone(cardId) {
+    updateCard(cardId, { completed: true })
+        .then(() => fetchAndRenderActionItems(document.querySelector('.filter-tab.active').innerText.toLowerCase()))
+        .catch(err => alert('Failed to mark done: ' + err.message));
 }
+
+function closeCompleteActionItemModal() {
+    const modal = document.getElementById('completeActionItemModal');
+    if (modal) modal.style.display = 'none';
+}
+
+
 
 async function markActionItemUndone(cardId, currentFilter) {
     try {

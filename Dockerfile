@@ -7,11 +7,15 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy force update file to bust cache
+COPY FORCE_UPDATE .
+
 # Copy source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -installsuffix cgo -o main ./cmd/server
 
 # Runtime stage
 FROM alpine:latest

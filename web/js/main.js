@@ -19,16 +19,33 @@ function initApp() {
     // Handle URL Hash for persistence
     handleUrlHash();
 
-    // Listen for back/forward navigation
+    // Listen for back/forward navigation AND hash changes
     window.addEventListener('popstate', handleUrlHash);
+    window.addEventListener('hashchange', handleUrlHash);
+
+    // Initialize User State from LocalStorage
+    if (!window.currentUser) {
+        const storedUser = localStorage.getItem('retroUser');
+        if (storedUser) {
+            window.currentUser = storedUser;
+            window.currentUserAvatar = localStorage.getItem('retroUserAvatar') || '👤';
+        }
+    }
 
     if (!window.currentUser) {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
         document.getElementById('userModal').style.display = 'block';
-    } else if (!window.location.hash.startsWith('#board/')) {
-        // Only show welcome back if not directly loading a board
-        console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
-        showReturningUserModal(window.currentUser);
+    } else {
+        // User is logged in
+        updateUserDisplay();
+
+        if (!window.location.hash.startsWith('#board/')) {
+            // Only show welcome back if not directly loading a board
+            console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
+            showReturningUserModal(window.currentUser);
+            // Also load boards in background so they are ready
+            loadBoards();
+        }
     }
 
     // Set version in Help Modal
@@ -60,9 +77,7 @@ function handleUrlHash() {
             }
         }
     } else if (!hash || hash === '#dashboard') {
-        if (window.currentBoard) {
-            showDashboard();
-        }
+        showDashboard();
     } else if (hash === '#action-items') {
         if (typeof loadActionItemsView === 'function') {
             loadActionItemsView();
@@ -115,7 +130,8 @@ function confirmReturningUser() {
 
     document.getElementById('returningUserModal').style.display = 'none';
     updateUserDisplay();
-    document.getElementById('editUserBtn').style.display = 'inline-block';
+    const editBtn = document.getElementById('editUserBtn');
+    if (editBtn) editBtn.style.display = 'inline-block';
     showDashboard();
 }
 
@@ -132,8 +148,12 @@ function openEditUserModal() {
 
 function updateUserDisplay() {
     const avatar = window.currentUserAvatar || getUserAvatar();
-    document.getElementById('userDisplay').textContent = `${avatar} ${window.currentUser}`;
-    document.getElementById('editUserBtn').style.display = 'inline-block';
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay) {
+        userDisplay.innerHTML = `${avatar} ${escapeHtml(window.currentUser)} <span class="edit-icon" title="Edit Profile">✏️</span>`;
+    }
+    const editBtn = document.getElementById('editUserBtn');
+    if (editBtn) editBtn.style.display = 'inline-block';
 }
 
 function showDashboard() {
@@ -150,10 +170,15 @@ function showDashboard() {
     const adminView = document.getElementById('adminView');
     if (adminView) adminView.style.display = 'none';
 
-    document.getElementById('dashboardBtn').style.display = 'none';
-    document.getElementById('actionItemsBtn').style.display = 'inline-block';
-    document.getElementById('leaveBoardBtn').style.display = 'none';
-    document.getElementById('editUserBtn').style.display = 'inline-block';
+    const dashboardBtn = document.getElementById('dashboardBtn');
+    if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    const actionItemsBtn = document.getElementById('actionItemsBtn');
+    if (actionItemsBtn) actionItemsBtn.style.display = 'inline-block';
+    const leaveBtn = document.getElementById('leaveBoardBtn');
+    if (leaveBtn) leaveBtn.style.display = 'none';
+    const editBtn = document.getElementById('editUserBtn');
+    if (editBtn) editBtn.style.display = 'inline-block';
     window.currentBoard = null;
 
     // Clear URL hash
@@ -234,20 +259,20 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+    document.getElementById('dashboardBtn')?.addEventListener('click', showDashboard);
     document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
         if (typeof loadActionItemsView === 'function') {
             loadActionItemsView();
         }
     });
 
-    document.getElementById('leaveBoardBtn').addEventListener('click', () => {
+    document.getElementById('leaveBoardBtn')?.addEventListener('click', () => {
         if (confirm('Are you sure you want to leave this board? You will be removed from the participant list.')) {
             showDashboard();
         }
     });
 
-    document.getElementById('newBoardBtn').addEventListener('click', () => {
+    document.getElementById('newBoardBtn')?.addEventListener('click', () => {
         document.getElementById('newBoardModal').style.display = 'block';
     });
 
@@ -265,7 +290,7 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('newBoardForm').addEventListener('submit', async (e) => {
+    document.getElementById('newBoardForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('boardName').value;
         const columnsText = document.getElementById('columnNames').value.trim();
@@ -275,7 +300,7 @@ function setupEventListeners() {
         closeModals();
     });
 
-    document.getElementById('newCardForm').addEventListener('submit', async (e) => {
+    document.getElementById('newCardForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const columnId = document.getElementById('cardColumnId').value;
         const content = document.getElementById('cardContent').value;
@@ -284,7 +309,7 @@ function setupEventListeners() {
         closeModals();
     });
 
-    document.getElementById('editColumnForm').addEventListener('submit', async (e) => {
+    document.getElementById('editColumnForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const columnId = document.getElementById('editColumnId').value;
         const name = document.getElementById('columnNameEdit').value;
@@ -293,7 +318,7 @@ function setupEventListeners() {
         closeModals();
     });
 
-    document.getElementById('addColumnBtn').addEventListener('click', async () => {
+    document.getElementById('addColumnBtn')?.addEventListener('click', async () => {
         const name = prompt('Enter column name:');
         if (name) {
             const position = window.currentBoard.columns.length;
@@ -301,9 +326,9 @@ function setupEventListeners() {
         }
     });
 
-    document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-    document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-    document.getElementById('switchPhaseBtn').addEventListener('click', switchPhase);
+    document.getElementById('startTimerBtn')?.addEventListener('click', startTimer);
+    document.getElementById('stopTimerBtn')?.addEventListener('click', stopTimer);
+    document.getElementById('switchPhaseBtn')?.addEventListener('click', switchPhase);
 
     document.querySelectorAll('.close').forEach(closeBtn => {
         closeBtn.addEventListener('click', closeModals);

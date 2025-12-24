@@ -1,12 +1,29 @@
 // Board Management
 
+let allBoardsCache = [];
+let currentFilter = 'active';
+
 async function loadBoards() {
     try {
         const boards = await apiCall('/boards');
-        renderDashboard(boards);
+        allBoardsCache = boards;
+        filterBoards(currentFilter || 'active');
     } catch (error) {
         console.error('Failed to load boards:', error);
     }
+}
+
+function filterBoards(status) {
+    currentFilter = status;
+
+    // Update Filter UI
+    document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(status === 'active' ? 'filterActiveBtn' : 'filterFinishedBtn');
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Filter Data
+    const filtered = allBoardsCache.filter(b => b.status === status);
+    renderDashboard(filtered);
 }
 
 function renderDashboard(boards) {
@@ -89,9 +106,10 @@ async function loadBoard(boardId) {
 
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'block';
-        document.getElementById('dashboardBtn').style.display = 'inline-block';
-        document.getElementById('leaveBoardBtn').style.display = 'inline-block';
-        document.getElementById('editUserBtn').style.display = 'none';
+
+        if (document.getElementById('dashboardBtn')) document.getElementById('dashboardBtn').style.display = 'inline-block';
+        if (document.getElementById('leaveBoardBtn')) document.getElementById('leaveBoardBtn').style.display = 'inline-block';
+        if (document.getElementById('editUserBtn')) document.getElementById('editUserBtn').style.display = 'inline-block';
 
         document.getElementById('boardTitle').textContent = board.name;
 
@@ -135,16 +153,40 @@ async function updateBoardStatus(boardId, status) {
     }
 }
 
-async function deleteBoard(boardId) {
-    if (!confirm('Are you sure you want to delete this board? This cannot be undone.')) return;
-    try {
-        await apiCall(`/boards/${boardId}`, 'DELETE');
-        loadBoards();
-    } catch (error) {
-        console.error('Failed to delete board:', error);
-        alert('Failed to delete board: ' + error.message);
+async function deleteBoard(id) {
+    if (confirm('Are you sure you want to delete this board? This cannot be undone.')) {
+        apiCall(`/boards/${id}`, 'DELETE')
+            .then(() => loadBoards())
+            .catch(err => alert('Failed to delete board: ' + err.message));
     }
 }
+
+// Manager Actions
+async function claimManagerAction() {
+    if (!window.currentBoard) return;
+    if (!confirm('Claim this board? You will be responsible for its settings.')) return;
+
+    try {
+        await claimBoardManager(window.currentBoard.id, window.currentUser);
+        loadBoard(window.currentBoard.id); // Reload to update UI
+    } catch (error) {
+        alert('Failed to claim board: ' + error.message);
+    }
+}
+
+function openBoardSettings() {
+    if (!window.currentBoard) return;
+
+    document.getElementById('settingVoteLimit').value = window.currentBoard.vote_limit || 0;
+    document.getElementById('settingBlindVoting').checked = window.currentBoard.blind_voting || false;
+
+    document.getElementById('boardSettingsModal').style.display = 'block';
+}
+
+function closeBoardSettingsModal() {
+    document.getElementById('boardSettingsModal').style.display = 'none';
+}
+
 
 function updateBoardStatusUI(status) {
     const isFinished = status === 'finished';
