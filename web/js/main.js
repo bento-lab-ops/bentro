@@ -16,13 +16,6 @@ function initApp() {
 
     initWebSocket();
 
-    // Handle URL Hash for persistence
-    handleUrlHash();
-
-    // Listen for back/forward navigation AND hash changes
-    window.addEventListener('popstate', handleUrlHash);
-    window.addEventListener('hashchange', handleUrlHash);
-
     // Initialize User State from LocalStorage
     if (!window.currentUser) {
         const storedUser = localStorage.getItem('retroUser');
@@ -31,6 +24,13 @@ function initApp() {
             window.currentUserAvatar = localStorage.getItem('retroUserAvatar') || '👤';
         }
     }
+
+    // Handle URL Hash for persistence (After user is restored)
+    handleUrlHash();
+
+    // Listen for back/forward navigation AND hash changes
+    window.addEventListener('popstate', handleUrlHash);
+    window.addEventListener('hashchange', handleUrlHash);
 
     if (!window.currentUser) {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
@@ -381,7 +381,8 @@ window.exportCurrentBoard = function () {
 // Load Modals dynamically
 async function loadModals() {
     try {
-        const response = await fetch('/static/modals.html');
+        const buster = typeof APP_VERSION !== 'undefined' ? APP_VERSION : Date.now();
+        const response = await fetch(`/static/modals.html?v=${buster}`);
         if (!response.ok) throw new Error('Failed to load modals');
         const html = await response.text();
         document.getElementById('modals-container').innerHTML = html;

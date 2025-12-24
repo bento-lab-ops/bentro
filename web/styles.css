@@ -1000,6 +1000,12 @@ kbd {
     color: var(--text-secondary);
 }
 
+.card.completed .action-completion-info,
+.card.completed .action-item-details {
+    text-decoration: none !important;
+    text-align: left;
+}
+
 .action-completed-checkbox {
     cursor: pointer;
     margin-right: 0.5rem;

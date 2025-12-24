@@ -105,6 +105,11 @@ async function loadBoard(boardId) {
         }
 
         document.getElementById('dashboardView').style.display = 'none';
+        const actionItemsView = document.getElementById('actionItemsView');
+        if (actionItemsView) actionItemsView.style.display = 'none';
+        const adminView = document.getElementById('adminView');
+        if (adminView) adminView.style.display = 'none';
+
         document.getElementById('boardContainer').style.display = 'block';
 
         if (document.getElementById('dashboardBtn')) document.getElementById('dashboardBtn').style.display = 'inline-block';
@@ -471,10 +476,16 @@ function createCardHTML(card) {
                     <label class="action-completed-label" onclick="event.stopPropagation()">
                         <input type="checkbox" class="action-completed-checkbox" 
                             ${card.completed ? 'checked' : ''} 
-                            onchange="toggleActionItemCompletion('${card.id}', this.checked)">
+                            onchange="this.checked ? markActionItemDone('${card.id}', false) : toggleActionItemCompletion('${card.id}', false)">
                         Done
                     </label>
                 </div>
+                ${card.completed && (card.completion_link || card.completion_desc) ? `
+                    <div class="action-completion-info" style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                        ${card.completion_link ? `<div style="margin-bottom:4px;"><a href="${escapeHtml(card.completion_link)}" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 500;">🔗 Open Link</a></div>` : ''}
+                        ${card.completion_desc ? `<div style="color: var(--text-primary);">📝 ${escapeHtml(card.completion_desc)}</div>` : ''}
+                    </div>
+                ` : ''}
             </div>
         `;
 
@@ -932,7 +943,8 @@ window.openActionItemModal = function (cardId) {
         // Format to YYYY-MM-DD for input[type=date]
         dateInput.value = new Date(card.due_date).toISOString().split('T')[0];
     } else {
-        dateInput.value = '';
+        // Default to Today to avoid 1700s/1900s weirdness
+        dateInput.value = new Date().toISOString().split('T')[0];
     }
 
     document.getElementById('actionItemModal').style.display = 'block';
@@ -960,9 +972,21 @@ window.saveActionItem = async function () {
 };
 
 window.toggleActionItemCompletion = async function (cardId, isChecked) {
+    if (!isChecked) {
+        if (!confirm('Are you sure you want to re-open this item?\nThis will clear the completion details (date, link, notes).')) {
+            // Revert checkbox state immediately
+            const checkbox = document.querySelector(`.card[data-card-id="${cardId}"] .action-completed-checkbox`);
+            if (checkbox) checkbox.checked = true;
+            return;
+        }
+    }
+
     try {
         await apiCall(`/cards/${cardId}`, 'PUT', {
-            completed: isChecked
+            completed: isChecked,
+            completion_date: isChecked ? new Date().toISOString() : null,
+            completion_link: isChecked ? null : "", // Explicitly clear if reopening
+            completion_desc: isChecked ? null : ""
         });
         // Optimistic update handled by checkbox state, but we should reload to be safe and sync
         await loadBoard(window.currentBoard.id);

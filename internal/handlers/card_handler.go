@@ -51,11 +51,14 @@ func UpdateCard(c *gin.Context) {
 	}
 
 	var input struct {
-		Content      string     `json:"content"`
-		IsActionItem *bool      `json:"is_action_item"`
-		Owner        *string    `json:"owner"`
-		DueDate      *time.Time `json:"due_date"`
-		Completed    *bool      `json:"completed"`
+		Content        *string    `json:"content"`
+		IsActionItem   *bool      `json:"is_action_item"`
+		Owner          *string    `json:"owner"`
+		DueDate        *time.Time `json:"due_date"`
+		Completed      *bool      `json:"completed"`
+		CompletionLink *string    `json:"completion_link"`
+		CompletionDesc *string    `json:"completion_desc"`
+		CompletionDate *time.Time `json:"completion_date"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -69,14 +72,25 @@ func UpdateCard(c *gin.Context) {
 		return
 	}
 
-	if input.Content != "" {
-		card.Content = input.Content
+	if input.Content != nil {
+		card.Content = *input.Content
 	}
 	if input.IsActionItem != nil {
 		card.IsActionItem = *input.IsActionItem
 	}
 	if input.Completed != nil {
 		card.Completed = *input.Completed
+		// If marking as completed and date is provided, use it.
+		// If cleared (false), maybe clear date? For now, we keep history unless explicitly cleared.
+	}
+	if input.CompletionLink != nil {
+		card.CompletionLink = *input.CompletionLink
+	}
+	if input.CompletionDesc != nil {
+		card.CompletionDesc = *input.CompletionDesc
+	}
+	if input.CompletionDate != nil {
+		card.CompletionDate = input.CompletionDate
 	}
 	if input.Owner != nil {
 		card.Owner = *input.Owner

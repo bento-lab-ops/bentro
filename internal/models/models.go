@@ -56,21 +56,24 @@ func (c *Column) BeforeCreate(tx *gorm.DB) error {
 
 // Card represents a card in a column
 type Card struct {
-	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
-	ColumnID     uuid.UUID      `gorm:"type:uuid;not null" json:"column_id"`
-	Content      string         `gorm:"type:text;not null" json:"content"`
-	Position     int            `gorm:"not null" json:"position"`
-	MergedWithID *uuid.UUID     `gorm:"type:uuid" json:"merged_with_id,omitempty"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	Votes        []Vote         `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
-	Reactions    []Reaction     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
-	MergedCards  []Card         `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
-	IsActionItem bool           `gorm:"default:false" json:"is_action_item"`
-	Owner        string         `json:"owner,omitempty"`
-	DueDate      *time.Time     `json:"due_date,omitempty"`
-	Completed    bool           `gorm:"default:false" json:"completed"`
-	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	ID             uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	ColumnID       uuid.UUID      `gorm:"type:uuid;not null" json:"column_id"`
+	Content        string         `gorm:"type:text;not null" json:"content"`
+	Position       int            `gorm:"not null" json:"position"`
+	MergedWithID   *uuid.UUID     `gorm:"type:uuid" json:"merged_with_id,omitempty"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	Votes          []Vote         `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"votes,omitempty"`
+	Reactions      []Reaction     `gorm:"foreignKey:CardID;constraint:OnDelete:CASCADE" json:"reactions,omitempty"`
+	MergedCards    []Card         `gorm:"foreignKey:MergedWithID;constraint:OnDelete:SET NULL" json:"merged_cards,omitempty"`
+	IsActionItem   bool           `gorm:"default:false" json:"is_action_item"`
+	Owner          string         `json:"owner,omitempty"`
+	DueDate        *time.Time     `json:"due_date,omitempty"`
+	CompletionLink string         `json:"completion_link,omitempty"`
+	CompletionDesc string         `json:"completion_desc,omitempty"`
+	CompletionDate *time.Time     `json:"completion_date,omitempty"`
+	Completed      bool           `gorm:"default:false" json:"completed"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // BeforeCreate hook to generate UUID
