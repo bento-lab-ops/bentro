@@ -365,8 +365,8 @@ function updateBoardStatusUI(status) {
     const adminSettingsBtn = document.getElementById('adminSettingsBtn');
     const claimBtn = document.getElementById('claimManagerBtn');
 
-    // Check if user is owner OR admin (using local token)
-    const isAdmin = !!localStorage.getItem('adminToken');
+    // Check if user is owner OR admin (JWT or K8s token)
+    const isAdmin = (window.currentUserRole === 'admin') || !!localStorage.getItem('adminToken');
     const isOwner = window.currentBoard && window.currentBoard.owner === window.currentUser;
     const isCoOwner = window.currentBoard && window.currentBoard.co_owner === window.currentUser;
     const hasOwner = window.currentBoard && !!window.currentBoard.owner;

@@ -243,6 +243,7 @@ func GetCurrentUser(c *gin.Context) {
 func AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("user_role")
+		fmt.Printf("AdminMiddleware - role exists: %v, role value: %v\n", exists, role)
 		if !exists || role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin access required"})
 			c.Abort()
@@ -356,6 +357,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if tokenString == "" {
+			fmt.Println("AuthMiddleware: No token found")
 			c.Next()
 			return
 		}
@@ -368,6 +370,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
+			fmt.Printf("AuthMiddleware: Invalid token - err: %v, valid: %v\n", err, token != nil && token.Valid)
 			c.Next()
 			return
 		}
@@ -377,9 +380,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			if ok {
 				var user models.User
 				if err := database.DB.First(&user, "id = ?", userIDStr).Error; err == nil {
+					fmt.Printf("AuthMiddleware: Setting user_role to: %s for user: %s\n", user.Role, user.Email)
 					c.Set("user", user)
 					c.Set("user_id", user.ID)
 					c.Set("user_role", user.Role)
+				} else {
+					fmt.Printf("AuthMiddleware: Failed to find user: %v\n", err)
 				}
 			}
 		}

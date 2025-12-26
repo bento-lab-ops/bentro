@@ -83,6 +83,7 @@ async function handleLoginSubmit(event) {
         window.currentUserId = response.user.id;
         window.currentUserEmail = response.user.email;
         window.currentUserFullName = response.user.name;
+        window.currentUserRole = response.user.role; // Store role for admin check
 
         // Check if password change is required
         if (response.require_password_change) {

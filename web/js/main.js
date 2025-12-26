@@ -27,6 +27,7 @@ async function initApp() {
             window.currentUserId = user.id;
             window.currentUserEmail = user.email;
             window.currentUserFullName = user.name;
+            window.currentUserRole = user.role; // Store role for admin check
             window.isGoogleAuth = true;
             console.log('%c🔐 Logged in via Google', 'color: #4CAF50; font-weight: bold;');
         }
@@ -195,6 +196,9 @@ function showDashboard() {
 
     const dashboardBtn = document.getElementById('dashboardBtn');
     if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    const newBoardBtn = document.getElementById('newBoardBtn');
+    if (newBoardBtn) newBoardBtn.style.display = 'inline-block'; // Show on dashboard
 
     const actionItemsBtn = document.getElementById('actionItemsBtn');
     if (actionItemsBtn) actionItemsBtn.style.display = 'inline-block';

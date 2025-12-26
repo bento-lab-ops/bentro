@@ -160,6 +160,23 @@ const translations = {
         'action.deleted': 'DELETED',
 
         // Admin
+        'admin.dashboard': 'Admin Dashboard',
+        'admin.stat_total_users': 'Total Users',
+        'admin.user_management': 'User Management',
+        'admin.role': 'Role',
+        'admin.actions': 'Actions',
+        'admin.stat_total_boards': 'Total Boards',
+        'admin.stat_active_boards': 'Active Boards',
+        'admin.stat_total_actions': 'Total Action Items',
+        'admin.stat_completed_actions': 'Completed Actions',
+        'admin.board_management': 'Board Management',
+        'admin.board_management_desc': 'Manage all retrospective boards',
+        'admin.connection_secure': 'Connection Secure',
+
+        // Buttons
+        'btn.close': 'Close',
+
+        // Admin
         'admin.title': 'Admin Access',
         'admin.enter_pass': 'Please enter the administrator password to continue.',
         'admin.dashboard': 'Admin Dashboard',

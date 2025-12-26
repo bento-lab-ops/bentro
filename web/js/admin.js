@@ -1,8 +1,9 @@
 // Admin Dashboard Management
 
 async function loadAdminView() {
-    // Check if we have a token
+    // Check if user is admin via JWT or has K8s admin token
     const token = localStorage.getItem('adminToken');
+    const isJWTAdmin = window.currentUserRole === 'admin';
 
     // Hide other views
     document.getElementById('dashboardView').style.display = 'none';
@@ -19,7 +20,8 @@ async function loadAdminView() {
     // Update Header
     document.getElementById('dashboardBtn').style.display = 'inline-block';
 
-    if (token) {
+    // Show dashboard if user is JWT admin or has K8s token
+    if (isJWTAdmin || token) {
         showAdminDashboard();
     } else {
         showAdminLogin();
@@ -111,6 +113,10 @@ async function showAdminDashboard() {
                     <div class="stat-card">
                         <span class="stat-value">${stats.action_items.completed}</span>
                         <span class="stat-label">${i18n.t('admin.stat_completed_actions')}</span>
+                    </div>
+                    <div class="stat-card clickable" onclick="openAdminUsersModal()" style="cursor: pointer;">
+                        <span class="stat-value">${stats.users || 0}</span>
+                        <span class="stat-label">👥 ${i18n.t('admin.stat_total_users')}</span>
                     </div>
                 </div>
             </div>

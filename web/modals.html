@@ -412,4 +412,31 @@
             <button type="button" class="btn btn-primary" onclick="closeActionItemDetailsModal()">Close</button>
         </div>
     </div>
+</div><!-- Modal for Admin User Management -->
+<div id="adminUsersModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="close-modal" onclick="closeAdminUsersModal()">&times;</span>
+        <h2 data-i18n="admin.user_management">User Management</h2>
+
+        <div id="usersTableContainer" style="margin-top: 1.5rem;">
+            <table class="users-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border);">
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.avatar">Avatar</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.display_name">Display Name</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.email">Email</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="admin.role">Role</th>
+                        <th style="padding: 0.75rem; text-align: center;" data-i18n="admin.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <button class="btn btn-outline" onclick="closeAdminUsersModal()" data-i18n="btn.close">Close</button>
+        </div>
+    </div>
 </div>

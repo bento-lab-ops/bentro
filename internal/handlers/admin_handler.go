@@ -109,6 +109,10 @@ func GetSystemStats(c *gin.Context) {
 	var totalCards int64
 	database.DB.Model(&models.Card{}).Count(&totalCards)
 
+	// Count registered users
+	var totalUsers int64
+	database.DB.Model(&models.User{}).Count(&totalUsers)
+
 	c.JSON(http.StatusOK, gin.H{
 		"boards": gin.H{
 			"total":  stats.TotalBoards,
@@ -122,5 +126,6 @@ func GetSystemStats(c *gin.Context) {
 		"activity": gin.H{
 			"total_cards": totalCards,
 		},
+		"users": totalUsers,
 	})
 }

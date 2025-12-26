@@ -21,6 +21,11 @@ func main() {
 	// Initialize Auth
 	handlers.InitAuth()
 
+	// Ensure admin user exists
+	if err := handlers.EnsureAdminUser(); err != nil {
+		log.Fatalf("Failed to ensure admin user: %v", err)
+	}
+
 	// Setup Gin router
 	router := gin.Default()
 

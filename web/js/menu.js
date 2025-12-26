@@ -67,8 +67,8 @@ function renderMenuLinks() {
         </li>
     `;
 
-    // 🛡️ Admin Dashboard (Only if logged in)
-    if (adminToken) {
+    // 🛡️ Admin Dashboard (JWT admin or K8s admin token)
+    if (window.currentUserRole === 'admin' || adminToken) {
         html += `
             <li onclick="navigateTo('admin'); closeMenu()" class="admin-item">
                 <span class="menu-icon">🛡️</span> ${i18n.t('menu.admin')}
@@ -177,7 +177,16 @@ function renderSettingsContent() {
             <h4>🛡️ ${i18n.t('settings.administration')}</h4>
     `;
 
-    if (adminToken) {
+    // Check if user is JWT admin or has K8s admin token
+    if (window.currentUserRole === 'admin') {
+        html += `
+            <div class="alert alert-success">✅ Authenticated as Admin (JWT)</div>
+            <p>You have full administrative access.</p>
+            <div class="settings-actions">
+                <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
+            </div>
+        `;
+    } else if (adminToken) {
         html += `
             <div class="alert alert-success">✅ ${i18n.t('menu.verified')}</div>
             <p>${i18n.t('admin.board_management_desc')}</p>
