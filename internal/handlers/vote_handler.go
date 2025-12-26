@@ -101,7 +101,7 @@ func GetVotes(c *gin.Context) {
 		var column models.Column
 		if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
 			if err := database.DB.First(&board, column.BoardID).Error; err == nil {
-				if board.Phase == "voting" {
+				if board.BlindVoting && board.Phase == "voting" {
 					isBlindVoting = true
 				}
 			}

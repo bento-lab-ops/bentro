@@ -11,7 +11,7 @@ import (
 
 // CreateColumn creates a new column in a board
 func CreateColumn(c *gin.Context) {
-	boardID, err := uuid.Parse(c.Param("boardId"))
+	boardID, err := uuid.Parse(c.Param("id")) // Using "id" to avoid conflict with other /boards/:id routes
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
 		return

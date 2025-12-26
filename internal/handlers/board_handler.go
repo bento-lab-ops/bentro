@@ -192,3 +192,39 @@ func GetBoardParticipants(c *gin.Context) {
 	participants := hub.GetBoardParticipants(boardID)
 	c.JSON(http.StatusOK, participants)
 }
+
+// ClaimBoard allows a user to become the moderator of a board
+func ClaimBoard(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
+		return
+	}
+
+	var input struct {
+		Owner string `json:"owner" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var board models.Board
+	if err := database.DB.First(&board, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
+		return
+	}
+
+	// Check if already claimed by another user?
+	// For now, we allow overriding or claiming if empty. The user requirement implies they just want to claim it.
+	// Optionally we could restrict it. Let's allow overriding for simplicity/MVP flexibility.
+
+	board.Owner = input.Owner
+	if err := database.DB.Save(&board).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to claim board"})
+		return
+	}
+
+	c.JSON(http.StatusOK, board)
+}

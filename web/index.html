@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.5.9">
-    <link rel="stylesheet" href="/static/bentro.css?v=0.4.0">
+    <link rel="stylesheet" href="/static/styles.css?v=0.8.0">
+    <link rel="stylesheet" href="/static/bentro.css?v=0.8.0">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -97,11 +97,14 @@
 
             <div class="board-header-section">
                 <h2 id="boardTitle"></h2>
+                <div id="voteStatusDisplay" class="vote-status-display" style="display:none;"></div>
                 <div class="participants-wrapper">
                     <span class="participants-label" data-i18n="label.active_participants">Active:</span>
                     <div id="participantsContainer" class="participants-container"></div>
                 </div>
-                <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardConfig()"
+                <button id="claimManagerBtn" class="btn btn-outline btn-sm" onclick="claimManagerAction()"
+                    title="Claim Moderation" style="display: none;">👑 Claim Host</button>
+                <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardSettings()"
                     title="Admin Settings" style="display: none;">⚙️</button>
             </div>
 
@@ -155,19 +158,19 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/i18n.js?v=0.7.0"></script>
-    <script src="/static/js/config.js?v=0.6.4"></script>
-    <script src="/static/js/version.js?v=0.6.4"></script>
-    <script src="/static/js/avatars.js?v=0.6.4"></script>
-    <script src="/static/js/state.js?v=0.6.4"></script>
-    <script src="/static/js/utils.js?v=0.6.4"></script>
-    <script src="/static/js/api.js?v=0.6.4"></script>
-    <script src="/static/js/timer.js?v=0.6.4"></script>
-    <script src="/static/js/board.js?v=0.6.4"></script>
-    <script src="/static/js/action_items.js?v=0.6.4"></script>
-    <script src="/static/js/admin.js?v=0.6.4"></script>
-    <script src="/static/js/menu.js?v=0.6.4"></script>
-    <script src="/static/js/main.js?v=0.6.4"></script>
+    <script src="/static/js/i18n.js?v=0.8.0"></script>
+    <script src="/static/js/config.js?v=0.8.0"></script>
+    <script src="/static/js/version.js?v=0.8.0"></script>
+    <script src="/static/js/avatars.js?v=0.8.0"></script>
+    <script src="/static/js/state.js?v=0.8.0"></script>
+    <script src="/static/js/utils.js?v=0.8.0"></script>
+    <script src="/static/js/api.js?v=0.8.0"></script>
+    <script src="/static/js/timer.js?v=0.8.0"></script>
+    <script src="/static/js/board.js?v=0.8.0"></script>
+    <script src="/static/js/action_items.js?v=0.8.0"></script>
+    <script src="/static/js/admin.js?v=0.8.0"></script>
+    <script src="/static/js/menu.js?v=0.8.0"></script>
+    <script src="/static/js/main.js?v=0.8.0"></script>
 </body>
 
 </html>

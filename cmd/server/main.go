@@ -45,9 +45,10 @@ func main() {
 		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
 		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
+		api.POST("/boards/:id/claim", handlers.ClaimBoard)
 
 		// Column routes
-		api.POST("/boards/:boardId/columns", handlers.CreateColumn)
+		api.POST("/boards/:id/columns", handlers.CreateColumn)
 		api.PUT("/columns/:id", handlers.UpdateColumn)
 		api.PUT("/columns/:id/position", handlers.UpdateColumnPosition)
 		api.DELETE("/columns/:id", handlers.DeleteColumn)
@@ -74,6 +75,7 @@ func main() {
 		// Admin Routes
 		api.POST("/admin/login", handlers.AdminLogin)
 		api.POST("/admin/boards/:id/settings", handlers.AdminUpdateBoardSettings)
+		api.GET("/admin/stats", handlers.GetSystemStats)
 
 	}
 

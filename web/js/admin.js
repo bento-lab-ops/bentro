@@ -18,7 +18,6 @@ async function loadAdminView() {
 
     // Update Header
     document.getElementById('dashboardBtn').style.display = 'inline-block';
-    document.getElementById('actionItemsBtn').style.display = 'inline-block';
 
     if (token) {
         showAdminDashboard();
@@ -68,11 +67,12 @@ async function showAdminDashboard() {
     const container = document.getElementById('adminContent');
     container.innerHTML = '<div class="loading-spinner">Loading admin data...</div>';
 
-    // In a real app we would fetch data here. For now, we'll verify connection by listing boards (public endpoint) 
-    // but in future we could have a protected /api/admin/boards endpoint.
-    // We'll implemented a Board Settings editor for the active board if one was selected, or a generic list.
+    try {
+        const response = await fetch('/api/admin/stats');
+        if (!response.ok) throw new Error('Failed to load stats');
+        const stats = await response.json();
 
-    container.innerHTML = `
+        container.innerHTML = `
         <div class="admin-dashboard">
             <div class="admin-header">
                 <h3>${i18n.t('admin.dashboard')}</h3>
@@ -81,17 +81,42 @@ async function showAdminDashboard() {
             
             <div class="admin-section">
                 <h4>Verified Access</h4>
-                <p>You are logged in as Administrator.</p>
-                <div class="alert alert-success">${i18n.t('admin.connection_secure')}</div>
+                <div class="alert alert-success">${i18n.t('admin.connection_secure')} - <small>Mode: ${window.location.protocol}</small></div>
+            </div>
+
+            <div class="admin-section">
+                <h4>System Statistics</h4>
+                <div class="admin-stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-value">${stats.boards.total}</span>
+                        <span class="stat-label">${i18n.t('admin.stat_total_boards')}</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">${stats.boards.active}</span>
+                        <span class="stat-label">${i18n.t('admin.stat_active_boards')}</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">${stats.action_items.total}</span>
+                        <span class="stat-label">${i18n.t('admin.stat_total_actions')}</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">${stats.action_items.completed}</span>
+                        <span class="stat-label">${i18n.t('admin.stat_completed_actions')}</span>
+                    </div>
+                </div>
             </div>
 
             <div class="admin-section">
                 <h4>${i18n.t('admin.board_management')}</h4>
                 <p>${i18n.t('admin.board_management_desc')}</p>
-                <!-- This is a placeholder for global settings -->
             </div>
         </div>
     `;
+
+    } catch (error) {
+        console.error('Admin stats error:', error);
+        container.innerHTML = `<div class="alert alert-danger">Failed to load admin dashboard: ${error.message}</div>`;
+    }
 }
 
 function logoutAdmin() {
@@ -99,42 +124,4 @@ function logoutAdmin() {
     showAdminLogin();
 }
 
-// Function to open board settings modal (admin only)
-function openBoardSettings(boardId) {
-    if (!localStorage.getItem('adminToken')) {
-        alert('You must be logged in as admin to access these settings.');
-        loadAdminView(); // Redirect to login
-        return;
-    }
-
-    // In a real implementation this would open a modal to set Vote Limit and Phase
-    // For MVP v0.5.0 we can just use prompts or a simple custom alert
-    const newLimit = prompt("Set Vote Limit per User (0 for unlimited):", "0");
-    if (newLimit !== null) {
-        updateBoardSettings(boardId, { vote_limit: parseInt(newLimit) });
-    }
-
-    // Phase switching is already handled by the UI button, but maybe we want to force it?
-}
-
-async function updateBoardSettings(boardId, settings) {
-    try {
-        const response = await fetch(`/api/admin/boards/${boardId}/settings`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-                // 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') // If we implemented JWT middleware
-            },
-            body: JSON.stringify(settings)
-        });
-
-        if (response.ok) {
-            alert('Settings updated');
-        } else {
-            alert('Failed to update settings');
-        }
-    } catch (error) {
-        console.error(error);
-        alert('Error updating settings');
-    }
-}
+// End of admin.js

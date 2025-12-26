@@ -8,14 +8,16 @@
 
 ### 🛡️ Admin, Security & Improved Tracking
 **Effort:** M (3-4 days)
-- [ ] **Advanced Action Items Filtering** - Filter by Period, Team/Board, or Owner in the Action Items Dashboard.
 - [ ] **Admin Dashboard** - Secure page to manage app settings and view global data.
 - [ ] **Vote Limiting** - Configurable limit on votes per user.
 - [ ] **Blind Voting** - Hide votes until voting phase ends.
 - [ ] **K8s Secret Auth** - Admin access secured by Kubernetes Secret.
+- [ ] **Role-Based Controls (RBAC)** - Restrict Start/Stop Timer, Phase Switching, and Finish Retro to Board Managers only.
+- [ ] **Export Restrictions** - Restrict "Export CSV" to only be available for Finished boards.
 
 ### v0.9.0 - Multi-Team Support Phase 1
 **Effort:** XL (1-2 weeks)
+- [ ] **Advanced Action Items Filtering** - Filter by Period, Team/Board, or Owner.
 - [ ] **Team/Squad management** - Allow multiple teams to use the app simultaneously.
 - [ ] **Team-filtered dashboard** - Filter boards by team.
 - [ ] **User roles** - Admin, facilitator, participant roles.

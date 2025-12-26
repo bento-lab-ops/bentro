@@ -182,6 +182,24 @@
 </div>
 
 <!-- Settings Modal -->
+<div id="boardSettingsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBoardSettingsModal()">&times;</span>
+        <h2>Board Settings</h2>
+        <div class="form-group">
+            <label for="settingVoteLimit">Vote Limit per User (0 = unlimited)</label>
+            <input type="number" id="settingVoteLimit" class="form-input" min="0">
+        </div>
+        <div class="form-group">
+            <label for="settingBlindVoting" style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="checkbox" id="settingBlindVoting">
+                Enable Blind Voting (Hide counts during voting)
+            </label>
+        </div>
+        <button class="btn btn-primary" onclick="saveBoardSettings()">Save Settings</button>
+    </div>
+</div>
+
 <div id="settingsModal" class="modal">
     <div class="modal-content settings-modal-content">
         <span class="close" onclick="closeSettingsModal()">&times;</span>

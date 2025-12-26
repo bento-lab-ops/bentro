@@ -128,6 +128,8 @@ async function loadBoard(boardId) {
 
         renderBoard(board);
         updateBoardStatusUI(board.status);
+        updateVoteStatusUI(board);
+
 
         // Join board for participant tracking if active
         if (board.status === 'active' && window.currentUser) {
@@ -187,6 +189,10 @@ async function claimManagerAction() {
     }
 }
 
+async function claimBoardManager(boardId, username) {
+    await apiCall(`/boards/${boardId}/claim`, 'POST', { owner: username });
+}
+
 function openBoardSettings() {
     if (!window.currentBoard) return;
 
@@ -198,6 +204,27 @@ function openBoardSettings() {
 
 function closeBoardSettingsModal() {
     document.getElementById('boardSettingsModal').style.display = 'none';
+}
+
+async function saveBoardSettings() {
+    if (!window.currentBoard) return;
+
+    const voteLimit = parseInt(document.getElementById('settingVoteLimit').value) || 0;
+    const blindVoting = document.getElementById('settingBlindVoting').checked;
+
+    try {
+        await apiCall(`/admin/boards/${window.currentBoard.id}/settings`, 'POST', {
+            vote_limit: voteLimit,
+            blind_voting: blindVoting
+        });
+
+        closeBoardSettingsModal();
+        loadBoard(window.currentBoard.id);
+        alert('Settings saved!');
+    } catch (error) {
+        console.error('Failed to save settings:', error);
+        alert('Failed to save settings: ' + error.message);
+    }
 }
 
 
@@ -249,10 +276,74 @@ function updateBoardStatusUI(status) {
         addColumnBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
     }
 
+    // Owner / Admin Button Visibility
+    const adminSettingsBtn = document.getElementById('adminSettingsBtn');
+    const claimBtn = document.getElementById('claimManagerBtn');
+
+    // Check if user is owner OR admin (using local token)
+    const isAdmin = !!localStorage.getItem('adminToken');
+    const isOwner = window.currentBoard && window.currentBoard.owner === window.currentUser;
+    const hasOwner = window.currentBoard && !!window.currentBoard.owner;
+
+    if (adminSettingsBtn) {
+        if (isOwner || isAdmin) {
+            adminSettingsBtn.style.display = 'inline-block';
+            adminSettingsBtn.disabled = isFinished;
+            if (isFinished) adminSettingsBtn.style.opacity = '0.5';
+        } else {
+            adminSettingsBtn.style.display = 'none';
+        }
+    }
+
+    if (claimBtn) {
+        if (!hasOwner && !isFinished) {
+            claimBtn.style.display = 'inline-block';
+        } else {
+            claimBtn.style.display = 'none';
+        }
+    }
+
     if (isFinished) {
         container.classList.add('read-only');
     } else {
         container.classList.remove('read-only');
+    }
+}
+
+function updateVoteStatusUI(board) {
+    const display = document.getElementById('voteStatusDisplay');
+    if (!display) return;
+
+    if (board.vote_limit > 0 && board.phase === 'voting' && board.status !== 'finished') {
+        // Count my votes
+        let myVotes = 0;
+        if (board.columns && window.currentUser) {
+            board.columns.forEach(col => {
+                if (col.cards) {
+                    col.cards.forEach(card => {
+                        if (card.votes) {
+                            myVotes += card.votes.filter(v => v.user_name === window.currentUser).length;
+                        }
+                    });
+                }
+            });
+        }
+
+        const remaining = board.vote_limit - myVotes;
+        display.style.display = 'block';
+        display.textContent = `${i18n.t('label.votes_remaining') || 'Votes Remaining'}: ${remaining} / ${board.vote_limit}`;
+
+        if (remaining <= 0) {
+            display.classList.add('limit-reached');
+            display.style.borderColor = 'var(--danger)';
+            display.style.color = 'var(--danger)';
+        } else {
+            display.classList.remove('limit-reached');
+            display.style.borderColor = 'var(--primary)';
+            display.style.color = 'var(--primary)';
+        }
+    } else {
+        display.style.display = 'none';
     }
 }
 
@@ -350,11 +441,11 @@ function createCardHTML(card) {
     // Let's trust Frontend masking for v0.5.0 MVP + Backend constraint on `GetVotes` calls (if used).
     // Actually `renderBoard` has `window.currentBoard.phase`.
 
-    const isVotingPhase = window.currentBoard.phase === 'voting';
+    const isBlindVotingEnabled = window.currentBoard.phase === 'voting' && window.currentBoard.blind_voting;
 
     let voteControlsHTML = '';
 
-    if (isVotingPhase) {
+    if (isBlindVotingEnabled) {
         voteControlsHTML = `
             <div class="vote-controls-blind">
                 <span class="blind-vote-badge" title="${i18n.t('card.votes_hidden')}">${i18n.t('card.votes_hidden')}</span>
