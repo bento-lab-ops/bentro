@@ -106,6 +106,7 @@ func main() {
 		auth.POST("/login", handlers.Login)
 		auth.POST("/logout", handlers.Logout)
 		auth.POST("/change-password", handlers.AuthMiddleware(), handlers.ChangePassword)
+		auth.PUT("/profile", handlers.AuthMiddleware(), handlers.UpdateProfile)
 	}
 
 	// WebSocket route

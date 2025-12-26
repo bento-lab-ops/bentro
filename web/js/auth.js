@@ -165,11 +165,88 @@ function openUserProfileModal() {
     document.getElementById('profileFullName').value = window.currentUserFullName || '';
     document.getElementById('profileEmail').value = window.currentUserEmail || '';
 
+    // Initialize avatar
+    const avatarDisplay = document.getElementById('profileAvatarDisplay');
+    if (avatarDisplay) {
+        avatarDisplay.textContent = window.currentUserAvatar || '👤';
+        window.selectedProfileAvatar = window.currentUserAvatar || '👤';
+    }
+
+    // Populate avatar selector
+    populateProfileAvatarSelector();
+
     modal.style.display = 'block';
+
+    // Refresh i18n for modal content
+    if (window.i18n) {
+        window.i18n.translatePage();
+    }
 }
 
 function closeUserProfileModal() {
     document.getElementById('userProfileModal').style.display = 'none';
+}
+
+// Avatar Selection Functions
+function populateProfileAvatarSelector() {
+    const selector = document.getElementById('profileAvatarSelector');
+    if (!selector) return;
+
+    const avatars = [
+        '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+        '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+        '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
+        '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏',
+        '👤', '👥', '👶', '👦', '👧', '👨', '👩', '👴',
+        '👵', '👱', '💂', '🕵️', '👷', '👮', '👳', '👲'
+    ];
+
+    selector.innerHTML = avatars.map(avatar =>
+        `<span class="avatar-option ${avatar === window.selectedProfileAvatar ? 'selected' : ''}" 
+               onclick="selectProfileAvatar('${avatar}')">${avatar}</span>`
+    ).join('');
+}
+
+function toggleProfileAvatarSelector() {
+    const selector = document.getElementById('profileAvatarSelector');
+    if (selector) {
+        selector.style.display = selector.style.display === 'none' ? 'grid' : 'none';
+    }
+}
+
+function selectProfileAvatar(avatar) {
+    window.selectedProfileAvatar = avatar;
+    const display = document.getElementById('profileAvatarDisplay');
+    if (display) {
+        display.textContent = avatar;
+    }
+
+    // Update selected state in UI
+    document.querySelectorAll('#profileAvatarSelector .avatar-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    if (window.event && window.event.target) {
+        window.event.target.classList.add('selected');
+    }
+}
+
+async function saveProfileChanges() {
+    try {
+        const response = await apiCall('/auth/profile', 'PUT', {
+            avatar_url: window.selectedProfileAvatar
+        });
+
+        // Update global state
+        window.currentUserAvatar = window.selectedProfileAvatar;
+
+        // Update UI
+        updateUserDisplay();
+
+        alert('Profile updated successfully!');
+        closeUserProfileModal();
+    } catch (error) {
+        alert('Failed to update profile: ' + error.message);
+    }
 }
 
 // Change Password Modal
@@ -246,6 +323,9 @@ window.handleLoginSubmit = handleLoginSubmit;
 window.handleRegisterSubmit = handleRegisterSubmit;
 window.openUserProfileModal = openUserProfileModal;
 window.closeUserProfileModal = closeUserProfileModal;
+window.toggleProfileAvatarSelector = toggleProfileAvatarSelector;
+window.selectProfileAvatar = selectProfileAvatar;
+window.saveProfileChanges = saveProfileChanges;
 window.openChangePasswordModal = openChangePasswordModal;
 window.closeChangePasswordModal = closeChangePasswordModal;
 window.handleChangePasswordSubmit = handleChangePasswordSubmit;

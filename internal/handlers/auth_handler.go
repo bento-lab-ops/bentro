@@ -185,6 +185,50 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }
 
+type UpdateProfileInput struct {
+	DisplayName string `json:"display_name" binding:"omitempty,min=3"`
+	AvatarURL   string `json:"avatar_url" binding:"omitempty"`
+}
+
+// UpdateProfile allows users to update their profile (display name, avatar)
+func UpdateProfile(c *gin.Context) {
+	// Get user from context (set by AuthMiddleware)
+	userInterface, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+		return
+	}
+	user := userInterface.(models.User)
+
+	var input UpdateProfileInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update fields if provided
+	if input.DisplayName != "" {
+		// Check if display name is already taken by another user
+		var existingUser models.User
+		if err := database.DB.Where("display_name = ? AND id != ?", input.DisplayName, user.ID).First(&existingUser).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "Display name already taken"})
+			return
+		}
+		user.DisplayName = input.DisplayName
+	}
+
+	if input.AvatarURL != "" {
+		user.AvatarURL = input.AvatarURL
+	}
+
+	if err := database.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully", "user": user})
+}
+
 // GetCurrentUser returns the current logged in user
 func GetCurrentUser(c *gin.Context) {
 	user, exists := c.Get("user")

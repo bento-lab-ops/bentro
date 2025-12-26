@@ -682,7 +682,27 @@ a:hover {
     margin-top: 0.5rem;
 }
 
-.avatar-option {
+/* Avatar Grid for Profile Modal */
+.avatar-grid {
+    display: none;
+    /* Hidden by default */
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem;
+    background: var(--bg-light);
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.avatar-grid[style*="display: grid"] {
+    display: grid !important;
+}
+
+.avatar-grid .avatar-option,
+#profileAvatarSelector .avatar-option {
     width: 48px;
     height: 48px;
     display: flex;
