@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.8.0">
-    <link rel="stylesheet" href="/static/bentro.css?v=0.8.0">
+    <link rel="stylesheet" href="/static/styles.css?v=0.9.0">
+    <link rel="stylesheet" href="/static/bentro.css?v=0.9.0">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <!-- Avatar Only -->
-                <span id="userDisplay" class="user-display" onclick="openEditUserModal()"></span>
+                <span id="userDisplay" class="user-display" onclick="openUserProfileModal()"></span>
                 <button class="hamburger-btn" onclick="toggleMenu()" title="Menu">☰</button>
             </div>
         </header>
@@ -120,15 +120,16 @@
                 <div class="timer-controls">
                     <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
                         value="5">
-                    <button id="startTimerBtn" class="btn btn-success" data-i18n="btn.start_timer">Start Timer</button>
-                    <button id="stopTimerBtn" class="btn btn-danger" style="display: none;"
-                        data-i18n="btn.stop_timer">Stop Timer</button>
-                    <button id="switchPhaseBtn" class="btn btn-secondary" data-i18n="btn.switch_voting">Switch to
+                    <button id="startTimerBtn" class="btn btn-success" style="display: none;"
+                        data-i18n="btn.start_timer">Start Timer</button> <button id="stopTimerBtn"
+                        class="btn btn-danger" style="display: none;" data-i18n="btn.stop_timer">Stop Timer</button>
+                    <button id="switchPhaseBtn" class="btn btn-secondary" style="display: none;"
+                        data-i18n="btn.switch_voting">Switch to
                         Voting</button>
                     <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()"
-                        data-i18n="btn.export_csv">📊 Export
+                        style="display: none;" data-i18n="btn.export_csv">📊 Export
                         CSV</button>
-                    <button id="finishRetroBtn" class="btn btn-danger" onclick="finishRetro()"
+                    <button id="finishRetroBtn" class="btn btn-danger" onclick="finishRetro()" style="display: none;"
                         data-i18n="btn.finish_retro">Finish Retro</button>
                     <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" onclick="reopenRetro()"
                         data-i18n="btn.reopen_retro">Re-open Retro</button>
@@ -142,7 +143,8 @@
 
             <!-- Add Column Button -->
             <div class="add-column-section">
-                <button id="addColumnBtn" class="btn btn-outline" data-i18n="btn.add_column">+ Add Column</button>
+                <button id="addColumnBtn" class="btn btn-outline" style="display: none;" data-i18n="btn.add_column">+
+                    Add Column</button>
             </div>
         </div>
     </div> <!-- End .container -->
@@ -158,19 +160,20 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/i18n.js?v=0.8.0"></script>
-    <script src="/static/js/config.js?v=0.8.0"></script>
-    <script src="/static/js/version.js?v=0.8.0"></script>
-    <script src="/static/js/avatars.js?v=0.8.0"></script>
-    <script src="/static/js/state.js?v=0.8.0"></script>
-    <script src="/static/js/utils.js?v=0.8.0"></script>
-    <script src="/static/js/api.js?v=0.8.0"></script>
-    <script src="/static/js/timer.js?v=0.8.0"></script>
-    <script src="/static/js/board.js?v=0.8.0"></script>
-    <script src="/static/js/action_items.js?v=0.8.0"></script>
-    <script src="/static/js/admin.js?v=0.8.0"></script>
-    <script src="/static/js/menu.js?v=0.8.0"></script>
-    <script src="/static/js/main.js?v=0.8.0"></script>
+    <script src="/static/js/i18n.js?v=0.9.0"></script>
+    <script src="/static/js/config.js?v=0.9.0"></script>
+    <script src="/static/js/version.js?v=0.9.0"></script>
+    <script src="/static/js/avatars.js?v=0.9.0"></script>
+    <script src="/static/js/state.js?v=0.9.0"></script>
+    <script src="/static/js/utils.js?v=0.9.0"></script>
+    <script src="/static/js/api.js?v=0.9.0"></script>
+    <script src="/static/js/timer.js?v=0.9.0"></script>
+    <script src="/static/js/board.js?v=0.9.0"></script>
+    <script src="/static/js/action_items.js?v=0.9.0"></script>
+    <script src="/static/js/admin.js?v=0.9.0"></script>
+    <script src="/static/js/auth.js?v=0.9.0"></script>
+    <script src="/static/js/menu.js?v=0.9.0"></script>
+    <script src="/static/js/main.js?v=0.9.0"></script>
 </body>
 
 </html>

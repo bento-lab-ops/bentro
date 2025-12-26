@@ -14,6 +14,7 @@ func CreateBoard(c *gin.Context) {
 	var input struct {
 		Name    string   `json:"name" binding:"required"`
 		Columns []string `json:"columns"`
+		Owner   string   `json:"owner"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -25,6 +26,7 @@ func CreateBoard(c *gin.Context) {
 	board := models.Board{
 		Name:   input.Name,
 		Status: "active",
+		Owner:  input.Owner,
 	}
 
 	if err := database.DB.Create(&board).Error; err != nil {
@@ -216,13 +218,81 @@ func ClaimBoard(c *gin.Context) {
 		return
 	}
 
-	// Check if already claimed by another user?
-	// For now, we allow overriding or claiming if empty. The user requirement implies they just want to claim it.
-	// Optionally we could restrict it. Let's allow overriding for simplicity/MVP flexibility.
+	// Dual Manager Logic
+	if board.Owner != "" {
+		if board.Owner == input.Owner {
+			// Already owner, return success
+			c.JSON(http.StatusOK, board)
+			return
+		}
+		if board.CoOwner != "" {
+			if board.CoOwner == input.Owner {
+				// Already co-owner, return success
+				c.JSON(http.StatusOK, board)
+				return
+			}
+			c.JSON(http.StatusConflict, gin.H{"error": "Board already has maximum of 2 managers"})
+			return
+		}
+		// Assign as CoOwner
+		board.CoOwner = input.Owner
+	} else {
+		// Assign as Owner
+		board.Owner = input.Owner
+	}
 
-	board.Owner = input.Owner
 	if err := database.DB.Save(&board).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to claim board"})
+		return
+	}
+
+	c.JSON(http.StatusOK, board)
+}
+
+// UnclaimBoard allows a manager to relinquish control
+func UnclaimBoard(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
+		return
+	}
+
+	var input struct {
+		User string `json:"user" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var board models.Board
+	if err := database.DB.First(&board, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
+		return
+	}
+
+	if board.Owner == input.User {
+		// Owner is leaving
+		if board.CoOwner != "" {
+			// Promote Co-Owner
+			board.Owner = board.CoOwner
+			board.CoOwner = ""
+		} else {
+			// No Co-Owner, board becomes unowned
+			board.Owner = ""
+		}
+	} else if board.CoOwner == input.User {
+		// Co-Owner is leaving
+		board.CoOwner = ""
+	} else {
+		// User is not a manager
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is not a manager of this board"})
+		return
+	}
+
+	if err := database.DB.Save(&board).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unclaim board"})
 		return
 	}
 

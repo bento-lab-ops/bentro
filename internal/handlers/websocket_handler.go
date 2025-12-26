@@ -31,6 +31,7 @@ type ParticipantMessage struct {
 	BoardID  string          `json:"board_id"`
 	Username string          `json:"username"`
 	Avatar   string          `json:"avatar"`
+	IsAdmin  bool            `json:"is_admin"`
 	Conn     *websocket.Conn `json:"-"`
 }
 
@@ -92,6 +93,7 @@ func (h *Hub) Run() {
 			h.boardParticipants[msg.BoardID][msg.Username] = models.Participant{
 				Username: msg.Username,
 				Avatar:   msg.Avatar,
+				IsAdmin:  msg.IsAdmin,
 			}
 			h.connToUser[msg.Conn] = UserConnection{
 				BoardID:  msg.BoardID,
@@ -219,11 +221,13 @@ func HandleWebSocket(c *gin.Context) {
 					username, _ := msg["username"].(string)
 					avatar, _ := msg["avatar"].(string)
 					if boardID != "" && username != "" {
+						isAdmin, _ := msg["is_admin"].(bool)
 						hub.joinBoard <- &ParticipantMessage{
 							Type:     "join_board",
 							BoardID:  boardID,
 							Username: username,
 							Avatar:   avatar,
+							IsAdmin:  isAdmin,
 							Conn:     conn,
 						}
 					}

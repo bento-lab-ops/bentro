@@ -1,5 +1,5 @@
 // App Initialization
-function initApp() {
+async function initApp() {
     console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
     console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
 
@@ -16,7 +16,25 @@ function initApp() {
 
     initWebSocket();
 
-    // Initialize User State from LocalStorage
+    // Initialize User State
+    // First, check if we have a server-side session (Google Auth)
+    try {
+        const response = await fetch('/api/user/me');
+        if (response.ok) {
+            const user = await response.json();
+            window.currentUser = user.display_name || user.name;
+            window.currentUserAvatar = user.avatar_url || '👤';
+            window.currentUserId = user.id;
+            window.currentUserEmail = user.email;
+            window.currentUserFullName = user.name;
+            window.isGoogleAuth = true;
+            console.log('%c🔐 Logged in via Google', 'color: #4CAF50; font-weight: bold;');
+        }
+    } catch (e) {
+        console.log('No active session');
+    }
+
+    // Fallback to LocalStorage if no session
     if (!window.currentUser) {
         const storedUser = localStorage.getItem('retroUser');
         if (storedUser) {
@@ -36,14 +54,12 @@ function initApp() {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
         document.getElementById('userModal').style.display = 'block';
     } else {
-        // User is logged in
+        // User is logged in via JWT - skip welcome modal
         updateUserDisplay();
 
         if (!window.location.hash.startsWith('#board/')) {
-            // Only show welcome back if not directly loading a board
-            console.log('%c👋 Showing welcome back modal', 'color: #4CAF50; font-style: italic;');
-            showReturningUserModal(window.currentUser);
-            // Also load boards in background so they are ready
+            // Load dashboard directly without showing welcome modal
+            console.log('%c👋 User authenticated, loading dashboard', 'color: #4CAF50; font-style: italic;');
             loadBoards();
         }
     }
@@ -395,6 +411,7 @@ function setupEventListeners() {
         document.getElementById('returningUserModal').style.display = 'none';
         window.currentUser = null;
         localStorage.removeItem('retroUser');
+        localStorage.removeItem('adminToken'); // Security fix: clear admin access
         document.getElementById('userModal').style.display = 'block';
     });
 

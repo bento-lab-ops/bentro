@@ -83,7 +83,47 @@ function renderMenuLinks() {
         </li>
     `;
 
+    // 👤 User Authentication Section
+    html += `<hr style="margin: 0.5rem 0; border-color: var(--border);">`;
+
+    if (window.currentUserId) {
+        // User is logged in (authenticated)
+        html += `
+            <li onclick="handleUserLogout(); closeMenu()">
+                <span class="menu-icon">🚪</span> ${i18n.t('menu.logout')}
+            </li>
+        `;
+    } else {
+        // User is not logged in
+        html += `
+            <li onclick="openLoginModal(); closeMenu()">
+                <span class="menu-icon">🔐</span> ${i18n.t('btn.login')}
+            </li>
+        `;
+    }
+
     menuList.innerHTML = html;
+}
+
+function handleUserLogout() {
+    // Call logout API
+    logout().then(() => {
+        // Clear user data
+        window.currentUser = null;
+        window.currentUserId = null;
+        window.currentUserAvatar = null;
+
+        // Clear localStorage
+        localStorage.removeItem('retroUser');
+        localStorage.removeItem('retroUserAvatar');
+
+        // Redirect to home
+        window.location.hash = '';
+        window.location.reload();
+    }).catch(err => {
+        console.error('Logout failed:', err);
+        alert('Logout failed: ' + err.message);
+    });
 }
 
 function navigateTo(route) {

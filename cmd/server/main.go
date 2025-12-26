@@ -18,6 +18,9 @@ func main() {
 	// Initialize WebSocket hub
 	handlers.InitWebSocketHub()
 
+	// Initialize Auth
+	handlers.InitAuth()
+
 	// Setup Gin router
 	router := gin.Default()
 
@@ -46,6 +49,7 @@ func main() {
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
 		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
 		api.POST("/boards/:id/claim", handlers.ClaimBoard)
+		api.POST("/boards/:id/unclaim", handlers.UnclaimBoard)
 
 		// Column routes
 		api.POST("/boards/:id/columns", handlers.CreateColumn)
@@ -77,6 +81,31 @@ func main() {
 		api.POST("/admin/boards/:id/settings", handlers.AdminUpdateBoardSettings)
 		api.GET("/admin/stats", handlers.GetSystemStats)
 
+		// User Routes (Protected)
+		user := api.Group("/user")
+		user.Use(handlers.AuthMiddleware())
+		{
+			user.GET("/me", handlers.GetCurrentUser)
+		}
+
+		// Admin User Management Routes
+		adminUsers := api.Group("/admin/users")
+		adminUsers.Use(handlers.AuthMiddleware(), handlers.AdminMiddleware())
+		{
+			adminUsers.GET("", handlers.GetAllUsers)
+			adminUsers.PUT("/:id/role", handlers.UpdateUserRole)
+			adminUsers.POST("/:id/reset-password", handlers.ResetUserPassword)
+			adminUsers.DELETE("/:id", handlers.DeleteUser)
+		}
+	}
+
+	// Auth Routes
+	auth := router.Group("/api/auth")
+	{
+		auth.POST("/register", handlers.Register)
+		auth.POST("/login", handlers.Login)
+		auth.POST("/logout", handlers.Logout)
+		auth.POST("/change-password", handlers.AuthMiddleware(), handlers.ChangePassword)
 	}
 
 	// WebSocket route

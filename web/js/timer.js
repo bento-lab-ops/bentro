@@ -10,8 +10,10 @@ function startTimer() {
 
 function startTimerUI(seconds) {
     window.timerSeconds = seconds;
+
+    const isManager = typeof isBoardManager === 'function' && isBoardManager();
     document.getElementById('startTimerBtn').style.display = 'none';
-    document.getElementById('stopTimerBtn').style.display = 'inline-block';
+    document.getElementById('stopTimerBtn').style.display = isManager ? 'inline-block' : 'none';
 
     if (window.timerInterval) clearInterval(window.timerInterval);
 
@@ -38,7 +40,8 @@ function stopTimerUI() {
         window.timerInterval = null;
     }
 
-    document.getElementById('startTimerBtn').style.display = 'inline-block';
+    const isManager = typeof isBoardManager === 'function' && isBoardManager();
+    document.getElementById('startTimerBtn').style.display = isManager ? 'inline-block' : 'none';
     document.getElementById('stopTimerBtn').style.display = 'none';
     window.timerSeconds = 0;
     updateTimerDisplay(0);

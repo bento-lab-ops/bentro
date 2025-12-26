@@ -41,6 +41,7 @@ func InitDB() error {
 		&models.Card{},
 		&models.Vote{},
 		&models.Reaction{},
+		&models.User{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)

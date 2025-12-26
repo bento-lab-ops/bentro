@@ -65,7 +65,8 @@ function joinBoard(boardId, username, avatar) {
             type: 'join_board',
             board_id: boardId,
             username: username,
-            avatar: avatar || getUserAvatar()
+            avatar: avatar || getUserAvatar(),
+            is_admin: !!localStorage.getItem('adminToken')
         }));
     }
 }
@@ -96,23 +97,52 @@ function leaveBoard(boardId, username) {
 async function apiCall(endpoint, method = 'GET', body = null) {
     const options = {
         method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: {}, // Initialize headers object
     };
 
+    // Add Content-Type if body exists
     if (body) {
         options.body = JSON.stringify(body);
+        options.headers['Content-Type'] = 'application/json';
+    }
+
+    // Add Auth Token from Cookie (if user is logged in via Google)
+    // The browser automatically sends cookies, but some APIs might expect Bearer token
+    // For now, we rely on the httpOnly cookie sent automatically by the browser.
+    const authToken = document.cookie.split('; ').find(row => row.startsWith('auth_token='));
+    if (authToken) {
+        options.headers['Authorization'] = `Bearer ${authToken.split('=')[1]}`;
     }
 
     const response = await fetch(`${API_BASE}${endpoint}`, options);
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'API request failed');
+    let data;
+    const text = await response.text();
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch (e) {
+        console.error('API Parse Error:', e, 'Response:', text);
+        throw new Error(`Server Error: ${text.substring(0, 50)}...`);
     }
 
-    return response.json();
+    if (!response.ok) {
+        throw new Error(data.error || `Request failed with status ${response.status}`);
+    }
+
+    return data;
+}
+
+// Auth API
+function login(email, password) {
+    return apiCall('/auth/login', 'POST', { email, password });
+}
+
+function register(data) {
+    return apiCall('/auth/register', 'POST', data);
+}
+
+function logout() {
+    return apiCall('/auth/logout', 'POST');
 }
 
 

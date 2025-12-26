@@ -54,6 +54,15 @@ async function handleAdminLogin(e) {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('adminToken', data.token);
+
+            // Refresh connection if on a board to update status
+            if (window.currentBoard && window.currentUser) {
+                // Determine layout based on current hash to avoid view switching issues
+                // If we are in admin view, we just stay there, but we send the websocket signal
+                joinBoard(window.currentBoard.id, window.currentUser);
+                loadBoard(window.currentBoard.id); // Refresh permissions
+            }
+
             showAdminDashboard();
         } else {
             alert(i18n.t('admin.invalid_pass'));

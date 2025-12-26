@@ -762,6 +762,18 @@ a:hover {
     position: relative;
 }
 
+.participant-badges {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    font-size: 0.8rem;
+    display: flex;
+    gap: 0;
+    pointer-events: none;
+    z-index: 20;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+
 .participant-avatar:hover {
     transform: scale(1.15);
     z-index: 10;

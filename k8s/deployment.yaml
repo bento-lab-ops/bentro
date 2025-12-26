@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bentro-app
-        image: dnlouko/bentro-app:v0.8.0
+        image: dnlouko/bentro-app:v0.9.1
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -43,6 +43,11 @@ spec:
             secretKeyRef:
               name: bentro-app-secret
               key: DB_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: bentro-app-secret
+              key: JWT_SECRET
         - name: ADMIN_PASSWORD
           value: "bentro"
         - name: DB_NAME

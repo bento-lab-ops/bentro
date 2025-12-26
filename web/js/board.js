@@ -90,7 +90,11 @@ function renderDashboard(boards) {
 
 async function createBoard(name, columns) {
     try {
-        const board = await apiCall('/boards', 'POST', { name, columns });
+        const board = await apiCall('/boards', 'POST', {
+            name,
+            columns,
+            owner: window.currentUser
+        });
         await loadBoard(board.id);
         return board;
     } catch (error) {
@@ -176,6 +180,23 @@ async function deleteBoard(id) {
     }
 }
 
+// Helper to check permissions
+function isBoardManager() {
+    if (!window.currentBoard) return false;
+
+    // Admin Check
+    const adminToken = localStorage.getItem('adminToken');
+    // Ensure token is valid and not string "undefined" or "null"
+    const isAdmin = !!adminToken && adminToken !== 'undefined' && adminToken !== 'null';
+
+    const currentUser = window.currentUser;
+    if (!currentUser) return isAdmin; // If not logged in, only admin counts
+
+    const isOwner = window.currentBoard.owner && window.currentBoard.owner === currentUser;
+    const isCoOwner = window.currentBoard.co_owner && window.currentBoard.co_owner === currentUser;
+    return isAdmin || isOwner || isCoOwner;
+}
+
 // Manager Actions
 async function claimManagerAction() {
     if (!window.currentBoard) return;
@@ -186,6 +207,18 @@ async function claimManagerAction() {
         loadBoard(window.currentBoard.id); // Reload to update UI
     } catch (error) {
         alert('Failed to claim board: ' + error.message);
+    }
+}
+
+async function unclaimManagerAction() {
+    if (!window.currentBoard) return;
+    if (!confirm(i18n.t('confirm.unclaim_board') || "Relinquish your manager role?")) return;
+
+    try {
+        await apiCall(`/boards/${window.currentBoard.id}/unclaim`, 'POST', { user: window.currentUser });
+        loadBoard(window.currentBoard.id);
+    } catch (error) {
+        alert('Failed to unclaim board: ' + error.message);
     }
 }
 
@@ -237,10 +270,12 @@ function updateBoardStatusUI(status) {
     const addColumnBtn = document.getElementById('addColumnBtn');
 
     const leaveBoardBtn = document.getElementById('leaveBoardBtn');
+    const exportBtn = document.getElementById('exportBoardBtn');
 
     document.getElementById('readOnlyBanner').style.display = isFinished ? 'block' : 'none';
-    document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
-    document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
+    // Buttons visibility handled below via RBAC
+    // document.getElementById('finishRetroBtn').style.display = isFinished ? 'none' : 'inline-block';
+    // document.getElementById('reopenRetroBtn').style.display = isFinished ? 'inline-block' : 'none';
 
     // Disable leave board button when finished
     if (leaveBoardBtn) {
@@ -269,11 +304,61 @@ function updateBoardStatusUI(status) {
         stopTimerBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
     }
 
-    // Disable add column button when finished
+    // Role-Based Control Visibility
+    const isCheck = isBoardManager();
+
+    // Hide Timer Controls for non-managers
+    if (startTimerBtn) startTimerBtn.style.display = isCheck ? 'inline-block' : 'none';
+    if (stopTimerBtn) stopTimerBtn.style.display = isCheck ? 'inline-block' : 'none';
+
+    // Hide Phase Switching for non-managers (unless finished, already handled above but double check visibility)
+    if (switchPhaseBtn) switchPhaseBtn.style.display = isCheck ? 'inline-block' : 'none';
+
+    // Hide Export CSV for non-finished boards (Roadmap item)
+    // AND hide it if controls should be restricted (optional, but requested implicitly by 'user can still see buttons')
+    if (exportBtn) {
+        if (isFinished) {
+            exportBtn.style.display = 'inline-block';
+        } else {
+            // If active, only show if Manager? Or hide completely as per Roadmap 'restrict to finished'?
+            // Roadmap said: "Restrict Export CSV to only be available for Finished boards"
+            // So we hide it if active, regardless of user.
+            exportBtn.style.display = 'none';
+        }
+    }
+
+    // Hide Finish Retro for non-managers
+    const finishBtn = document.getElementById('finishRetroBtn');
+    if (finishBtn) {
+        if (isFinished) {
+            finishBtn.style.display = 'none'; // Already hidden if finished
+        } else {
+            finishBtn.style.display = isCheck ? 'inline-block' : 'none';
+        }
+    }
+
+    // Hide Reopen for non-managers
+    const reopenBtn = document.getElementById('reopenRetroBtn');
+    if (reopenBtn) {
+        if (!isFinished) {
+            reopenBtn.style.display = 'none';
+        } else {
+            reopenBtn.style.display = isCheck ? 'inline-block' : 'none';
+        }
+    }
+
+    // Timer Input Visibility
+    const timerInput = document.getElementById('timerMinutes');
+    if (timerInput) timerInput.style.display = isCheck ? 'inline-block' : 'none';
+
+    // Disable add column button when finished, Hide if not manager
     if (addColumnBtn) {
-        addColumnBtn.disabled = isFinished;
-        addColumnBtn.style.opacity = isFinished ? '0.5' : '1';
-        addColumnBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+        if (!isCheck || isFinished) {
+            addColumnBtn.style.display = 'none';
+        } else {
+            addColumnBtn.style.display = 'block'; // or flex/inline-block
+            addColumnBtn.disabled = false;
+        }
     }
 
     // Owner / Admin Button Visibility
@@ -283,10 +368,12 @@ function updateBoardStatusUI(status) {
     // Check if user is owner OR admin (using local token)
     const isAdmin = !!localStorage.getItem('adminToken');
     const isOwner = window.currentBoard && window.currentBoard.owner === window.currentUser;
+    const isCoOwner = window.currentBoard && window.currentBoard.co_owner === window.currentUser;
     const hasOwner = window.currentBoard && !!window.currentBoard.owner;
+    const hasCoOwner = window.currentBoard && !!window.currentBoard.co_owner;
 
     if (adminSettingsBtn) {
-        if (isOwner || isAdmin) {
+        if (isOwner || isCoOwner || isAdmin) {
             adminSettingsBtn.style.display = 'inline-block';
             adminSettingsBtn.disabled = isFinished;
             if (isFinished) adminSettingsBtn.style.opacity = '0.5';
@@ -295,9 +382,43 @@ function updateBoardStatusUI(status) {
         }
     }
 
+    // Unclaim Button Injection (Custom Logic as it's not in HTML by default)
+    // We check if it exists, if not create it next to claim button or header controls
+    let unclaimBtn = document.getElementById('unclaimManagerBtn');
+    if (!unclaimBtn) {
+        unclaimBtn = document.createElement('button');
+        unclaimBtn.id = 'unclaimManagerBtn';
+        unclaimBtn.className = 'btn btn-outline btn-sm btn-danger-outline'; // Add custom class if needed
+        unclaimBtn.style.marginLeft = '8px';
+        unclaimBtn.onclick = unclaimManagerAction;
+        // Insert after claim button or append to header controls
+        // headerControls is in index.html, but claimBtn is in participants-wrapper usually? No, it's in board-header-section
+        const boardHeaderSection = document.querySelector('.board-header-section');
+        if (boardHeaderSection) {
+            boardHeaderSection.appendChild(unclaimBtn);
+        }
+    }
+
+    if (isOwner || isCoOwner) {
+        unclaimBtn.style.display = 'inline-block';
+        unclaimBtn.textContent = '❌ ' + (i18n.t('btn.unclaim') || 'Relinquish');
+    } else {
+        unclaimBtn.style.display = 'none';
+    }
+
     if (claimBtn) {
-        if (!hasOwner && !isFinished) {
-            claimBtn.style.display = 'inline-block';
+        if (!isFinished) {
+            if (!hasOwner) {
+                claimBtn.style.display = 'inline-block';
+                claimBtn.innerHTML = '👑 ' + (i18n.t('btn.claim_host') || 'Claim Host');
+            } else if (!hasCoOwner && !isOwner && !isCoOwner) {
+                // Show if 1 slot open and I'm not already a manager
+                // Only show if user is logged in? window.currentUser is required for this check anyway
+                claimBtn.style.display = 'inline-block';
+                claimBtn.innerHTML = '👑 ' + (i18n.t('btn.claim_co_host') || 'Claim Co-Host');
+            } else {
+                claimBtn.style.display = 'none';
+            }
         } else {
             claimBtn.style.display = 'none';
         }
@@ -377,7 +498,7 @@ function createColumnElement(column) {
             <h3 class="column-title">${escapeHtml(column.name)}</h3>
             <div class="column-actions">
                 <button class="icon-btn sort-column-btn" data-column-id="${column.id}" title="Sort by Votes">🔃</button>
-                ${!isFinished ? `
+                ${!isFinished && isBoardManager() ? `
                     <button class="icon-btn edit-column-btn" data-column-id="${column.id}" title="Edit column">✏️</button>
                     <button class="icon-btn delete-column-btn" data-column-id="${column.id}" title="Delete column">🗑️</button>
                 ` : ''}
@@ -965,11 +1086,27 @@ function updateParticipantsDisplay(participants) {
         return;
     }
 
-    container.innerHTML = displayParticipants.map(p => `
+    container.innerHTML = displayParticipants.map(p => {
+        let badge = '';
+        const isOwner = window.currentBoard && window.currentBoard.owner === p.username;
+        const isCoOwner = window.currentBoard && window.currentBoard.co_owner === p.username;
+
+        if (isOwner || isCoOwner) {
+            badge += '<span class="role-badge" title="Access: Manager">👑</span>';
+        }
+
+        // Optimistic check for self, otherwise rely on server flag
+        const isAdmin = p.is_admin || (p.username === window.currentUser && !!localStorage.getItem('adminToken'));
+        if (isAdmin) {
+            badge += '<span class="role-badge" title="Access: Admin">🛡️</span>';
+        }
+
+        return `
         <div class="participant-avatar" title="${escapeHtml(p.username)}">
             ${p.avatar || '👤'}
+            ${badge ? `<div class="participant-badges">${badge}</div>` : ''}
         </div>
-    `).join('');
+    `}).join('');
 }
 window.updateParticipantsDisplay = updateParticipantsDisplay;
 

@@ -11,6 +11,30 @@ import (
 type Participant struct {
 	Username string `json:"username"`
 	Avatar   string `json:"avatar"`
+	IsAdmin  bool   `json:"is_admin,omitempty"`
+}
+
+// User represents a registered user
+type User struct {
+	ID                    uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
+	Email                 string    `gorm:"uniqueIndex" json:"email"`
+	DisplayName           string    `gorm:"uniqueIndex" json:"display_name"`
+	PasswordHash          string    `json:"-"` // Never return password
+	Name                  string    `json:"name"`
+	AvatarURL             string    `json:"avatar_url"`
+	Role                  string    `gorm:"default:'user'" json:"role"` // 'admin', 'user'
+	RequirePasswordChange bool      `gorm:"default:false" json:"require_password_change"`
+	LastLogin             time.Time `json:"last_login"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+}
+
+// BeforeCreate hook to generate UUID for User
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+	return nil
 }
 
 // Board represents a retrospective board
@@ -23,6 +47,7 @@ type Board struct {
 	Columns      []Column       `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
 	Participants []Participant  `gorm:"type:jsonb;serializer:json" json:"participants"`
 	Owner        string         `json:"owner"`                        // Username of board owner/manager
+	CoOwner      string         `json:"co_owner"`                     // Username of second board manager
 	Phase        string         `gorm:"default:'input'" json:"phase"` // input, voting, discuss
 	VoteLimit    int            `gorm:"default:0" json:"vote_limit"`  // 0 = unlimited
 	BlindVoting  bool           `gorm:"default:false" json:"blind_voting"`
