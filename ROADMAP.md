@@ -1,17 +1,19 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.9.1
+## Current Version: v0.9.14
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### v0.9.2 - Admin User Management UI
+### v0.9.2 - v0.9.3 Admin User Management & Improvements (COMPLETED)
 **Effort:** M (1-2 days)
-- [ ] **Admin Users Management Modal** - Frontend interface to list, manage roles, reset passwords, and delete users.
-- [ ] **User Role Toggle** - UI to change user roles between 'user' and 'admin'.
-- [ ] **Password Reset UI** - Button to reset user passwords to default "bentro".
-- [ ] **Delete User UI** - Ability to delete users with incorrect emails.
+- [x] **Admin Users Management Modal** - Frontend interface to list, manage roles, reset passwords, and delete users.
+- [x] **User Role Toggle** - UI to change user roles between 'user' and 'admin'.
+- [x] **Password Reset UI** - Button to reset user passwords to default "bentro".
+- [x] **Delete User UI** - Ability to delete users with incorrect emails.
+- [x] **Unified Authentication** - Support for both JWT Admin Role and K8s Secret.
+- [x] **Admin Auto-Creation** - Automatic creation of default admin user.
 
 ### v0.10.0 - Team Management & Advanced Features
 **Effort:** XL (2-3 weeks)
@@ -37,7 +39,15 @@
 
 ## ✅ Completed Features
 
-### v0.9.1 (Latest - Stable)
+### v0.9.1 - v0.9.14 (Admin & UI Polish)
+- [x] **Admin Visual Upgrade** - Premium Hero-style headers and clean layout for Admin Dashboard.
+- [x] **Universal Visuals** - Consistent Hero styling across Main Dashboard (`.page-controls`) and Action Items.
+- [x] **Action Item Statuses** - Green (Open), Yellow (Overdue), Red (Closed) indicators.
+- [x] **Navigation Fixes** - Fixed Z-index overlap between Admin and Action Items views.
+- [x] **Admin Action Edit** - Added Link and Description fields for manual item completion in Admin.
+- [x] **i18n Polish** - Fixed missing translation keys for page titles and subtitles.
+
+### v0.9.1 (Stable Base)
 - [x] **User Profile Modal** - View profile with Display Name, Full Name, Email (read-only), and logout option.
 - [x] **Change Password** - Secure password change functionality.
 - [x] **Forced Password Change** - Users with default password "bentro" must change it on login (except admins).

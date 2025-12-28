@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"retro-app/internal/database"
 	"retro-app/internal/models"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -88,10 +89,16 @@ func UpdateBoardStatus(c *gin.Context) {
 
 	board.Status = input.Status
 
-	// If finishing board, save participants
+	// Status change logic
+	now := time.Now()
 	if input.Status == "finished" {
+		// Finish board
+		board.FinishedAt = &now
 		participants := hub.GetBoardParticipants(id.String())
 		board.Participants = participants
+	} else if input.Status == "active" {
+		// Reopen board
+		board.FinishedAt = nil
 	}
 
 	if err := database.DB.Save(&board).Error; err != nil {
@@ -126,6 +133,8 @@ func GetBoard(c *gin.Context) {
 // ListBoards retrieves all boards with action item counts
 func ListBoards(c *gin.Context) {
 	var boards []models.Board
+	// Use Unscoped to find deleted boards for admin, but basic ListBoards usually filters them out.
+	// For Admin use, we might want a separate endpoint or query param. For now, keep as is.
 	if err := database.DB.Order("created_at DESC").Find(&boards).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch boards"})
 		return
@@ -175,6 +184,7 @@ func DeleteBoard(c *gin.Context) {
 		return
 	}
 
+	// Perform soft delete
 	if err := database.DB.Delete(&models.Board{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete board"})
 		return

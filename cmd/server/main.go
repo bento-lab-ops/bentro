@@ -93,14 +93,25 @@ func main() {
 			user.GET("/me", handlers.GetCurrentUser)
 		}
 
-		// Admin User Management Routes
-		adminUsers := api.Group("/admin/users")
-		adminUsers.Use(handlers.AuthMiddleware(), handlers.AdminMiddleware())
+		// Admin Routes (Protected by Auth + Admin Middleware)
+		adminGroup := api.Group("/admin")
+		adminGroup.Use(handlers.AuthMiddleware(), handlers.AdminMiddleware())
 		{
-			adminUsers.GET("", handlers.GetAllUsers)
-			adminUsers.PUT("/:id/role", handlers.UpdateUserRole)
-			adminUsers.POST("/:id/reset-password", handlers.ResetUserPassword)
-			adminUsers.DELETE("/:id", handlers.DeleteUser)
+			// User Management
+			adminGroup.GET("/users", handlers.GetAllUsers)
+			adminGroup.PUT("/users/:id/role", handlers.UpdateUserRole)
+			adminGroup.POST("/users/:id/reset-password", handlers.ResetUserPassword)
+			adminGroup.DELETE("/users/:id", handlers.DeleteUser)
+
+			// Board Management
+			adminGroup.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
+			adminGroup.DELETE("/boards/:id", handlers.DeleteBoard)
+
+			// Action Item Management
+			// GET /admin/action-items uses existing GetGlobalActionItems but we might want a specific admin one if filtering differs.
+			// For now, reusing existing public/user endpoint is fine, but editing is admin only.
+			adminGroup.PUT("/action-items/:id", handlers.AdminUpdateActionItem)
+			adminGroup.DELETE("/action-items/:id", handlers.AdminDeleteActionItem)
 		}
 	}
 

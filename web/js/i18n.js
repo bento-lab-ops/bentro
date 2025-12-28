@@ -13,9 +13,12 @@ const translations = {
         'msg.no_boards': 'No Boards Yet',
         'msg.click_new_board': 'Click "+ New Board" in the header to create your first retrospective.',
         'heading.create_new_board': 'Create New Board',
+        'dashboard.title': 'My Retrospectives',
+        'dashboard.subtitle': 'Manage and join your team\'s retrospective boards',
 
         // Action Items
         'heading.action_items': '⚡ My Action Items',
+        'action.subtitle': 'Track and manage your tasks across all retrospectives',
 
         // Board View
         'banner.read_only': '⚠️ This board is finished (Read Only)',
@@ -250,7 +253,17 @@ const translations = {
         'phase.completed': 'Completed',
         'phase.discuss': 'Discuss Phase',
 
-        // Add to existing phases if needed
+        // New Admin Features (v0.9.4)
+        'admin.manage_boards': 'Manage Boards',
+        'admin.manage_actions': 'Manage Action Items',
+        'admin.edit_action': 'Edit Action Item',
+        'label.created_at': 'Created At',
+        'label.duration': 'Duration',
+        'label.status': 'Status',
+        'label.board': 'Board',
+        'label.assignee': 'Assignee',
+        'label.owner': 'Owner',
+        'label.actions': 'Actions',
     },
     'pt-BR': {
         // Queue/Dashboard
@@ -265,9 +278,12 @@ const translations = {
         'msg.no_boards': 'Nenhuma Retro Ainda',
         'msg.click_new_board': 'Clique em "+ Nova Retro" no cabeçalho para criar sua primeira retrospectiva.',
         'heading.create_new_board': 'Criar Nova Retro',
+        'dashboard.title': 'Minhas Retrospectivas',
+        'dashboard.subtitle': 'Gerencie e participe das retrospectivas do seu time',
 
         // Action Items
         'heading.action_items': '⚡ Meus Acionáveis',
+        'action.subtitle': 'Acompanhe e gerencie suas tarefas de todas as retrospectivas',
 
         // Board View
         'banner.read_only': '⚠️ Esta retro foi finalizada (Somente Leitura)',
@@ -279,7 +295,7 @@ const translations = {
         'btn.start_timer': 'Iniciar Timer',
         'btn.stop_timer': 'Parar Timer',
         'btn.switch_voting': 'Fase de Votação',
-        'btn.switch_input': 'Fase de Entrada',
+        'btn.switch_input': 'Fase de Input',
         'btn.switch_discuss': 'Fase de Discussão',
         'btn.export_csv': '📊 Exportar CSV',
         'btn.finish_retro': 'Finalizar Retro',
@@ -436,8 +452,18 @@ const translations = {
         'btn.unclaim': 'Deixar Gestão',
         'btn.admin_settings': 'Configurações Admin',
 
-        // Board Templates
-        'template.custom': 'Personalizado (Manual)',
+        // New Admin Features
+        'admin.manage_boards': 'Gerenciar Retros',
+        'admin.manage_actions': 'Gerenciar Acionáveis',
+        'admin.edit_action': 'Editar Item',
+        'label.created_at': 'Criado em',
+        'label.duration': 'Duração',
+        'label.status': 'Status',
+        'label.board': 'Retro',
+        'label.assignee': 'Responsável',
+        'label.owner': 'Dono',
+        'label.actions': 'Ações',
+        'phase.discuss': 'Fase de Discussão',
         'template.start-stop-continue.name': 'Começar / Parar / Continuar',
         'template.start-stop-continue.col1': 'Começar',
         'template.start-stop-continue.col2': 'Parar',

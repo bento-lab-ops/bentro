@@ -1,0 +1,86 @@
+<!-- Admin Action Items Management Modal -->
+<div id="adminActionsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminActionsModal()">&times;</span>
+        <h2 data-i18n="admin.manage_actions">Manage Action Items</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminActionSearch" placeholder="Search items..." onkeyup="filterAdminActions()">
+            </div>
+            <div class="filter-box">
+                <select id="adminActionFilter" onchange="filterAdminActions()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.description">Description</th>
+                        <th data-i18n="label.board">Board</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.assignee">Assignee</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminActionsList">
+                    <!-- Action Items will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Action Item Sub-Modal -->
+<div id="adminEditActionModal" class="modal" style="z-index: 1002;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAdminEditActionModal()">&times;</span>
+        <h3 data-i18n="admin.edit_action">Edit Action Item</h3>
+        <form id="adminEditActionForm" onsubmit="handleAdminUpdateAction(event)">
+            <input type="hidden" id="editActionId">
+            <div class="form-group">
+                <label data-i18n="label.description">Description</label>
+                <textarea id="editActionContent" class="form-input" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.assignee">Assignee (Owner)</label>
+                <input type="text" id="editActionOwner" class="form-input" list="userListData">
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.status">Status</label>
+                <select id="editActionStatus" class="form-input" onchange="toggleAdminCompletionFields()">
+                    <option value="false">Pending</option>
+                    <option value="true">Completed</option>
+                </select>
+            </div>
+
+            <!-- Completion Fields (Hidden by default) -->
+            <div id="adminCompletionFields"
+                style="display: none; border-top: 1px solid #444; padding-top: 1rem; margin-top: 1rem;">
+                <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 0.9em; color: var(--text-secondary);">
+                    Completion Details</h4>
+                <div class="form-group">
+                    <label data-i18n="action.link">Link (Optional)</label>
+                    <input type="url" id="editActionLink" class="form-input" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="action.note">Note (Optional)</label>
+                    <textarea id="editActionDesc" class="form-input" rows="2"
+                        placeholder="Resolution details..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeAdminEditActionModal()"
+                    data-i18n="btn.cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>

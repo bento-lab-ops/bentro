@@ -1,0 +1,38 @@
+<!-- Admin Boards Management Modal -->
+<div id="adminBoardsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminBoardsModal()">&times;</span>
+        <h2 data-i18n="admin.manage_boards">Manage Boards</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminBoardSearch" placeholder="Search boards..." onkeyup="filterAdminBoards()">
+            </div>
+            <div class="filter-box">
+                <select id="adminBoardFilter" onchange="filterAdminBoards()">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="finished">Finished</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.board_name">Board Name</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.created_at">Created</th>
+                        <th data-i18n="label.duration">Duration</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminBoardsList">
+                    <!-- Boards will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

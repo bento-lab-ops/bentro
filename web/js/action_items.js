@@ -9,6 +9,8 @@ async function loadActionItemsView() {
         // Hide other views
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('boardContainer').style.display = 'none';
+        const adminView = document.getElementById('adminView');
+        if (adminView) adminView.style.display = 'none';
 
         // Show Action Items View (we need to create this container in index.html)
         let container = document.getElementById('actionItemsView');
@@ -24,6 +26,10 @@ async function loadActionItemsView() {
 
         const leaveBoardBtn = document.getElementById('leaveBoardBtn');
         if (leaveBoardBtn) leaveBoardBtn.style.display = 'none';
+
+        const newBoardBtn = document.getElementById('newBoardBtn');
+        if (newBoardBtn) newBoardBtn.style.display = 'none'; // Fix: Hide New Board button
+
 
         // Update URL hash
         if (window.location.hash !== '#action-items') {
@@ -59,7 +65,7 @@ function renderActionItemsTable(items, currentFilter) {
 
     // Render Filter Tabs first
     let html = `
-        <div class="action-items-controls">
+        <div class="page-controls">
             <div class="filter-tabs">
                 <button class="filter-tab ${currentFilter === 'pending' ? 'active' : ''}" 
                     onclick="fetchAndRenderActionItems('pending')">${i18n.t('action.pending')}</button>
@@ -114,7 +120,7 @@ function renderActionItemsTable(items, currentFilter) {
         }
 
         html += `
-            <tr class="action-item-row ${item.completed ? 'completed' : ''}">
+            <tr class="action-item-row ${item.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}">
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td class="task-content" title="${escapeHtml(item.content)}">
                     ${escapeHtml(item.content)}
@@ -217,7 +223,7 @@ window.openActionItemDetails = function (id, link, desc) {
     const linkEl = document.getElementById('detailsLink');
     const descEl = document.getElementById('detailsDesc');
 
-    if (link) {
+    if (link && link !== 'null' && link !== 'undefined') {
         linkContainer.style.display = 'block';
         linkEl.href = link;
         linkEl.textContent = link;

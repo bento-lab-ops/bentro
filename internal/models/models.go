@@ -44,6 +44,7 @@ type Board struct {
 	Status       string         `gorm:"default:'active'" json:"status"` // active, finished
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
+	FinishedAt   *time.Time     `json:"finished_at"` // Pointer to allow null (active)
 	Columns      []Column       `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
 	Participants []Participant  `gorm:"type:jsonb;serializer:json" json:"participants"`
 	Owner        string         `json:"owner"`                        // Username of board owner/manager

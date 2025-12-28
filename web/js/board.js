@@ -127,6 +127,8 @@ async function loadBoard(boardId) {
         if (document.getElementById('dashboardBtn')) document.getElementById('dashboardBtn').style.display = 'inline-block';
         if (document.getElementById('leaveBoardBtn')) document.getElementById('leaveBoardBtn').style.display = 'inline-block';
         if (document.getElementById('editUserBtn')) document.getElementById('editUserBtn').style.display = 'inline-block';
+        if (document.getElementById('newBoardBtn')) document.getElementById('newBoardBtn').style.display = 'none'; // Fix: Hide New Board button
+
 
         document.getElementById('boardTitle').textContent = board.name;
 

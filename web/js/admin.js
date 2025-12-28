@@ -19,6 +19,9 @@ async function loadAdminView() {
 
     // Update Header
     document.getElementById('dashboardBtn').style.display = 'inline-block';
+    const newBoardBtn = document.getElementById('newBoardBtn');
+    if (newBoardBtn) newBoardBtn.style.display = 'none'; // Fix: Hide New Board button
+
 
     // Show dashboard if user is JWT admin or has K8s token
     if (isJWTAdmin || token) {
@@ -84,33 +87,29 @@ async function showAdminDashboard() {
         const stats = await response.json();
 
         container.innerHTML = `
-        <div class="admin-dashboard">
-            <div class="admin-header">
-                <h3>${i18n.t('admin.dashboard')}</h3>
-                <button onclick="logoutAdmin()" class="btn btn-outline btn-sm">${i18n.t('menu.logout')}</button>
+        <div class="page-container">
+            <div class="page-hero">
+                <h1 class="page-title">${i18n.t('admin.dashboard')}</h1>
+                <p class="page-subtitle">System Overview & Management</p>
             </div>
             
             <div class="admin-section">
-                <h4>Verified Access</h4>
-                <div class="alert alert-success">${i18n.t('admin.connection_secure')} - <small>Mode: ${window.location.protocol}</small></div>
-            </div>
-
-            <div class="admin-section">
                 <h4>System Statistics</h4>
                 <div class="admin-stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card clickable" onclick="openAdminBoardsModal()" style="cursor: pointer;">
                         <span class="stat-value">${stats.boards.total}</span>
                         <span class="stat-label">${i18n.t('admin.stat_total_boards')}</span>
                     </div>
-                    <div class="stat-card">
+
+                    <div class="stat-card clickable" onclick="openAdminBoardsModal('active')" style="cursor: pointer;">
                         <span class="stat-value">${stats.boards.active}</span>
                         <span class="stat-label">${i18n.t('admin.stat_active_boards')}</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card clickable" onclick="openAdminActionsModal()" style="cursor: pointer;">
                         <span class="stat-value">${stats.action_items.total}</span>
                         <span class="stat-label">${i18n.t('admin.stat_total_actions')}</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card clickable" onclick="openAdminActionsModal()" style="cursor: pointer;">
                         <span class="stat-value">${stats.action_items.completed}</span>
                         <span class="stat-label">${i18n.t('admin.stat_completed_actions')}</span>
                     </div>
@@ -119,11 +118,6 @@ async function showAdminDashboard() {
                         <span class="stat-label">👥 ${i18n.t('admin.stat_total_users')}</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="admin-section">
-                <h4>${i18n.t('admin.board_management')}</h4>
-                <p>${i18n.t('admin.board_management_desc')}</p>
             </div>
         </div>
     `;

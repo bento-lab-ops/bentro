@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.9.0">
-    <link rel="stylesheet" href="/static/bentro.css?v=0.9.0">
+    <link rel="stylesheet" href="/static/styles.css?v=0.9.9">
+    <link rel="stylesheet" href="/static/bentro.css?v=0.9.9">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -49,8 +49,13 @@
 
         <!-- Dashboard View -->
         <div id="dashboardView" class="dashboard-view">
-            <div class="dashboard-header">
-                <h2 data-i18n="heading.board_list">Board List</h2>
+            <div class="page-hero">
+                <h1 class="page-title" data-i18n="dashboard.title">My Retrospectives</h1>
+                <p class="page-subtitle" data-i18n="dashboard.subtitle">Manage and join your team's retrospective boards
+                </p>
+            </div>
+
+            <div class="page-controls">
                 <div class="board-filters">
                     <button class="filter-tab active" onclick="filterBoards('active')" id="filterActiveBtn"
                         data-i18n="tab.active">Active</button>
@@ -74,8 +79,10 @@
 
         <!-- Action Items View -->
         <div id="actionItemsView" class="dashboard-view" style="display: none;">
-            <div class="view-header">
-                <h2 data-i18n="heading.action_items">⚡ My Action Items</h2>
+            <div class="page-hero">
+                <h1 class="page-title" data-i18n="heading.action_items">My Action Items</h1>
+                <p class="page-subtitle" data-i18n="action.subtitle">Track and manage your tasks across all
+                    retrospectives</p>
             </div>
             <div id="actionItemsList" class="action-items-container">
                 <!-- Items table will be loaded here -->
@@ -160,21 +167,24 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/i18n.js?v=0.9.0"></script>
-    <script src="/static/js/config.js?v=0.9.0"></script>
-    <script src="/static/js/version.js?v=0.9.0"></script>
-    <script src="/static/js/avatars.js?v=0.9.0"></script>
-    <script src="/static/js/state.js?v=0.9.0"></script>
-    <script src="/static/js/utils.js?v=0.9.0"></script>
-    <script src="/static/js/api.js?v=0.9.0"></script>
-    <script src="/static/js/timer.js?v=0.9.0"></script>
-    <script src="/static/js/board.js?v=0.9.0"></script>
-    <script src="/static/js/action_items.js?v=0.9.0"></script>
-    <script src="/static/js/admin.js?v=0.9.0"></script>
-    <script src="/static/js/auth.js?v=0.9.0"></script>
-    <script src="/static/js/admin-users.js?v=0.9.3"></script>
-    <script src="/static/js/menu.js?v=0.9.0"></script>
-    <script src="/static/js/main.js?v=0.9.0"></script>
+    <script src="/static/js/i18n.js?v=0.9.9"></script>
+    <script src="/static/js/config.js?v=0.9.9"></script>
+    <script src="/static/js/version.js?v=0.9.9"></script>
+    <script src="/static/js/avatars.js?v=0.9.9"></script>
+    <script src="/static/js/state.js?v=0.9.9"></script>
+    <script src="/static/js/utils.js?v=0.9.9"></script>
+    <script src="/static/js/api.js?v=0.9.9"></script>
+    <script src="/static/js/timer.js?v=0.9.9"></script>
+    <script src="/static/js/board.js?v=0.9.9"></script>
+    <script src="/static/js/action_items.js?v=0.9.9"></script>
+    <script src="/static/js/admin.js?v=0.9.9"></script>
+    <script src="/static/js/auth.js?v=0.9.9"></script>
+    <script src="/static/js/admin-users.js?v=0.9.9"></script>
+    <script src="/static/js/admin-boards.js?v=0.9.9"></script>
+    <script src="/static/js/admin-actions.js?v=0.9.9"></script>
+    <script src="/static/js/menu.js?v=0.9.9"></script>
+
+    <script src="/static/js/main.js?v=0.9.9"></script>
 </body>
 
 </html>

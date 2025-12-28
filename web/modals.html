@@ -388,7 +388,7 @@
 </div>
 
 <!-- Read-Only Details Modal -->
-<div id="actionItemDetailsModal" class="modal">
+<div id="actionItemDetailsModal" class="modal" style="z-index: 1005;">
     <div class="modal-content">
         <span class="close-modal" onclick="closeActionItemDetailsModal()">&times;</span>
         <h2>ℹ️ Action Item Details</h2>
@@ -438,5 +438,115 @@
         <div style="margin-top: 1.5rem; text-align: center;">
             <button class="btn btn-outline" onclick="closeAdminUsersModal()" data-i18n="btn.close">Close</button>
         </div>
+    </div>
+</div>
+<!-- Modal for Admin Boards Management -->
+<!-- Included from modals_admin_boards.html -->
+<div id="adminBoardsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminBoardsModal()">&times;</span>
+        <h2 data-i18n="admin.manage_boards">Manage Boards</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminBoardSearch" placeholder="Search boards..." onkeyup="filterAdminBoards()">
+            </div>
+            <div class="filter-box">
+                <select id="adminBoardFilter" onchange="filterAdminBoards()">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="finished">Finished</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.board_name">Board Name</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.created_at">Created</th>
+                        <th data-i18n="label.duration">Duration</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminBoardsList">
+                    <!-- Boards will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Admin Action Items Management -->
+<!-- Included from modals_admin_actions.html -->
+<div id="adminActionsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminActionsModal()">&times;</span>
+        <h2 data-i18n="admin.manage_actions">Manage Action Items</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminActionSearch" placeholder="Search items..." onkeyup="filterAdminActions()">
+            </div>
+            <div class="filter-box">
+                <select id="adminActionFilter" onchange="filterAdminActions()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.description">Description</th>
+                        <th data-i18n="label.board">Board</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.assignee">Assignee</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminActionsList">
+                    <!-- Action Items will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Action Item Sub-Modal -->
+<div id="adminEditActionModal" class="modal" style="z-index: 1002;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAdminEditActionModal()">&times;</span>
+        <h3 data-i18n="admin.edit_action">Edit Action Item</h3>
+        <form id="adminEditActionForm" onsubmit="handleAdminUpdateAction(event)">
+            <input type="hidden" id="editActionId">
+            <div class="form-group">
+                <label data-i18n="label.description">Description</label>
+                <textarea id="editActionContent" class="form-input" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.assignee">Assignee (Owner)</label>
+                <input type="text" id="editActionOwner" class="form-input" list="userListData">
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.status">Status</label>
+                <select id="editActionStatus" class="form-input">
+                    <option value="false">Pending</option>
+                    <option value="true">Completed</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeAdminEditActionModal()"
+                    data-i18n="btn.cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save Changes</button>
+            </div>
+        </form>
     </div>
 </div>
