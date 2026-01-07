@@ -1,28 +1,18 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.9.14
+## Current Version: v0.10.38
 
 ---
 
 ## 🎯 Immediate Priorities
-
-### v0.9.2 - v0.9.3 Admin User Management & Improvements (COMPLETED)
-**Effort:** M (1-2 days)
-- [x] **Admin Users Management Modal** - Frontend interface to list, manage roles, reset passwords, and delete users.
-- [x] **User Role Toggle** - UI to change user roles between 'user' and 'admin'.
-- [x] **Password Reset UI** - Button to reset user passwords to default "bentro".
-- [x] **Delete User UI** - Ability to delete users with incorrect emails.
-- [x] **Unified Authentication** - Support for both JWT Admin Role and K8s Secret.
-- [x] **Admin Auto-Creation** - Automatic creation of default admin user.
 
 ### v0.10.39 - Bug Fixes & Stability
 **Effort:** S (1-2 days)
 - [ ] **Dashboard Participant Count** - Fix erratic participant count display and random disappearance on Board Cards.
 - [ ] **Team Member Count** - Fix incorrect member count display on Team Cards.
 
-### v0.10.0 - Team Management & Advanced Features
-**Effort:** XL (2-3 weeks)
-- [ ] **Team/Squad Management** - Allow multiple teams to use the app simultaneously.
+### v0.10.x - Team Management & Advanced Collaboration
+**Effort:** M (1-2 weeks)
 - [ ] **Team-filtered Dashboard** - Filter boards by team.
 - [ ] **Advanced Action Items Filtering** - Filter by Period, Team/Board, or Owner.
 
@@ -34,73 +24,43 @@
 
 ---
 
-### Phase 2: Advanced Collaboration (v1.1.0+)
-**Effort:** L (3-5 days)
-- [ ] **Real-time Cursor Tracking** - See where other users are clicking/typing.
-- [ ] **Card Comments** - Add threaded comments to cards for discussion.
-- [ ] **Retrospective Analytics** - Track trends across multiple retros.
-
----
-
 ## ✅ Completed Features
 
-### v0.9.1 - v0.9.14 (Admin & UI Polish)
-- [x] **Admin Visual Upgrade** - Premium Hero-style headers and clean layout for Admin Dashboard.
-- [x] **Universal Visuals** - Consistent Hero styling across Main Dashboard (`.page-controls`) and Action Items.
-- [x] **Action Item Statuses** - Green (Open), Yellow (Overdue), Red (Closed) indicators.
-- [x] **Navigation Fixes** - Fixed Z-index overlap between Admin and Action Items views.
-- [x] **Admin Action Edit** - Added Link and Description fields for manual item completion in Admin.
-- [x] **i18n Polish** - Fixed missing translation keys for page titles and subtitles.
+### v0.10.0 - v0.10.38 (Teams & Participation)
+- [x] **Board Participation Persistence** - Users can permanently join/leave boards, preserving history.
+- [x] **Dashboard UI Overhaul** - Improved card layout with metadata (Participants, Team, Owner).
+- [x] **Team Management** - Create teams, join teams (Invite Only), and assign boards to teams.
+- [x] **Multiple Team Owners** - Support for multiple owners per team.
+- [x] **Concurrent Participation Fixes** - Locking mechanisms to prevent race conditions on Join.
 
-### v0.9.1 (Stable Base)
-- [x] **User Profile Modal** - View profile with Display Name, Full Name, Email (read-only), and logout option.
-- [x] **Change Password** - Secure password change functionality.
-- [x] **Forced Password Change** - Users with default password "bentro" must change it on login (except admins).
-- [x] **Admin User Management Backend** - Complete API for managing users (list, change roles, reset passwords, delete).
-- [x] **15-Day Session Persistence** - JWT tokens now last 15 days for better UX.
-- [x] **Seamless Authentication** - No "Welcome Back" modal, direct to dashboard when authenticated.
+### v0.9.x (Admin & User Management)
+- [x] **Admin Dashboard** - Premium Hero-style headers and clean layout.
+- [x] **User Management** - List, manage roles, reset passwords, delete users.
+- [x] **Unified Authentication** - Support for both JWT Admin Role and K8s Secret.
+- [x] **Action Item Statuses** - Green (Open), Yellow (Overdue), Red (Closed).
 
-### v0.9.0
-- [x] **Native Email/Password Authentication** - Secure login with bcrypt password hashing.
-- [x] **User Registration** - New user registration with First Name, Last Name, Display Name, Email, and Password.
-- [x] **Persistent Sessions** - JWT-based authentication with secure httpOnly cookies.
-- [x] **User Traceability** - All actions linked to authenticated user records.
+### v0.9.0 (Authentication Base)
+- [x] **Native Email/Password Authentication** - Secure login with bcrypt.
+- [x] **User Registration** - Full registration flow.
+- [x] **Persistent Sessions** - 15-day JWT tokens.
 
-### v0.8.0 - v0.8.9
-- [x] **Admin Dashboard** - Secure page with system statistics and board management.
-- [x] **Vote Limiting** - Configurable limit on votes per user per board.
-- [x] **Blind Voting** - Hide votes until voting phase ends.
-- [x] **Role-Based Access Control (RBAC)** - Board managers control timer, phases, and finish.
-- [x] **Dual Manager Support** - Two managers (Owner + Co-Host) per board.
-- [x] **Manager Badges** - Visual indicators (👑/🛡️) for board managers.
+### v0.8.x (Board Controls)
+- [x] **Vote Limiting & Blind Voting**
+- [x] **Role-Based Access Control (RBAC)**
+- [x] **Dual Manager Support**
 
-### v0.7.0
-- [x] **Soft Delete for Action Items** - Backend and Frontend support to preserve items from deleted boards.
-- [x] **Safe Delete** - Prevent deleting active boards to avoid accidental data loss.
+### v0.7.x (Data Safety)
+- [x] **Soft Delete for Action Items**
+- [x] **Safe Delete Protection**
 
-### v0.6.17
-- [x] **Fix** - Fixed navigation to Dashboard and Action Items not updating URL hash.
-- [x] **Fix** - Page refresh on Action Items/Admin view now persists correctly.
+### v0.6.x (Internationalization)
+- [x] **i18n Support** - Portuguese (pt-BR) and English.
+- [x] **Dynamic Board Templates**
 
-### v0.6.10 - v0.6.15
-- [x] **Internationalization (i18n)** - Added complete Portuguese (pt-BR) support.
-- [x] **New Retro Modal** - Translated and polished UI.
-- [x] **Board Templates** - Templates and columns now dynamically translated.
-
-### v0.3.1 - v0.6.9
-- [x] **Action Items** - Track tasks with owners and due dates.
-- [x] **HTTPS Support** - Fixed Username Prompt disappearing on HTTPS (wss://).
-- [x] **Data Persistence** - PostgreSQL fixes for local-path-provisioner.
-- [x] **Card Reactions** - Emoji reactions on cards.
-- [x] **Keyboard Shortcuts** - Global shortcuts added.
-- [x] **Dark/Light Theme** - Theme toggle implemented.
-
-### v0.2.x Series
-- [x] **Active Participants Display** - Real-time list of users.
-- [x] **Avatar Selection** - Emoji avatars for users.
-- [x] **Read-Only Mode** - For finished boards.
-- [x] **Timer Sound** - Audio notifications.
-- [x] **Leaving Boards** - Ability to leave a retrospective.
+### v0.2.x - v0.5.x (Foundation)
+- [x] **Real-time WebSockets** - Live updates for boards.
+- [x] **Action Items** - Task tracking.
+- [x] **Themes** - Dark/Light mode.
 
 ---
 
