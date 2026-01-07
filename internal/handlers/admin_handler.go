@@ -93,6 +93,7 @@ func GetSystemStats(c *gin.Context) {
 		TotalActionItems     int64 `json:"total_action_items"`
 		CompletedActionItems int64 `json:"completed_action_items"`
 		TotalUsers           int64 `json:"total_users"` // Estimate based on distinct participants in boards
+		TotalTeams           int64 `json:"total_teams"`
 	}
 
 	// Boards stats
@@ -103,20 +104,21 @@ func GetSystemStats(c *gin.Context) {
 	database.DB.Model(&models.Card{}).Where("is_action_item = ?", true).Count(&stats.TotalActionItems)
 	database.DB.Model(&models.Card{}).Where("is_action_item = ? AND completed = ?", true, true).Count(&stats.CompletedActionItems)
 
-	// Approximate total users (participants are stored as JSONB, this is hard to count efficiently without a normalized table,
-	// but we can count distinct names in Votes or rely on simple board count for now as a proxy or skip)
-	// For now, let's just count total cards created as a proxy for activity
+	// User & Team stats
+	database.DB.Model(&models.User{}).Count(&stats.TotalUsers)
+	database.DB.Model(&models.Team{}).Count(&stats.TotalTeams)
+
+	// Approximate total cards created as a proxy for activity
 	var totalCards int64
 	database.DB.Model(&models.Card{}).Count(&totalCards)
-
-	// Count registered users
-	var totalUsers int64
-	database.DB.Model(&models.User{}).Count(&totalUsers)
 
 	c.JSON(http.StatusOK, gin.H{
 		"boards": gin.H{
 			"total":  stats.TotalBoards,
 			"active": stats.ActiveBoards,
+		},
+		"teams": gin.H{
+			"total": stats.TotalTeams,
 		},
 		"action_items": gin.H{
 			"total":     stats.TotalActionItems,
@@ -126,6 +128,6 @@ func GetSystemStats(c *gin.Context) {
 		"activity": gin.H{
 			"total_cards": totalCards,
 		},
-		"users": totalUsers,
+		"users": stats.TotalUsers,
 	})
 }

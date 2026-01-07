@@ -9,24 +9,26 @@ import (
 
 // Participant represents a user in a board
 type Participant struct {
-	Username string `json:"username"`
-	Avatar   string `json:"avatar"`
-	IsAdmin  bool   `json:"is_admin,omitempty"`
+	Username string    `json:"username"`
+	Avatar   string    `json:"avatar"`
+	IsAdmin  bool      `json:"is_admin,omitempty"`
+	JoinedAt time.Time `json:"joined_at"`
 }
 
 // User represents a registered user
 type User struct {
-	ID                    uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	Email                 string    `gorm:"uniqueIndex" json:"email"`
-	DisplayName           string    `gorm:"uniqueIndex" json:"display_name"`
-	PasswordHash          string    `json:"-"` // Never return password
-	Name                  string    `json:"name"`
-	AvatarURL             string    `json:"avatar_url"`
-	Role                  string    `gorm:"default:'user'" json:"role"` // 'admin', 'user'
-	RequirePasswordChange bool      `gorm:"default:false" json:"require_password_change"`
-	LastLogin             time.Time `json:"last_login"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	ID                    uuid.UUID    `gorm:"type:uuid;primary_key" json:"id"`
+	Email                 string       `gorm:"uniqueIndex" json:"email"`
+	DisplayName           string       `json:"display_name"`
+	PasswordHash          string       `json:"-"` // Never return password
+	Name                  string       `json:"name"`
+	AvatarURL             string       `json:"avatar_url"`
+	Role                  string       `gorm:"default:'user'" json:"role"` // 'admin', 'user'
+	RequirePasswordChange bool         `gorm:"default:false" json:"require_password_change"`
+	LastLogin             time.Time    `json:"last_login"`
+	CreatedAt             time.Time    `json:"created_at"`
+	UpdatedAt             time.Time    `json:"updated_at"`
+	Teams                 []TeamMember `gorm:"foreignKey:UserID" json:"teams,omitempty"`
 }
 
 // BeforeCreate hook to generate UUID for User
@@ -52,6 +54,7 @@ type Board struct {
 	Phase        string         `gorm:"default:'input'" json:"phase"` // input, voting, discuss
 	VoteLimit    int            `gorm:"default:0" json:"vote_limit"`  // 0 = unlimited
 	BlindVoting  bool           `gorm:"default:false" json:"blind_voting"`
+	TeamID       *uuid.UUID     `gorm:"type:uuid;index" json:"team_id,omitempty"` // Nullable, as personal boards exist
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
@@ -146,4 +149,36 @@ func (r *Reaction) BeforeCreate(tx *gorm.DB) error {
 		r.ID = uuid.New()
 	}
 	return nil
+}
+
+// Team represents a group of users
+type Team struct {
+	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	Name         string         `gorm:"not null" json:"name"`
+	Description  string         `json:"description"`
+	IsInviteOnly bool           `json:"is_invite_only"`
+	OwnerID      uuid.UUID      `gorm:"type:uuid;not null" json:"owner_id"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	Members      []TeamMember   `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE" json:"members,omitempty"`
+	Boards       []Board        `gorm:"foreignKey:TeamID" json:"boards,omitempty"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// BeforeCreate hook to generate UUID
+func (t *Team) BeforeCreate(tx *gorm.DB) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	return nil
+}
+
+// TeamMember represents the many-to-many relationship between User and Team
+type TeamMember struct {
+	TeamID   uuid.UUID `gorm:"type:uuid;primaryKey" json:"team_id"`
+	UserID   uuid.UUID `gorm:"type:uuid;primaryKey" json:"user_id"`
+	Role     string    `gorm:"default:'member'" json:"role"` // 'owner', 'admin', 'member'
+	JoinedAt time.Time `json:"joined_at"`
+	User     User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Team     Team      `gorm:"foreignKey:TeamID" json:"-"`
 }

@@ -117,6 +117,10 @@ async function showAdminDashboard() {
                         <span class="stat-value">${stats.users || 0}</span>
                         <span class="stat-label">👥 ${i18n.t('admin.stat_total_users')}</span>
                     </div>
+                    <div class="stat-card clickable" style="cursor: default;">
+                        <span class="stat-value">${stats.teams ? stats.teams.total : 0}</span>
+                        <span class="stat-label">🛡️ ${i18n.t('admin.stat_total_teams') || 'Total Teams'}</span>
+                    </div>
                 </div>
             </div>
         </div>

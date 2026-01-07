@@ -49,9 +49,11 @@ func main() {
 		log.Println("Registering board routes...")
 		api.POST("/boards", handlers.CreateBoard)
 		api.GET("/boards/:id", handlers.GetBoard)
-		api.GET("/boards", handlers.ListBoards)
-		api.PUT("/boards/:id/status", handlers.UpdateBoardStatus)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
+		api.POST("/boards/:id/claim", handlers.ClaimBoard)
+		api.POST("/boards/:id/unclaim", handlers.UnclaimBoard)
+		api.POST("/boards/:id/join", handlers.JoinBoard)
+		api.POST("/boards/:id/leave", handlers.LeaveBoard)
 		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
 		api.POST("/boards/:id/claim", handlers.ClaimBoard)
 		api.POST("/boards/:id/unclaim", handlers.UnclaimBoard)
@@ -93,6 +95,12 @@ func main() {
 			user.GET("/me", handlers.GetCurrentUser)
 		}
 
+		users := api.Group("/users")
+		users.Use(handlers.AuthMiddleware())
+		{
+			users.GET("/search", handlers.SearchUsers)
+		}
+
 		// Admin Routes (Protected by Auth + Admin Middleware)
 		adminGroup := api.Group("/admin")
 		adminGroup.Use(handlers.AuthMiddleware(), handlers.AdminMiddleware())
@@ -112,6 +120,23 @@ func main() {
 			// For now, reusing existing public/user endpoint is fine, but editing is admin only.
 			adminGroup.PUT("/action-items/:id", handlers.AdminUpdateActionItem)
 			adminGroup.DELETE("/action-items/:id", handlers.AdminDeleteActionItem)
+		}
+
+		// Team Routes (Protected)
+		teams := api.Group("/teams")
+		teams.Use(handlers.AuthMiddleware())
+		{
+			teams.POST("", handlers.CreateTeam)
+			teams.GET("", handlers.GetMyTeams)
+			teams.GET("/all", handlers.ListAvailableTeams)
+			teams.GET("/:id", handlers.GetTeam)
+			teams.PUT("/:id", handlers.UpdateTeam)
+			teams.DELETE("/:id", handlers.DeleteTeam)
+			teams.POST("/:id/members", handlers.AddTeamMember)
+			teams.DELETE("/:id/members/:userID", handlers.RemoveTeamMember)
+			teams.PUT("/:id/members/:userID/role", handlers.UpdateMemberRole)
+			teams.POST("/:id/join", handlers.JoinTeam)
+			teams.POST("/:id/leave", handlers.LeaveTeam)
 		}
 	}
 

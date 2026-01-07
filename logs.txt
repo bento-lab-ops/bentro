@@ -1,0 +1,347 @@
+2026/01/06 17:10:01 Database connection established
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[14.836ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[0.512ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[26.914ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'boards'
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[1.911ms] [34;1m[rows:-][0m SELECT * FROM "boards" LIMIT 5
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[19.309ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'boards' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[16.861ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'boards'
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[1.698ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'boards'
+
+2026/01/06 17:10:01 [32m/app/internal/database/database.go:38
+[0m[33m[5.844ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[50.205ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'name') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[9.660ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'status') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[5.214ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'created_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[4.896ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'updated_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[4.726ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'finished_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.972ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'participants') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.896ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'owner') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.783ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'co_owner') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.760ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'phase') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.710ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'vote_limit') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.713ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'blind_voting') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.690ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'team_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.685ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND column_name = 'deleted_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'boards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[3.573ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'boards' AND constraint_name = 'fk_teams_boards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[4.480ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'boards' AND indexname = 'idx_boards_team_id' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.820ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'boards' AND indexname = 'idx_boards_deleted_at' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.940ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.280ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[53.287ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'columns'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.649ms] [34;1m[rows:-][0m SELECT * FROM "columns" LIMIT 5
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[19.624ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'columns' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[14.654ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'columns'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.981ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'columns'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.738ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.720ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'board_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.704ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'name') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.687ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'position') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.745ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'created_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.703ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND column_name = 'deleted_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'columns' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[2.739ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'columns' AND constraint_name = 'fk_boards_columns'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.688ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'columns' AND indexname = 'idx_columns_deleted_at' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.594ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.209ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[61.203ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'cards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.246ms] [34;1m[rows:-][0m SELECT * FROM "cards" LIMIT 5
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[16.919ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'cards' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[17.101ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'cards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.057ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'cards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.841ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.736ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'column_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.704ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'content') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.708ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'position') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.669ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'merged_with_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.663ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'created_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.719ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'updated_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.726ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'is_action_item') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[42.260ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'owner') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.247ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'due_date') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.068ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'completion_link') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.046ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'completion_desc') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.054ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'completion_date') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.039ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'completed') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.992ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND column_name = 'deleted_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'cards' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[7.232ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND constraint_name = 'fk_cards_merged_cards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[3.127ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'cards' AND constraint_name = 'fk_columns_cards'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.921ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'cards' AND indexname = 'idx_cards_deleted_at' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.588ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.222ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[10.566ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'votes'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.312ms] [34;1m[rows:-][0m SELECT * FROM "votes" LIMIT 5
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[14.389ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'votes' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[65.260ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'votes'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.073ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'votes'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.832ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.804ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'card_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.775ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'user_name') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.753ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'vote_type') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.745ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'created_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.773ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND column_name = 'deleted_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'votes' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[2.901ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND constraint_name = 'fk_cards_votes'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[3.038ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'votes' AND constraint_name = 'chk_votes_vote_type'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.880ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'votes' AND indexname = 'idx_card_user' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.956ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'votes' AND indexname = 'idx_votes_deleted_at' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.730ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.262ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[11.496ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'reactions'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.253ms] [34;1m[rows:-][0m SELECT * FROM "reactions" LIMIT 5
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[58.360ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'reactions' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[23.253ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'reactions'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.062ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'reactions'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.999ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.875ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'card_id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.737ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'user_name') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.806ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'reaction_type') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.180ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'created_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[2.572ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND column_name = 'deleted_at') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'reactions' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.705ms] [34;1m[rows:1][0m SELECT count(*) FROM INFORMATION_SCHEMA.table_constraints WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'reactions' AND constraint_name = 'fk_cards_reactions'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.791ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'reactions' AND indexname = 'idx_card_user_reaction' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.640ms] [34;1m[rows:1][0m SELECT count(*) FROM pg_indexes WHERE tablename = 'reactions' AND indexname = 'idx_reactions_deleted_at' AND schemaname = CURRENT_SCHEMA()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[1.883ms] [34;1m[rows:1][0m SELECT count(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'users' AND table_type = 'BASE TABLE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.324ms] [34;1m[rows:1][0m SELECT CURRENT_DATABASE()
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[13.554ms] [34;1m[rows:-][0m SELECT c.column_name, c.is_nullable = 'YES', c.udt_name, c.character_maximum_length, c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, c.datetime_precision, 8 * typlen, c.column_default, pd.description, c.identity_increment FROM information_schema.columns AS c JOIN pg_type AS pgt ON c.udt_name = pgt.typname LEFT JOIN pg_catalog.pg_description as pd ON pd.objsubid = c.ordinal_position AND pd.objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = c.table_name AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = c.table_schema)) where table_catalog = 'retrodb' AND table_schema = CURRENT_SCHEMA() AND table_name = 'users'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[3.395ms] [34;1m[rows:-][0m SELECT * FROM "users" LIMIT 5
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[58.232ms] [34;1m[rows:-][0m SELECT constraint_name FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'users' AND constraint_type = 'UNIQUE'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[15.462ms] [34;1m[rows:-][0m SELECT c.column_name, constraint_name, constraint_type FROM information_schema.table_constraints tc JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_catalog, table_name, constraint_name) JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name WHERE constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = 'retrodb' AND c.table_schema = CURRENT_SCHEMA() AND c.table_name = 'users'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.949ms] [34;1m[rows:-][0m SELECT a.attname as column_name, format_type(a.atttypid, a.atttypmod) AS data_type
+		FROM pg_attribute a JOIN pg_class b ON a.attrelid = b.oid AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA())
+		WHERE a.attnum > 0 -- hide internal columns
+		AND NOT a.attisdropped -- hide deleted columns
+		AND b.relname = 'users'
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.769ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'users' AND column_name = 'id') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'users' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [32m/app/internal/database/database.go:38
+[0m[33m[0.766ms] [34;1m[rows:0][0m SELECT description FROM pg_catalog.pg_description WHERE objsubid = (SELECT ordinal_position FROM information_schema.columns WHERE table_schema = CURRENT_SCHEMA() AND table_name = 'users' AND column_name = 'email') AND objoid = (SELECT oid FROM pg_catalog.pg_class WHERE relname = 'users' AND relnamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = CURRENT_SCHEMA()))
+
+2026/01/06 17:10:02 [31;1m [35;1mERROR: constraint "uni_users_display_name" of relation "users" does not exist (SQLSTATE 42704)
+[0m[33m[0.527ms] [34;1m[rows:0][0m ALTER TABLE "users" DROP CONSTRAINT "uni_users_display_name"
+2026/01/06 17:10:02 Failed to initialize database: failed to migrate database: ERROR: constraint "uni_users_display_name" of relation "users" does not exist (SQLSTATE 42704)

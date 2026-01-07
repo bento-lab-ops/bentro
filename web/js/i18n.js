@@ -129,6 +129,7 @@ const translations = {
         // Menu
         'menu.dashboard': 'Dashboard',
         'menu.my_tasks': 'My Tasks',
+        'menu.my_teams': 'My Teams',
         'menu.settings': 'Settings',
         'menu.admin': 'Admin Dashboard',
         'menu.help': 'Help',
@@ -397,6 +398,7 @@ const translations = {
         // Menu
         'menu.dashboard': 'Dashboard',
         'menu.my_tasks': 'Minhas Tarefas',
+        'menu.my_teams': 'Meus Times',
         'menu.settings': 'Configurações',
         'menu.admin': 'Painel Admin',
         'menu.help': 'Ajuda',

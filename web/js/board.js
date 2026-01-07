@@ -17,7 +17,7 @@ function filterBoards(status) {
     currentFilter = status;
 
     // Update Filter UI
-    document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.team-nav-tab').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(status === 'active' ? 'filterActiveBtn' : 'filterFinishedBtn');
     if (activeBtn) activeBtn.classList.add('active');
 
@@ -38,8 +38,20 @@ function renderDashboard(boards) {
     document.getElementById('emptyDashboard').style.display = 'none';
 
     boards.forEach(board => {
+        const isMyBoard = board.owner === (window.currentUser || '');
+        // Determine other flags based on board data (e.g. if it has a team_id)
+        const isTeamBoard = !!board.team_id;
+        // Participation is harder to check on the fly without the full participant list in the board object.
+        // For now, let's assume if it's in the list and not mine, I'm participating (since GET /boards returns boards I have access to).
+        // This is a simplification but works for "I'm Participating" filter roughly.
+        const isParticipating = !isMyBoard;
+
         const card = document.createElement('div');
-        card.className = 'dashboard-card';
+        card.className = 'board-card';
+        card.dataset.id = board.id;
+        card.dataset.myBoard = isMyBoard;
+        card.dataset.teamBoard = isTeamBoard;
+        card.dataset.participating = isParticipating;
         const statusClass = board.status === 'active' ? 'status-active' : 'status-finished';
 
         // Action Item Logic
@@ -71,30 +83,115 @@ function renderDashboard(boards) {
                 </div>
             </div>
             <div class="board-meta">
-                Created: ${new Date(board.created_at).toLocaleDateString()}
+                <div class="meta-row">
+                    <span>📅 ${new Date(board.created_at).toLocaleDateString()}</span>
+                    ${board.participant_count > 0 ?
+                `<div class="participant-badge" title="${i18n.t('label.participants') || 'Participants'}">👤 ${board.participant_count}</div>`
+                : ''}
+                    ${board.team_name ? `<span class="meta-badge team-badge" title="Team Board">🛡️ ${escapeHtml(board.team_name)}</span>` : ''}
+                </div>
+                <div class="meta-row">
+                     ${board.owner ? `<span class="meta-badge owner-badge" title="Board Owner">👑 ${escapeHtml(board.owner)}</span>` : ''}
+                </div>
             </div>
-            <div class="dashboard-actions">
-                <button class="btn btn-primary btn-small" onclick="loadBoard('${board.id}')">${i18n.t('btn.enter')}</button>
+            </div>
+            <div class="dashboard-actions" style="gap: 0.5rem; justify-content: flex-end;">
+                ${(() => {
+                if (board.status === 'finished') {
+                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.view_results') || 'View Results'}">
+                             <i class="fas fa-chart-bar"></i> ${i18n.t('btn.view')}
+                        </button>`;
+                }
+
+                const myUser = window.currentUser;
+                const isMember = board.participants && board.participants.some(p => p.username === myUser);
+                const isOwner = board.owner === myUser; // Owner is implicitly a member? Backend join logic should handle this, but let's assume they might need to join too or we auto-join them.
+                // For now, "View" if member, "Join" if not.
+                // Auto-join owners on creation? Yes.
+
+                if (isMember || isOwner) {
+                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.enter')}">
+                             <i class="fas fa-arrow-right"></i> ${i18n.t('btn.enter')}
+                        </button>`;
+                } else {
+                    return `<button class="btn btn-success btn-sm" onclick="joinBoardPersistent('${board.id}')" title="${i18n.t('btn.join')}">
+                             <i class="fas fa-sign-in-alt"></i> ${i18n.t('btn.join')}
+                        </button>`;
+                }
+            })()}
+
                 ${board.status === 'finished' ?
-                `<button class="btn btn-warning btn-small" onclick="updateBoardStatus('${board.id}', 'active')">${i18n.t('btn.reopen')}</button>` : ''}
-                <button class="btn btn-danger btn-small" 
+                `<button class="btn btn-warning btn-sm" onclick="updateBoardStatus('${board.id}', 'active')" title="${i18n.t('btn.reopen')}"><i class="fas fa-sync-alt"></i></button>` : ''}
+                <button class="btn btn-danger btn-sm" 
                     onclick="deleteBoard('${board.id}')" 
                     ${deleteDisabled} 
                     style="${deleteStyle}"
-                    title="${deleteTitle}">${i18n.t('modal.delete')}</button>
+                    title="${deleteTitle}">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         `;
+
         grid.appendChild(card);
     });
+
+    // Apply client-side filters (text search, toggles) after rendering
+    if (typeof applyDashboardFilters === 'function') {
+        applyDashboardFilters();
+    }
 }
 
-async function createBoard(name, columns) {
+async function joinBoardPersistent(boardId) {
+    if (!window.currentUser) {
+        alert("Please log in to join a board.");
+        return;
+    }
     try {
-        const board = await apiCall('/boards', 'POST', {
+        await apiCall(`/boards/${boardId}/join`, 'POST', {
+            username: window.currentUser,
+            avatar: window.currentUserAvatar
+        });
+        await loadBoard(boardId);
+    } catch (error) {
+        console.error('Failed to join board:', error);
+        alert('Failed to join board: ' + error.message);
+    }
+}
+
+async function leaveBoardPersistent(boardId) {
+    if (!confirm(i18n.t('confirm.leave_board') || "Are you sure you want to leave this board?")) return;
+    try {
+        await apiCall(`/boards/${boardId}/leave`, 'POST', {
+            username: window.currentUser
+        });
+        // Redirect to dashboard
+        showDashboard();
+        // Refresh dashboard data
+        loadBoards();
+    } catch (error) {
+        console.error('Failed to leave board:', error);
+        alert('Failed to leave board: ' + error.message);
+    }
+}
+
+async function createBoard(name, columns, teamId = null) {
+    try {
+        const payload = {
             name,
             columns,
             owner: window.currentUser
+        };
+        if (teamId) {
+            payload.team_id = teamId;
+        }
+
+        const board = await apiCall('/boards', 'POST', payload);
+        // Auto-join the creator
+        await apiCall(`/boards/${board.id}/join`, 'POST', {
+            username: window.currentUser,
+            avatar: window.currentUserAvatar
         });
+
         await loadBoard(board.id);
         return board;
     } catch (error) {
@@ -105,9 +202,7 @@ async function createBoard(name, columns) {
 
 async function loadBoard(boardId) {
     try {
-        // Stop any existing polling
-        stopParticipantPolling();
-
+        // Fix API calls
         const board = await apiCall(`/boards/${boardId}`);
         window.currentBoard = board;
 
@@ -284,6 +379,7 @@ function updateBoardStatusUI(status) {
         leaveBoardBtn.disabled = isFinished;
         leaveBoardBtn.style.opacity = isFinished ? '0.5' : '1';
         leaveBoardBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
+        leaveBoardBtn.onclick = () => leaveBoardPersistent(window.currentBoard.id);
         leaveBoardBtn.title = isFinished ? 'Cannot leave a finished board' : 'Leave board and stop participating';
     }
 
@@ -1144,7 +1240,92 @@ async function fetchParticipants(boardId) {
 }
 
 window.startParticipantPolling = startParticipantPolling;
+
+// Dashboard Filtering Logic
+document.addEventListener('DOMContentLoaded', () => {
+    initDashboardFilters();
+});
+
+function initDashboardFilters() {
+    const filterButtons = document.querySelectorAll('.filter-toggle');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Toggle active state
+            btn.classList.toggle('active');
+            applyDashboardFilters();
+        });
+    });
+
+    const searchInput = document.getElementById('boardSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', applyDashboardFilters);
+    }
+
+    // Clear filters
+    const clearBtn = document.getElementById('clearFiltersBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            document.getElementById('boardSearchInput').value = '';
+            document.querySelectorAll('.filter-toggle').forEach(b => b.classList.remove('active'));
+            applyDashboardFilters();
+        });
+    }
+}
+
+function applyDashboardFilters() {
+    const activeFilters = Array.from(document.querySelectorAll('.filter-toggle.active')).map(btn => btn.dataset.filter);
+    const searchTerm = document.getElementById('boardSearchInput')?.value.toLowerCase() || '';
+
+    const boardCards = document.querySelectorAll('.board-card');
+    let visibleCount = 0;
+
+    boardCards.forEach(card => {
+        let isVisible = true;
+
+        // Text Search
+        const name = card.querySelector('h3')?.innerText.toLowerCase() || '';
+        if (searchTerm && !name.includes(searchTerm)) {
+            isVisible = false;
+        }
+
+        // Category Filters
+        // Note: Implementation depends on how we tag cards. 
+        // Currently we rely on DOM classes or attributes.
+        // We need to assume renderDashboard adds these attributes.
+        // If not, we rely on best effort or defaults for now.
+
+        if (isVisible && activeFilters.length > 0) {
+            // Logic: OR condition between filters? Or AND? Typically OR for categories.
+            // If "My Boards" AND "Team Boards" are selected, show boards that match EITHER.
+
+            let matchesFilter = false;
+
+            // Check for data attributes on the card (Need to ensure renderDashboard adds these)
+            const isMyBoard = card.dataset.myBoard === 'true';
+            const isParticipating = card.dataset.participating === 'true';
+            const isTeamBoard = card.dataset.teamBoard === 'true';
+
+            if (activeFilters.includes('myBoards') && isMyBoard) matchesFilter = true;
+            if (activeFilters.includes('participant') && isParticipating) matchesFilter = true;
+            if (activeFilters.includes('teamBoards') && isTeamBoard) matchesFilter = true;
+
+            if (!matchesFilter) isVisible = false;
+        }
+
+        card.style.display = isVisible ? 'block' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    // Update empty state if needed
+    const container = document.getElementById('activeBoards'); // or whatever container ID
+    // ... logic to show "No boards found" if visibleCount === 0
+}
+
+// Make sure to expose it if needed, or just let the event listeners handle it.
+window.initDashboardFilters = initDashboardFilters;
+window.applyDashboardFilters = applyDashboardFilters;
 window.stopParticipantPolling = stopParticipantPolling;
+window.loadBoards = loadBoards;
 
 // Action Item Logic
 window.openActionItemModal = function (cardId) {

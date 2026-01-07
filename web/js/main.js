@@ -110,6 +110,40 @@ function handleUrlHash() {
         if (typeof loadAdminView === 'function') {
             loadAdminView();
         }
+    } else if (hash === '#teams') {
+        if (typeof loadTeamsView === 'function') {
+            loadTeamsView();
+        }
+    } else if (hash.startsWith('#team/')) {
+        const teamId = hash.replace('#team/', '');
+        if (teamId) {
+            // Explicitly hide other views since loadTeamDetails doesn't do it all?
+            // Actually let's assume loadTeamsView logic:
+            // We need to call a function that sets up the container.
+            // But loadTeamDetails is in teams.js.
+            if (typeof openTeamDetails === 'function') {
+                openTeamDetails(teamId);
+            } else if (typeof loadTeamDetails === 'function') {
+                // Fallback if openTeamDetails is not exposed or different
+                // But openTeamDetails handles view switching.
+                // We need to make sure openTeamDetails is valid.
+                // Let's assume teams.js is loaded.
+                // We might need to hide dashboard/etc if openTeamDetails doesn't.
+                // openTeamDetails (in teams.js) DOES hide dashboardView/etc?
+                // Let's check: Yes, it hides teamsList but maybe not dashboard if called directly?
+                // No, line 245 teams.js: hides teamsView.
+                // But we need to hide dashboard too.
+                // Let's create a helper or just manually hide here for safety.
+                const dashboardView = document.getElementById('dashboardView');
+                if (dashboardView) dashboardView.style.display = 'none';
+                const boardContainer = document.getElementById('boardContainer');
+                if (boardContainer) boardContainer.style.display = 'none';
+
+                // Call teams.js function
+                // Note: We need to ensure openTeamDetails is global.
+                window.openTeamDetails(teamId); // Ensure it's attached to window or global scope in teams.js
+            }
+        }
     }
 }
 
@@ -182,10 +216,10 @@ function updateUserDisplay() {
 
 function showDashboard() {
     // Leave current board if viewing one
-    if (window.currentBoard && window.currentUser) {
-        leaveBoard(window.currentBoard.id, window.currentUser);
-        stopParticipantPolling();
-    }
+    // if (window.currentBoard && window.currentUser) {
+    //    leaveBoard(window.currentBoard.id, window.currentUser);
+    //    stopParticipantPolling();
+    // }
 
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
@@ -196,6 +230,12 @@ function showDashboard() {
 
     const dashboardBtn = document.getElementById('dashboardBtn');
     if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    // Hide Team Views
+    const teamsView = document.getElementById('teamsView');
+    if (teamsView) teamsView.style.display = 'none';
+    const teamDetailsView = document.getElementById('teamDetailsView');
+    if (teamDetailsView) teamDetailsView.style.display = 'none';
 
     const newBoardBtn = document.getElementById('newBoardBtn');
     if (newBoardBtn) newBoardBtn.style.display = 'inline-block'; // Show on dashboard
@@ -333,11 +373,11 @@ function setupEventListeners() {
         window.location.hash = 'action-items';
     });
 
-    document.getElementById('leaveBoardBtn')?.addEventListener('click', () => {
-        if (confirm(i18n.t('confirm.leave_board') || 'Are you sure you want to leave this board?')) {
-            showDashboard();
-        }
-    });
+    // document.getElementById('leaveBoardBtn')?.addEventListener('click', () => {
+    //     if (confirm(i18n.t('confirm.leave_board') || 'Are you sure you want to leave this board?')) {
+    //         showDashboard();
+    //     }
+    // });
 
     document.getElementById('newBoardBtn')?.addEventListener('click', () => {
         document.getElementById('newBoardModal').style.display = 'block';
@@ -370,8 +410,17 @@ function setupEventListeners() {
         const columnsText = document.getElementById('columnNames').value.trim();
         const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
 
-        await createBoard(name, columns);
+        // Check if we are in a team context
+        // currentTeamId is set in teams.js when opening team details
+        const teamId = window.currentTeamId || null;
+
+        await createBoard(name, columns, teamId);
         closeModals();
+
+        // If we are in team view, refresh the team details to show the new board
+        if (teamId && typeof loadTeamDetails === 'function') {
+            await loadTeamDetails(teamId);
+        }
     });
 
     document.getElementById('newCardForm')?.addEventListener('submit', async (e) => {

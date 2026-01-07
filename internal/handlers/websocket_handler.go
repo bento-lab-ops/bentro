@@ -173,6 +173,17 @@ func (h *Hub) GetBoardParticipants(boardID string) []models.Participant {
 	return participants
 }
 
+// GetParticipantCount returns the number of active participants for a board
+func (h *Hub) GetParticipantCount(boardID string) int {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	if participants, ok := h.boardParticipants[boardID]; ok {
+		return len(participants)
+	}
+	return 0
+}
+
 // BroadcastMessage sends a message to all connected clients
 func BroadcastMessage(messageType string, data interface{}) {
 	message := map[string]interface{}{

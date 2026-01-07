@@ -1,4 +1,386 @@
-<<<<<<< HEAD:web/bentro-v0.2.0.css
+/* BenTro v0.2.0 Branding Additions */
+
+/* ... (previous styles) ... */
+
+/* Header Branding */
+/* ... */
+
+/* ROUND 3 UI POLISH */
+
+/* Premium Search Input */
+.search-input-premium {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    /* Space for icon */
+    background: rgba(255, 255, 255, 0.05);
+    /* Glassy */
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23a1a1aa" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: 12px center;
+}
+
+.search-input-premium:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    outline: none;
+}
+
+/* Segmented Tabs (Active/Finalized) */
+.segmented-tabs {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.segmented-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.segmented-tab:hover {
+    color: var(--text-primary);
+}
+
+.segmented-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Teams Page Overhaul */
+.teams-nav-tabs {
+    display: flex;
+    gap: 2rem;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+}
+
+.team-nav-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.team-nav-tab.active {
+    color: var(--primary);
+}
+
+.team-nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    /* aligns with border-bottom of container */
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* Premium Team Cards */
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.team-card-premium {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-card-premium:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary);
+}
+
+.team-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.team-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.team-card-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.team-card-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex-grow: 1;
+    /* Pushes footer down */
+}
+
+.team-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.member-count {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.team-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Updated Filter Toggles */
+.filter-toggle {
+    /* (Existing styles should be preserved or updated if needed) */
+}
+
+/* Header Branding */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px var(--shadow);
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.brand-logo-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.3));
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.tagline {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-left: 62px;
+    /* Align with title (logo width + gap) */
+}
+
+.tagline-help {
+    font-style: italic;
+    color: var(--primary);
+    margin: 0.5rem 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--bg-light);
+}
+
+.user-display {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Team Switcher */
+.team-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#currentTeamName {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* Team Selection Modal */
+.team-selection-options {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin: 0.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+    padding: 0 10px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+/* Help Modal Content */
+.help-content {
+    text-align: left;
+    line-height: 1.6;
+}
+
+.help-content ul {
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.help-content li {
+    margin-bottom: 0.5rem;
+}
+
+.help-content hr {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+}
+
+/* Filter Toggles (Pills) */
+.filter-toggles {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-toggle:hover {
+    border-color: var(--primary);
+    color: var(--text-primary);
+}
+
+.filter-toggle.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.filter-toggle.active:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
+}
+
 /* BenTro v0.2.0 Branding Additions */
 
 /* Container */
@@ -148,11 +530,7 @@
     /* Align with title (logo width + gap) */
 }
 
-.header-controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
+
 
 .btn-icon {
     background: transparent;
@@ -257,122 +635,108 @@
 .help-content hr {
     border: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 1.5rem 0;
-=======
-/* BenTro v0.2.0 Branding Additions */
 
-/* Container */
-.container {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 2rem;
 }
 
-/* Header Branding */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
+/* Premium Board Cards (Matching Team Cards) */
+.board-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
-    box-shadow: 0 8px 32px var(--shadow);
-}
-
-.header-brand {
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
 }
 
-.brand-logo-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+.board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary);
 }
 
-.header-logo {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.3));
+.board-status {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
 }
 
-.title {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0;
+.board-status.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
-.tagline {
+.board-status.status-finished {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.action-item-dashboard-badge {
+    background: rgba(234, 179, 8, 0.1);
+    color: #facc15;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.board-meta {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    font-style: italic;
-    margin-left: 62px;
-    /* Align with title (logo width + gap) */
 }
 
-.tagline-help {
-    font-style: italic;
-    color: var(--primary);
-    margin: 0.5rem 0;
-}
-
-.header-controls {
+.dashboard-actions {
     display: flex;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* UI Standardization - Tabs Left Aligned */
+.teams-nav-tabs {
+    display: flex;
+    justify-content: flex-start;
+    /* Align left */
     gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.page-controls {
+    display: flex;
+    justify-content: flex-start;
+    /* Align container left */
+    width: 100%;
+}
+
+/* UI Standardization - Dashboard Filters */
+.dashboard-filters-container {
+    display: flex;
     align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    background: var(--glass-bg);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
 }
 
-.btn-icon {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+#boardSearchInput.search-input-premium {
+    width: 300px;
+    /* Fixed reasonable width */
+    flex-shrink: 0;
+    margin-bottom: 0;
+    /* Remove potential legacy margins */
 }
 
-.btn-icon:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--bg-light);
-}
-
-.user-display {
-    color: var(--text-primary);
-    font-weight: 600;
-}
-
-/* Help Panel */
-.help-content {
-    text-align: left;
-    line-height: 1.8;
-}
-
-.help-content h3 {
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
-}
-
-.help-content ul {
-    margin-left: 1.5rem;
-    color: var(--text-secondary);
-}
-
-.help-content hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 1.5rem 0;
->>>>>>> migration/bentro-namespace:web/bentro.css
+.filter-toggles {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
 }

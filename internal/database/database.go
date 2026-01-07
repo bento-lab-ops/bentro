@@ -42,6 +42,8 @@ func InitDB() error {
 		&models.Vote{},
 		&models.Reaction{},
 		&models.User{},
+		&models.Team{},
+		&models.TeamMember{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)

@@ -12,6 +12,12 @@ async function loadActionItemsView() {
         const adminView = document.getElementById('adminView');
         if (adminView) adminView.style.display = 'none';
 
+        // Hide Team Views
+        const teamsView = document.getElementById('teamsView');
+        if (teamsView) teamsView.style.display = 'none';
+        const teamDetailsView = document.getElementById('teamDetailsView');
+        if (teamDetailsView) teamDetailsView.style.display = 'none';
+
         // Show Action Items View (we need to create this container in index.html)
         let container = document.getElementById('actionItemsView');
         if (!container) {
@@ -66,10 +72,10 @@ function renderActionItemsTable(items, currentFilter) {
     // Render Filter Tabs first
     let html = `
         <div class="page-controls">
-            <div class="filter-tabs">
-                <button class="filter-tab ${currentFilter === 'pending' ? 'active' : ''}" 
+            <div class="teams-nav-tabs">
+                <button class="team-nav-tab ${currentFilter === 'pending' ? 'active' : ''}" 
                     onclick="fetchAndRenderActionItems('pending')">${i18n.t('action.pending')}</button>
-                <button class="filter-tab ${currentFilter === 'completed' ? 'active' : ''}" 
+                <button class="team-nav-tab ${currentFilter === 'completed' ? 'active' : ''}" 
                     onclick="fetchAndRenderActionItems('completed')">${i18n.t('action.completed')}</button>
             </div>
         </div>
@@ -249,3 +255,5 @@ window.markActionItemUndone = async function (cardId, currentFilter) {
         alert('Failed to update item: ' + error.message);
     }
 };
+
+window.loadActionItemsView = loadActionItemsView;

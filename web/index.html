@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=0.9.9">
-    <link rel="stylesheet" href="/static/bentro.css?v=0.9.9">
+    <link rel="stylesheet" href="/static/styles.css?v=0.10.38">
+    <link rel="stylesheet" href="/static/bentro.css?v=0.10.38">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
@@ -15,7 +16,7 @@
     <div class="container mobile-container-fix">
         <header class="header">
             <div class="header-left">
-                <div class="brand-logo-title">
+                <div class="brand-logo-title" onclick="showDashboard()" style="cursor: pointer;">
                     <img src="/static/bentrologo.png" alt="BenTro Logo" class="header-logo">
                     <h1 class="title" data-i18n="app.title">BenTro</h1>
                 </div>
@@ -24,7 +25,7 @@
 
             <div class="header-right">
                 <div id="headerControls" class="header-controls"
-                    style="display: flex; gap: 0.5rem; align-items: center;">
+                    style="display: flex; gap: 1.5rem; align-items: center;">
                     <button id="newBoardBtn" class="btn btn-primary btn-small" data-i18n="btn.new_board"
                         style="display: none;">+ New Board</button>
                     <button id="dashboardBtn" class="btn btn-outline btn-small" onclick="showDashboard()"
@@ -56,13 +57,37 @@
             </div>
 
             <div class="page-controls">
-                <div class="board-filters">
-                    <button class="filter-tab active" onclick="filterBoards('active')" id="filterActiveBtn"
+                <div class="teams-nav-tabs">
+                    <button class="team-nav-tab active" onclick="filterBoards('active')" id="filterActiveBtn"
                         data-i18n="tab.active">Active</button>
-                    <button class="filter-tab" onclick="filterBoards('finished')" id="filterFinishedBtn"
+                    <button class="team-nav-tab" onclick="filterBoards('finished')" id="filterFinishedBtn"
                         data-i18n="tab.finalized">Finalized</button>
                 </div>
             </div>
+
+            <!-- Search and Custom Filters -->
+            <div class="dashboard-filters-container">
+                <input type="text" id="boardSearchInput" class="search-input-premium" placeholder="Search boards...">
+
+                <div class="filter-toggles">
+                    <button class="filter-toggle" id="myBoardsToggle" data-filter="myBoards">
+                        📋 My Boards
+                    </button>
+                    <button class="filter-toggle" id="participantToggle" data-filter="participant">
+                        👤 I'm Participating
+                    </button>
+                    <button class="filter-toggle" id="teamBoardsToggle" data-filter="teamBoards">
+                        🛡️ Team Boards
+                    </button>
+                    <button class="btn-link" id="clearFiltersBtn" style="display: none;">
+                        Clear Filters
+                    </button>
+                    <div class="active-filters-badge" id="activeFiltersBadge" style="display: none;">
+                        <span id="activeFiltersCount">0</span> filters active
+                    </div>
+                </div>
+            </div>
+
             <div id="dashboardGrid" class="dashboard-grid">
                 <!-- Boards will be loaded here -->
             </div>
@@ -89,71 +114,202 @@
             </div>
         </div>
 
-        <!-- Admin View -->
-        <div id="adminView" class="dashboard-view" style="display: none;">
-            <div id="adminContent" class="admin-container">
-                <!-- Admin Content Loaded Here -->
+        <!-- Teams View -->
+        <div id="teamsView" class="dashboard-view" style="display: none;">
+            <div class="page-hero">
+                <h1 class="page-title">Teams</h1>
+                <p class="page-subtitle">Collaborate and manage your squads</p>
+            </div>
+
+            <!-- Teams Navigation Tabs -->
+            <div class="teams-nav-tabs">
+                <button class="team-nav-tab active" onclick="switchTeamTab('myTeams')" id="tabMyTeams">My Teams</button>
+                <button class="team-nav-tab" onclick="switchTeamTab('exploreTeams')" id="tabExploreTeams">Explore
+                    Teams</button>
+            </div>
+
+            <!-- My Teams Content -->
+            <div id="myTeamsContent" class="team-tab-content">
+                <div class="page-controls" style="margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="openCreateTeamModal()">
+                        <span style="font-size: 1.2rem;">+</span> Create New Team
+                    </button>
+                </div>
+                <div id="teamsList" class="teams-grid">
+                    <!-- My Teams loaded here -->
+                </div>
+            </div>
+
+            <!-- Explore Teams Content -->
+            <div id="exploreTeamsContent" class="team-tab-content" style="display: none;">
+                <div class="page-controls">
+                    <!-- Optional: Search bar for teams could go here in future -->
+                </div>
+                <div id="availableTeamsList" class="teams-grid">
+                    <!-- Available teams loaded here -->
+                </div>
             </div>
         </div>
 
-        <!-- Board View -->
-        <div id="boardContainer" class="board-container" style="display: none;">
-            <div id="readOnlyBanner" class="read-only-banner" style="display: none;" data-i18n="banner.read_only">
-                ⚠️ This board is finished (Read Only)
-            </div>
-
-            <div class="board-header-section">
-                <h2 id="boardTitle"></h2>
-                <div id="voteStatusDisplay" class="vote-status-display" style="display:none;"></div>
-                <div class="participants-wrapper">
-                    <span class="participants-label" data-i18n="label.active_participants">Active:</span>
-                    <div id="participantsContainer" class="participants-container"></div>
-                </div>
-                <button id="claimManagerBtn" class="btn btn-outline btn-sm" onclick="claimManagerAction()"
-                    title="Claim Moderation" style="display: none;">👑 Claim Host</button>
-                <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardSettings()"
-                    title="Admin Settings" style="display: none;">⚙️</button>
-            </div>
-
-            <!-- Timer Section -->
-            <div class="timer-section">
-                <div class="phase-info">
-                    <span class="phase-label" data-i18n="label.current_phase">Current Phase:</span>
-                    <span id="currentPhase" class="phase-name" data-i18n="phase.input">Input Phase</span>
-                </div>
-                <div class="timer-display">
-                    <span id="timerDisplay" class="timer-text">00:00</span>
-                </div>
-                <div class="timer-controls">
-                    <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
-                        value="5">
-                    <button id="startTimerBtn" class="btn btn-success" style="display: none;"
-                        data-i18n="btn.start_timer">Start Timer</button> <button id="stopTimerBtn"
-                        class="btn btn-danger" style="display: none;" data-i18n="btn.stop_timer">Stop Timer</button>
-                    <button id="switchPhaseBtn" class="btn btn-secondary" style="display: none;"
-                        data-i18n="btn.switch_voting">Switch to
-                        Voting</button>
-                    <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()"
-                        style="display: none;" data-i18n="btn.export_csv">📊 Export
-                        CSV</button>
-                    <button id="finishRetroBtn" class="btn btn-danger" onclick="finishRetro()" style="display: none;"
-                        data-i18n="btn.finish_retro">Finish Retro</button>
-                    <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" onclick="reopenRetro()"
-                        data-i18n="btn.reopen_retro">Re-open Retro</button>
-                </div>
-            </div>
-
-            <!-- Columns Section -->
-            <div id="columnsContainer" class="columns-container">
-                <!-- Columns will be dynamically added here -->
-            </div>
-
-            <!-- Add Column Button -->
-            <div class="add-column-section">
-                <button id="addColumnBtn" class="btn btn-outline" style="display: none;" data-i18n="btn.add_column">+
-                    Add Column</button>
+        <!-- Team Details View -->
+        <div id="teamDetailsView" class="dashboard-view" style="display: none;">
+            <div id="teamDetailsContent">
+                <!-- Team details loaded here -->
             </div>
         </div>
+
+        <!-- Create Team Modal -->
+        <div id="createTeamModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeCreateTeamModal()">&times;</span>
+                <h2>Create New Team</h2>
+                <form onsubmit="handleCreateTeam(event)">
+                    <div class="form-group">
+                        <label for="createTeamName">Team Name</label>
+                        <input type="text" id="createTeamName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createTeamDesc">Description (Optional)</label>
+                        <textarea id="createTeamDesc" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group checkbox-group"
+                        style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="checkbox" id="createTeamInviteOnly" style="width: auto;">
+                        <label for="createTeamInviteOnly" style="margin: 0; cursor: pointer;">Invite Only (Users cannot
+                            join without being added)</label>
+                    </div>
+                    <div class="modal-footer"
+                        style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateTeamModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Member Modal -->
+        <div id="addMemberModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddMemberModal()">&times;</span>
+                <h2>Add Team Member</h2>
+                <form onsubmit="handleAddMember(event)">
+                    <div class="form-group" style="position: relative;">
+                        <label for="addMemberSearch">Search User (Name or Email)</label>
+                        <input type="text" id="addMemberSearch" class="form-input" placeholder="Type to search..."
+                            autocomplete="off" oninput="handleUserSearch(this.value)">
+                        <div id="userSearchResults" class="search-results-dropdown" style="display: none;"></div>
+                        <input type="hidden" id="selectedMemberEmail">
+                    </div>
+                    <!-- Fallback or explicit email entry handled by search selection -->
+
+                    <div class="modal-footer"
+                        style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMemberModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddMemberSubmit" disabled>Add
+                            Member</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Team Modal -->
+        <div id="editTeamModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditTeamModal()">&times;</span>
+                <h2>Edit Team</h2>
+                <form onsubmit="handleEditTeam(event)">
+                    <div class="form-group">
+                        <label for="editTeamName">Team Name</label>
+                        <input type="text" id="editTeamName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTeamDesc">Description</label>
+                        <textarea id="editTeamDesc" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group checkbox-group"
+                        style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="checkbox" id="editTeamInviteOnly" style="width: auto;">
+                        <label for="editTeamInviteOnly" style="margin: 0; cursor: pointer;">Invite Only (Users cannot
+                            join without being added)</label>
+                    </div>
+                    <div class="modal-footer"
+                        style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditTeamModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </form>
+    </div>
+    </div>
+
+    <!-- Admin View -->
+    <div id="adminView" class="dashboard-view" style="display: none;">
+        <div id="adminContent" class="admin-container">
+            <!-- Admin Content Loaded Here -->
+        </div>
+    </div>
+
+    <!-- Board View -->
+    <div id="boardContainer" class="board-container" style="display: none;">
+        <div id="readOnlyBanner" class="read-only-banner" style="display: none;" data-i18n="banner.read_only">
+            ⚠️ This board is finished (Read Only)
+        </div>
+
+        <div class="board-header-section">
+            <h2 id="boardTitle"></h2>
+            <div id="voteStatusDisplay" class="vote-status-display" style="display:none;"></div>
+            <div class="participants-wrapper">
+                <span class="participants-label" data-i18n="label.active_participants">Active:</span>
+                <div id="participantsContainer" class="participants-container"></div>
+            </div>
+            <button id="claimManagerBtn" class="btn btn-outline btn-sm" onclick="claimManagerAction()"
+                title="Claim Moderation" style="display: none;">👑 Claim Host</button>
+            <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardSettings()"
+                title="Admin Settings" style="display: none;">⚙️</button>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="timer-section">
+            <div class="phase-info">
+                <span class="phase-label" data-i18n="label.current_phase">Current Phase:</span>
+                <span id="currentPhase" class="phase-name" data-i18n="phase.input">Input Phase</span>
+            </div>
+            <div class="timer-display">
+                <span id="timerDisplay" class="timer-text">00:00</span>
+            </div>
+            <div class="timer-controls">
+                <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
+                    value="5">
+                <button id="startTimerBtn" class="btn btn-success" style="display: none;"
+                    data-i18n="btn.start_timer">Start Timer</button> <button id="stopTimerBtn" class="btn btn-danger"
+                    style="display: none;" data-i18n="btn.stop_timer">Stop Timer</button>
+                <button id="switchPhaseBtn" class="btn btn-secondary" style="display: none;"
+                    data-i18n="btn.switch_voting">Switch to
+                    Voting</button>
+                <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()"
+                    style="display: none;" data-i18n="btn.export_csv">📊 Export
+                    CSV</button>
+                <button id="finishRetroBtn" class="btn btn-danger" onclick="finishRetro()" style="display: none;"
+                    data-i18n="btn.finish_retro">Finish Retro</button>
+                <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" onclick="reopenRetro()"
+                    data-i18n="btn.reopen_retro">Re-open Retro</button>
+            </div>
+        </div>
+
+        <!-- Columns Section -->
+        <div id="columnsContainer" class="columns-container">
+            <!-- Columns will be dynamically added here -->
+        </div>
+
+        <!-- Add Column Button -->
+        <div class="add-column-section">
+            <button id="addColumnBtn" class="btn btn-outline" style="display: none;" data-i18n="btn.add_column">+
+                Add Column</button>
+        </div>
+    </div>
     </div> <!-- End .container -->
 
     <div id="appSidebar" class="app-sidebar">
@@ -164,27 +320,85 @@
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleMenu()"></div>
 
+    <!-- Auth Modals -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2 data-i18n="btn.login">Login</h2>
+            <div class="auth-buttons">
+                <a href="/api/auth/google/login" class="btn btn-google">
+                    Sign in with Google
+                </a>
+            </div>
+            <div class="divider">OR</div>
+            <form onsubmit="handleLoginSubmit(event)">
+                <div class="form-group">
+                    <label data-i18n="label.email">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label.password">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" required>
+                </div>
+                <div class="modal-footer"
+                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
+                    <a href="#" onclick="switchAuthModal('register')" style="font-size: 0.9rem;">Need an account?
+                        Register</a>
+                    <button type="submit" class="btn btn-primary" data-i18n="btn.login">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Register</h2>
+            <form onsubmit="handleRegisterSubmit(event)">
+                <div class="form-group">
+                    <label data-i18n="label.name">Name</label>
+                    <input type="text" id="regName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label.email">Email</label>
+                    <input type="email" id="regEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label.password">Password</label>
+                    <input type="password" id="regPassword" class="form-input" required>
+                </div>
+                <div class="modal-footer"
+                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
+                    <a href="#" onclick="switchAuthModal('login')" style="font-size: 0.9rem;">Have
+                        an account? Login</a>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/i18n.js?v=0.9.9"></script>
-    <script src="/static/js/config.js?v=0.9.9"></script>
-    <script src="/static/js/version.js?v=0.9.9"></script>
-    <script src="/static/js/avatars.js?v=0.9.9"></script>
-    <script src="/static/js/state.js?v=0.9.9"></script>
-    <script src="/static/js/utils.js?v=0.9.9"></script>
-    <script src="/static/js/api.js?v=0.9.9"></script>
-    <script src="/static/js/timer.js?v=0.9.9"></script>
-    <script src="/static/js/board.js?v=0.9.9"></script>
-    <script src="/static/js/action_items.js?v=0.9.9"></script>
-    <script src="/static/js/admin.js?v=0.9.9"></script>
-    <script src="/static/js/auth.js?v=0.9.9"></script>
-    <script src="/static/js/admin-users.js?v=0.9.9"></script>
-    <script src="/static/js/admin-boards.js?v=0.9.9"></script>
-    <script src="/static/js/admin-actions.js?v=0.9.9"></script>
-    <script src="/static/js/menu.js?v=0.9.9"></script>
-
-    <script src="/static/js/main.js?v=0.9.9"></script>
+    <script src="/static/js/i18n.js?v=0.10.38"></script>
+    <script src="/static/js/config.js?v=0.10.38"></script>
+    <script src="/static/js/version.js?v=0.10.38"></script>
+    <script src="/static/js/avatars.js?v=0.10.38"></script>
+    <script src="/static/js/state.js?v=0.10.38"></script>
+    <script src="/static/js/utils.js?v=0.10.38"></script>
+    <script src="/static/js/api.js?v=0.10.38"></script>
+    <script src="/static/js/timer.js?v=0.10.38"></script>
+    <script src="/static/js/board.js?v=0.10.38"></script>
+    <script src="/static/js/action_items.js?v=0.10.38"></script>
+    <script src="/static/js/admin.js?v=0.10.38"></script>
+    <script src="/static/js/auth.js?v=0.10.38"></script>
+    <script src="/static/js/admin-users.js?v=0.10.38"></script>
+    <script src="/static/js/admin-boards.js?v=0.10.38"></script>
+    <script src="/static/js/admin-actions.js?v=0.10.38"></script>
+    <!-- drag-drop.js removed as it does not exist -->
+    <script src="/static/js/menu.js?v=0.10.38"></script>
+    <script src="/static/js/main.js?v=0.10.38"></script>
+    <script src="/static/js/teams.js?v=0.10.38"></script>
 </body>
 
 </html>

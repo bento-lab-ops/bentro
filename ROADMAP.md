@@ -15,6 +15,11 @@
 - [x] **Unified Authentication** - Support for both JWT Admin Role and K8s Secret.
 - [x] **Admin Auto-Creation** - Automatic creation of default admin user.
 
+### v0.10.39 - Bug Fixes & Stability
+**Effort:** S (1-2 days)
+- [ ] **Dashboard Participant Count** - Fix erratic participant count display and random disappearance on Board Cards.
+- [ ] **Team Member Count** - Fix incorrect member count display on Team Cards.
+
 ### v0.10.0 - Team Management & Advanced Features
 **Effort:** XL (2-3 weeks)
 - [ ] **Team/Squad Management** - Allow multiple teams to use the app simultaneously.

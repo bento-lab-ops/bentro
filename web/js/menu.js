@@ -58,6 +58,9 @@ function renderMenuLinks() {
         <li onclick="navigateTo('action-items'); closeMenu()">
             <span class="menu-icon">⚡</span> ${i18n.t('menu.my_tasks')}
         </li>
+        <li onclick="navigateTo('teams'); closeMenu()">
+            <span class="menu-icon">👥</span> ${i18n.t('menu.my_teams') || 'My Teams'}
+        </li>
     `;
 
     // ⚙️ Settings (Theme + Admin)
