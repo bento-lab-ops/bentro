@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"retro-app/internal/database"
 	"retro-app/internal/models"
@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -44,6 +43,17 @@ func CreateBoard(c *gin.Context) {
 	if err := database.DB.Create(&board).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create board"})
 		return
+	}
+
+	// Auto-join the creator as a member
+	member := models.BoardMember{
+		BoardID:  board.ID,
+		Username: input.Owner,
+		JoinedAt: time.Now(),
+	}
+	if err := database.DB.Create(&member).Error; err != nil {
+		// Log error but don't fail the request, user can join manually
+		fmt.Printf("Failed to auto-join owner %s to board %s: %v\n", input.Owner, board.ID, err)
 	}
 
 	// Create default columns if none provided
@@ -134,10 +144,22 @@ func GetBoard(c *gin.Context) {
 		Preload("Columns.Cards.Votes").
 		Preload("Columns.Cards.Reactions").
 		Preload("Columns.Cards.MergedCards").
+		Preload("Members").
 		First(&board, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
 		return
 	}
+
+	// Map members to participants
+	participants := make([]models.Participant, len(board.Members))
+	for i, m := range board.Members {
+		participants[i] = models.Participant{
+			Username: m.Username,
+			Avatar:   m.Avatar,
+			JoinedAt: m.JoinedAt,
+		}
+	}
+	board.Participants = participants
 
 	c.JSON(http.StatusOK, board)
 }
@@ -152,7 +174,8 @@ func ListBoards(c *gin.Context) {
 	var boards []models.Board
 	// Use Unscoped to find deleted boards for admin, but basic ListBoards usually filters them out.
 	// For Admin use, we might want a separate endpoint or query param. For now, keep as is.
-	if err := database.DB.Order("created_at DESC").Find(&boards).Error; err != nil {
+	// Preload members to populate participants
+	if err := database.DB.Preload("Members").Order("created_at DESC").Find(&boards).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch boards"})
 		return
 	}
@@ -213,6 +236,16 @@ func ListBoards(c *gin.Context) {
 
 	response := make([]BoardResponse, len(boards))
 	for i, b := range boards {
+		// Populate participants for frontend consistency
+		b.Participants = make([]models.Participant, len(b.Members))
+		for j, m := range b.Members {
+			b.Participants[j] = models.Participant{
+				Username: m.Username,
+				Avatar:   m.Avatar,
+				JoinedAt: m.JoinedAt,
+			}
+		}
+
 		// Count is persistent membership
 		participantCount := len(b.Participants)
 
@@ -387,58 +420,52 @@ func JoinBoard(c *gin.Context) {
 		return
 	}
 
-	// Transaction with locking to prevent race conditions
-	err = database.DB.Transaction(func(tx *gorm.DB) error {
-		var board models.Board
-		// Lock the row for update
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&board, id).Error; err != nil {
-			return err
-		}
-
-		if board.Status == "finished" {
-			return errors.New("cannot join a finished board")
-		}
-
-		// Check if already participant
-		exists := false
-		for _, p := range board.Participants {
-			if p.Username == input.Username {
-				exists = true
-				break
-			}
-		}
-
-		if !exists {
-			newParticipant := models.Participant{
-				Username: input.Username,
-				Avatar:   input.Avatar,
-				JoinedAt: time.Now(),
-			}
-			// Append to participants list
-			// Assign to a new slice to force update detection if needed, though append works usually
-			board.Participants = append(board.Participants, newParticipant)
-
-			if err := tx.Save(&board).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		if err.Error() == "cannot join a finished board" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to join board"})
-		}
+	// Double check board status (optional, but good UX)
+	var board models.Board
+	if err := database.DB.First(&board, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
+		return
+	}
+	if board.Status == "finished" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot join a finished board"})
 		return
 	}
 
-	// Fetch updated board
+	// Create BoardMember entry
+	// Using Clause(clause.OnConflict{DoNothing: true}) to handle duplicates gracefully (race condition safe)
+	member := models.BoardMember{
+		BoardID:  id,
+		Username: input.Username,
+		Avatar:   input.Avatar,
+		JoinedAt: time.Now(),
+	}
+
+	if err := database.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&member).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to join board"})
+		return
+	}
+
+	// Log for debug
+	fmt.Printf("[JoinBoard] User %s joined board %s.\n", input.Username, id)
+
+	// Fetch updated board with participants populating the JSON field
 	var updatedBoard models.Board
-	database.DB.First(&updatedBoard, id)
+	// Preload Members
+	if err := database.DB.Preload("Members").First(&updatedBoard, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated board"})
+		return
+	}
+
+	// Map members to participants for JSON response
+	participants := make([]models.Participant, len(updatedBoard.Members))
+	for i, m := range updatedBoard.Members {
+		participants[i] = models.Participant{
+			Username: m.Username,
+			Avatar:   m.Avatar,
+			JoinedAt: m.JoinedAt,
+		}
+	}
+	updatedBoard.Participants = participants
 
 	// Broadcast update
 	BroadcastBoardUpdate(updatedBoard.ID)
@@ -463,49 +490,39 @@ func LeaveBoard(c *gin.Context) {
 		return
 	}
 
-	err = database.DB.Transaction(func(tx *gorm.DB) error {
-		var board models.Board
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&board, id).Error; err != nil {
-			return err
-		}
-
-		if board.Status == "finished" {
-			return errors.New("cannot leave a finished board")
-		}
-
-		// Remove participant
-		newParticipants := []models.Participant{}
-		removed := false
-		for _, p := range board.Participants {
-			if p.Username != input.Username {
-				newParticipants = append(newParticipants, p)
-			} else {
-				removed = true
-			}
-		}
-
-		if removed {
-			board.Participants = newParticipants
-			if err := tx.Save(&board).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		if err.Error() == "cannot leave a finished board" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		} else if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to leave board"})
-		}
+	var board models.Board
+	if err := database.DB.First(&board, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
+		return
+	}
+	if board.Status == "finished" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot leave a finished board"})
 		return
 	}
 
+	// Delete BoardMember
+	if err := database.DB.Where("board_id = ? AND username = ?", id, input.Username).Delete(&models.BoardMember{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to leave board"})
+		return
+	}
+
+	// Fetch updated board
 	var updatedBoard models.Board
-	database.DB.First(&updatedBoard, id)
+	if err := database.DB.Preload("Members").First(&updatedBoard, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated board"})
+		return
+	}
+
+	// Map members to participants
+	participants := make([]models.Participant, len(updatedBoard.Members))
+	for i, m := range updatedBoard.Members {
+		participants[i] = models.Participant{
+			Username: m.Username,
+			Avatar:   m.Avatar,
+			JoinedAt: m.JoinedAt,
+		}
+	}
+	updatedBoard.Participants = participants
 
 	// Broadcast update
 	BroadcastBoardUpdate(updatedBoard.ID)

@@ -103,19 +103,31 @@ func GetMyTeams(c *gin.Context) {
 		return
 	}
 
+	// Populate count
+	for i := range teams {
+		teams[i].MemberCount = int64(len(teams[i].Members))
+	}
+
 	c.JSON(http.StatusOK, teams)
 }
 
 // ListAvailableTeams returns all teams for directory listing
 func ListAvailableTeams(c *gin.Context) {
 	var teams []models.Team
-	// Preload Members count to show "X members"
-	// For simplicity, just fetching basic team info.
-	// Optimally, we'd do a Count on members.
-	if err := database.DB.Preload("Members").Find(&teams).Error; err != nil {
+	// Optimize: Select teams and count members using a subquery or join-scan
+	// For simplicity and correctness with GORM features:
+	if err := database.DB.Find(&teams).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch teams"})
 		return
 	}
+
+	// Efficiently count members for displayed teams
+	for i := range teams {
+		var count int64
+		database.DB.Model(&models.TeamMember{}).Where("team_id = ?", teams[i].ID).Count(&count)
+		teams[i].MemberCount = count
+	}
+
 	c.JSON(http.StatusOK, teams)
 }
 

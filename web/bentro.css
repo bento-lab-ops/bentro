@@ -638,36 +638,64 @@
 
 }
 
-/* Premium Board Cards (Matching Team Cards) */
+/* Premium Board Cards */
 .board-card {
-    background: var(--glass-bg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    height: 100%;
+}
+
+.board-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 .board-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
-    border-color: var(--primary);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    border-color: rgba(var(--primary-rgb), 0.3);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.board-card h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    line-height: 1.4;
 }
 
 .board-status {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
 }
 
 .board-status.status-active {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.15);
     color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.1);
 }
 
 .board-status.status-finished {
@@ -677,24 +705,70 @@
 }
 
 .action-item-dashboard-badge {
-    background: rgba(234, 179, 8, 0.1);
+    background: rgba(234, 179, 8, 0.15);
     color: #facc15;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    border: 1px solid rgba(234, 179, 8, 0.2);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .board-meta {
-    font-size: 0.9rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: auto;
+}
+
+.meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.participant-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #a5b4fc;
+    font-weight: 500;
 }
 
 .dashboard-actions {
     display: flex;
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.dashboard-actions .btn {
+    transition: all 0.2s;
+}
+
+.dashboard-actions .btn:hover {
+    transform: translateY(-2px);
 }
 
 /* UI Standardization - Tabs Left Aligned */

@@ -1,20 +1,22 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.10.38
+## Current Version: v0.10.40
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### v0.10.39 - Bug Fixes & Stability
-**Effort:** S (1-2 days)
-- [ ] **Dashboard Participant Count** - Fix erratic participant count display and random disappearance on Board Cards.
-- [ ] **Team Member Count** - Fix incorrect member count display on Team Cards.
+### v0.10.x - Field Testing & Refinement
+**Focus:** Stability, UX Polish, and Real-world usage.
+- [ ] **Peek Mode**: Allow users to view a board as read-only before joining ("Peek" button).
+- [ ] **Data Export**: Export board data to CSV/PDF (Backend implementation).
+- [ ] **Team-filtered Dashboard (Backend)**: Refactor to support Many-to-Many Board-Team relations for "Hybrid" filtering.
+- [ ] **Advanced Action Items Filtering**: Filter by Period, Team/Board, or Owner.
 
-### v0.10.x - Team Management & Advanced Collaboration
-**Effort:** M (1-2 weeks)
-- [ ] **Team-filtered Dashboard** - Filter boards by team.
-- [ ] **Advanced Action Items Filtering** - Filter by Period, Team/Board, or Owner.
+### v1.0.0 - Semantic Release
+**Goal:** Official release after field testing validation.
+- [ ] **Production Readiness Review**: Stress testing and final security audit.
+- [ ] **User Documentation**: Complete guide for end-users and admins.
 
 ### v1.0.0 - Integrations & Release Candidate
 **Effort:** XL (1-2 weeks)
@@ -26,7 +28,8 @@
 
 ## ✅ Completed Features
 
-### v0.10.0 - v0.10.38 (Teams & Participation)
+### v0.10.0 - v0.10.40 (Teams & UX Polish)
+- [x] **Dashboard UI Fixes** - Fixed "Leave Board" redirect, Button Labels ("Return"), and Filter Logic.
 - [x] **Board Participation Persistence** - Users can permanently join/leave boards, preserving history.
 - [x] **Dashboard UI Overhaul** - Improved card layout with metadata (Participants, Team, Owner).
 - [x] **Team Management** - Create teams, join teams (Invite Only), and assign boards to teams.

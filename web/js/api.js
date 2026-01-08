@@ -38,10 +38,14 @@ function handleWebSocketMessage(message) {
             updatePhase(message.data.phase);
             break;
         case 'board_update':
-            if (document.getElementById('dashboardView').style.display !== 'none') {
+            // console.log('[WS] Board Update received:', message.data);
+            // Refresh dashboard lists if we are potentially viewing them
+            // We remove strict display check to ensure robustness
+            if (document.getElementById('dashboardView')) {
                 loadBoards();
             }
             if (window.currentBoard && window.currentBoard.id === message.data.board_id) {
+                // If we are IN the board, reload it to get new participants
                 loadBoard(window.currentBoard.id);
             }
             break;

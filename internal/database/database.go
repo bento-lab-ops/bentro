@@ -33,6 +33,14 @@ func InitDB() error {
 	}
 
 	log.Println("Database connection established")
+	log.Println("!!! I AM ALIVE v0.11.6 AND THE DB IS HERE !!!")
+
+	// Ensure BoardMember is registered
+	if !DB.Migrator().HasTable(&models.BoardMember{}) {
+		log.Println("BoardMember table does not exist, creating it...")
+	} else {
+		log.Println("BoardMember table already exists.")
+	}
 
 	// Auto-migrate models
 	err = DB.AutoMigrate(
@@ -44,6 +52,7 @@ func InitDB() error {
 		&models.User{},
 		&models.Team{},
 		&models.TeamMember{},
+		&models.BoardMember{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)

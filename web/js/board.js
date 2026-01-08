@@ -6,6 +6,7 @@ let currentFilter = 'active';
 async function loadBoards() {
     try {
         const boards = await apiCall('/boards');
+        console.log('[loadBoards] Fetched boards:', boards.length, boards.map(b => ({ id: b.id, name: b.name, part_count: b.participant_count, participants: b.participants })));
         allBoardsCache = boards;
         filterBoards(currentFilter || 'active');
     } catch (error) {
@@ -38,34 +39,34 @@ function renderDashboard(boards) {
     document.getElementById('emptyDashboard').style.display = 'none';
 
     boards.forEach(board => {
-        const isMyBoard = board.owner === (window.currentUser || '');
-        // Determine other flags based on board data (e.g. if it has a team_id)
-        const isTeamBoard = !!board.team_id;
-        // Participation is harder to check on the fly without the full participant list in the board object.
-        // For now, let's assume if it's in the list and not mine, I'm participating (since GET /boards returns boards I have access to).
-        // This is a simplification but works for "I'm Participating" filter roughly.
-        const isParticipating = !isMyBoard;
-
         const card = document.createElement('div');
         card.className = 'board-card';
-        card.dataset.id = board.id;
-        card.dataset.myBoard = isMyBoard;
-        card.dataset.teamBoard = isTeamBoard;
-        card.dataset.participating = isParticipating;
-        const statusClass = board.status === 'active' ? 'status-active' : 'status-finished';
+        card.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I' && !e.target.closest('button')) {
+                loadBoard(board.id);
+            }
+        };
+
+        // Determine flags
+        const myUser = (window.currentUser || '').toLowerCase();
+        const isOwner = (board.owner || '').toLowerCase() === myUser;
+        const isMember = board.participants && board.participants.some(p => (p.username || '').toLowerCase() === myUser);
+        const isTeamBoard = !!board.team_id;
+        const hasTeam = !!board.team_name;
+
+        // Add filter attributes
+        card.dataset.myBoard = isOwner ? 'true' : 'false';
+        card.dataset.participating = isMember ? 'true' : 'false';
+        card.dataset.teamBoard = isTeamBoard ? 'true' : 'false';
 
         // Action Item Logic
         const actionItemCount = board.action_item_count || 0;
         const hasActionItems = actionItemCount > 0;
-        const actionItemBadge = hasActionItems
-            ? `<div class="action-item-dashboard-badge" title="${actionItemCount} active action items">⚡ ${actionItemCount}</div>`
-            : '';
-
-        // Delete Button Logic
-        // Disable delete if has action items OR if board is active
         const isActive = board.status === 'active';
-        const deleteDisabled = (hasActionItems || isActive) ? 'disabled' : '';
-        const deleteStyle = (hasActionItems || isActive) ? 'opacity: 0.5; cursor: not-allowed;' : '';
+        const statusClass = isActive ? 'status-active' : 'status-finished';
+        const actionItemBadge = hasActionItems
+            ? `<span class="action-item-dashboard-badge" title="${actionItemCount} Action Items">⚡ ${actionItemCount}</span>`
+            : '';
 
         let deleteTitle = i18n.t('modal.delete');
         if (hasActionItems) {
@@ -75,60 +76,66 @@ function renderDashboard(boards) {
         }
 
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:start;">
-                <h3 style="margin:0;">${escapeHtml(board.name)}</h3>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                <h3 title="${escapeHtml(board.name)}" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 70%;">${escapeHtml(board.name)}</h3>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
                     ${actionItemBadge}
                     <span class="board-status ${statusClass}">${i18n.t('status.' + board.status) || board.status}</span>
                 </div>
             </div>
-            <div class="board-meta">
+            
+            <div class="board-meta" style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <div class="meta-row">
-                    <span>📅 ${new Date(board.created_at).toLocaleDateString()}</span>
-                    ${board.participant_count > 0 ?
-                `<div class="participant-badge" title="${i18n.t('label.participants') || 'Participants'}">👤 ${board.participant_count}</div>`
-                : ''}
-                    ${board.team_name ? `<span class="meta-badge team-badge" title="Team Board">🛡️ ${escapeHtml(board.team_name)}</span>` : ''}
+                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.created_at') || 'Created'}:</span>
+                    <span>${new Date(board.created_at).toLocaleDateString()}</span>
                 </div>
                 <div class="meta-row">
-                     ${board.owner ? `<span class="meta-badge owner-badge" title="Board Owner">👑 ${escapeHtml(board.owner)}</span>` : ''}
+                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.participants') || 'Participants'}:</span>
+                    <span>${board.participant_count}</span>
                 </div>
+                <div class="meta-row">
+                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.owner') || 'Owner'}:</span>
+                    <span>${escapeHtml(board.owner || '-')}</span>
+                </div>
+                ${board.team_name ? `
+                <div class="meta-row">
+                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.team') || 'Team'}:</span>
+                    <span title="${escapeHtml(board.team_name)}">${escapeHtml(board.team_name)}</span>
+                </div>` : ''}
             </div>
-            </div>
-            <div class="dashboard-actions" style="gap: 0.5rem; justify-content: flex-end;">
+
+            <div class="dashboard-actions">
                 ${(() => {
+                const myUser = (window.currentUser || '').toLowerCase();
+                const isMember = board.participants && board.participants.some(p => (p.username || '').toLowerCase() === myUser);
+                const isOwner = (board.owner || '').toLowerCase() === myUser;
+
                 if (board.status === 'finished') {
                     return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.view_results') || 'View Results'}">
                              <i class="fas fa-chart-bar"></i> ${i18n.t('btn.view')}
                         </button>`;
                 }
 
-                const myUser = window.currentUser;
-                const isMember = board.participants && board.participants.some(p => p.username === myUser);
-                const isOwner = board.owner === myUser; // Owner is implicitly a member? Backend join logic should handle this, but let's assume they might need to join too or we auto-join them.
-                // For now, "View" if member, "Join" if not.
-                // Auto-join owners on creation? Yes.
-
                 if (isMember || isOwner) {
-                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.enter')}">
-                             <i class="fas fa-arrow-right"></i> ${i18n.t('btn.enter')}
+                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.return') || 'Return'}">
+                             <i class="fas fa-arrow-right"></i> ${i18n.t('btn.return') || 'Retornar'}
                         </button>`;
                 } else {
                     return `<button class="btn btn-success btn-sm" onclick="joinBoardPersistent('${board.id}')" title="${i18n.t('btn.join')}">
-                             <i class="fas fa-sign-in-alt"></i> ${i18n.t('btn.join')}
+                             <i class="fas fa-sign-in-alt"></i> ${i18n.t('btn.enter') || 'Entrar'}
                         </button>`;
                 }
             })()}
 
                 ${board.status === 'finished' ?
                 `<button class="btn btn-warning btn-sm" onclick="updateBoardStatus('${board.id}', 'active')" title="${i18n.t('btn.reopen')}"><i class="fas fa-sync-alt"></i></button>` : ''}
-                <button class="btn btn-danger btn-sm" 
+                
+                ${board.status === 'finished' ?
+                `<button class="btn btn-danger btn-sm" 
                     onclick="deleteBoard('${board.id}')" 
-                    ${deleteDisabled} 
-                    style="${deleteStyle}"
                     title="${deleteTitle}">
                     <i class="fas fa-trash"></i>
-                </button>
+                </button>` : ''}
             </div>
         `;
 
@@ -159,17 +166,42 @@ async function joinBoardPersistent(boardId) {
 }
 
 async function leaveBoardPersistent(boardId) {
+    const id = boardId || (window.currentBoard ? window.currentBoard.id : null);
+    if (!id) {
+        console.error("No board ID found for leave action");
+        return;
+    }
+    if (!window.currentUser) {
+        window.location.hash = '#dashboard';
+        showDashboard();
+        return;
+    }
+
     if (!confirm(i18n.t('confirm.leave_board') || "Are you sure you want to leave this board?")) return;
     try {
-        await apiCall(`/boards/${boardId}/leave`, 'POST', {
+        await apiCall(`/boards/${id}/leave`, 'POST', {
             username: window.currentUser
         });
-        // Redirect to dashboard
-        showDashboard();
-        // Refresh dashboard data
-        loadBoards();
+
+        // Success: Redirect to dashboard
+        window.location.hash = '#dashboard';
+
+        // Ensure UI update
+        if (typeof showDashboard === 'function') {
+            showDashboard();
+        } else {
+            // Fallback if showDashboard is not available or hash change didn't trigger
+            document.getElementById('board-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'block';
+            loadBoards();
+        }
+
+        // Refresh data
+        setTimeout(loadBoards, 50);
     } catch (error) {
         console.error('Failed to leave board:', error);
+        // If error is "user not participant", we should probably just return to dashboard anyway?
+        // For now, alert logic is fine.
         alert('Failed to leave board: ' + error.message);
     }
 }
@@ -186,11 +218,8 @@ async function createBoard(name, columns, teamId = null) {
         }
 
         const board = await apiCall('/boards', 'POST', payload);
-        // Auto-join the creator
-        await apiCall(`/boards/${board.id}/join`, 'POST', {
-            username: window.currentUser,
-            avatar: window.currentUserAvatar
-        });
+        // Auto-join handled by backend
+        // await apiCall(`/boards/${board.id}/join`...
 
         await loadBoard(board.id);
         return board;

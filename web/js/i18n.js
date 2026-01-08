@@ -42,7 +42,7 @@ const translations = {
         'status.finished': 'Finished',
         'help.desc_full': 'Retrospectives are a vital part of agile development. Use BenTro to collaborate with your team, vote on ideas, and create action items for continuous improvement.',
         'label.desc_notes': 'Description / Notes',
-
+        'label.participants': 'Participants',
         // Generic
         'modal.close': 'Close',
         'modal.cancel': 'Cancel',
@@ -65,6 +65,8 @@ const translations = {
         'label.password': 'Password',
         'label.old_password': 'Current Password',
         'label.new_password': 'New Password',
+        'btn.return': 'Return',
+        'label.team': 'Team',
         'label.confirm_password': 'Confirm New Password',
         'label.first_name': 'First Name',
         'label.last_name': 'Last Name',
@@ -107,6 +109,7 @@ const translations = {
 
         // Dynamic / JS
         'alert.enter_board_name': 'Please enter a board name',
+        'confirm.leave_board': 'Are you sure you want to leave this board?',
         'confirm.delete_board': 'Are you sure you want to delete this board?',
         'confirm.finish_retro': 'Are you sure you want to finish this retrospective? This will disable adding new cards and voting.',
         'confirm.reopen_retro': 'Re-open this retrospective?',
@@ -179,6 +182,7 @@ const translations = {
 
         // Buttons
         'btn.close': 'Close',
+        'btn.join': 'Join',
 
         // Admin
         'admin.title': 'Admin Access',
@@ -289,6 +293,7 @@ const translations = {
         // Board View
         'banner.read_only': '⚠️ Esta retro foi finalizada (Somente Leitura)',
         'label.active_participants': 'Ativos:',
+        'label.participants': 'Participantes',
         'label.current_phase': 'Fase Atual:',
         'phase.input': 'Entrada',
         'phase.voting': 'Votação',
@@ -330,6 +335,8 @@ const translations = {
         'label.password': 'Senha',
         'label.old_password': 'Senha Atual',
         'label.new_password': 'Nova Senha',
+        'btn.return': 'Retornar',
+        'label.team': 'Time',
         'label.confirm_password': 'Confirmar Nova Senha',
         'label.first_name': 'Nome',
         'label.last_name': 'Sobrenome',
@@ -376,6 +383,7 @@ const translations = {
 
         // Dynamic / JS
         'alert.enter_board_name': 'Por favor, digite um nome para a retro',
+        'confirm.leave_board': 'Tem certeza que deseja sair desta retro?',
         'confirm.delete_board': 'Tem certeza que deseja excluir esta retro?',
         'confirm.finish_retro': 'Tem certeza que deseja finalizar esta retrospectiva? Isso impedirá a criação de novos cards e votos.',
         'confirm.reopen_retro': 'Reabrir esta retrospectiva?',
@@ -447,6 +455,7 @@ const translations = {
         'admin.stat_completed_actions': 'Tarefas Concluídas',
         'label.votes_remaining': 'Votos Restantes',
         'label.votes_remaining': 'Votos Restantes',
+        'btn.join': 'Entrar',
         'btn.login': 'Entrar',
         'btn.signin_google': 'Entrar com Google',
         'btn.claim_host': 'Tornar-se Moderador',

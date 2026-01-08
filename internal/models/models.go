@@ -39,16 +39,26 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// BoardMember represents a user who has joined a board
+type BoardMember struct {
+	BoardID  uuid.UUID `gorm:"type:uuid;primaryKey" json:"board_id"`
+	Username string    `gorm:"type:text;primaryKey" json:"username"`
+	Avatar   string    `json:"avatar"`
+	JoinedAt time.Time `json:"joined_at"`
+}
+
 // Board represents a retrospective board
 type Board struct {
-	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
-	Name         string         `gorm:"not null" json:"name"`
-	Status       string         `gorm:"default:'active'" json:"status"` // active, finished
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	FinishedAt   *time.Time     `json:"finished_at"` // Pointer to allow null (active)
-	Columns      []Column       `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
-	Participants []Participant  `gorm:"type:jsonb;serializer:json" json:"participants"`
+	ID         uuid.UUID  `gorm:"type:uuid;primary_key" json:"id"`
+	Name       string     `gorm:"not null" json:"name"`
+	Status     string     `gorm:"default:'active'" json:"status"` // active, finished
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	FinishedAt *time.Time `json:"finished_at"` // Pointer to allow null (active)
+	Columns    []Column   `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"columns,omitempty"`
+	// Participants is now computed from BoardMembers for JSON response, not stored as JSONB
+	Participants []Participant  `gorm:"-" json:"participants"`
+	Members      []BoardMember  `gorm:"foreignKey:BoardID;constraint:OnDelete:CASCADE" json:"-"`
 	Owner        string         `json:"owner"`                        // Username of board owner/manager
 	CoOwner      string         `json:"co_owner"`                     // Username of second board manager
 	Phase        string         `gorm:"default:'input'" json:"phase"` // input, voting, discuss
@@ -163,6 +173,7 @@ type Team struct {
 	Members      []TeamMember   `gorm:"foreignKey:TeamID;constraint:OnDelete:CASCADE" json:"members,omitempty"`
 	Boards       []Board        `gorm:"foreignKey:TeamID" json:"boards,omitempty"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	MemberCount  int64          `gorm:"-" json:"member_count"` // Computed field
 }
 
 // BeforeCreate hook to generate UUID

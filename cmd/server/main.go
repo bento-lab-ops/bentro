@@ -41,12 +41,16 @@ func main() {
 	// Serve static files
 	router.Static("/static", "./web")
 	router.StaticFile("/", "./web/index.html")
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
 	// API routes
 	api := router.Group("/api")
 	{
 		// Board routes
 		log.Println("Registering board routes...")
+		api.GET("/boards", handlers.ListBoards)
 		api.POST("/boards", handlers.CreateBoard)
 		api.GET("/boards/:id", handlers.GetBoard)
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
@@ -55,8 +59,6 @@ func main() {
 		api.POST("/boards/:id/join", handlers.JoinBoard)
 		api.POST("/boards/:id/leave", handlers.LeaveBoard)
 		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
-		api.POST("/boards/:id/claim", handlers.ClaimBoard)
-		api.POST("/boards/:id/unclaim", handlers.UnclaimBoard)
 
 		// Column routes
 		api.POST("/boards/:id/columns", handlers.CreateColumn)

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bentro-app
-        image: dnlouko/bentro-app:v0.10.38
+        image: dnlouko/bentro-app-final:v0.10.40
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -64,13 +64,13 @@ spec:
             cpu: "200m"
         livenessProbe:
           httpGet:
-            path: /api/boards
+            path: /health
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /api/boards
+            path: /health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5

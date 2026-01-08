@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"retro-app/internal/models"
 
@@ -53,7 +54,7 @@ var hub = &Hub{
 	clients:           make(map[*websocket.Conn]bool),
 	boardParticipants: make(map[string]map[string]models.Participant),
 	connToUser:        make(map[*websocket.Conn]UserConnection),
-	broadcast:         make(chan []byte),
+	broadcast:         make(chan []byte, 256), // Buffered channel prevents locking
 	register:          make(chan *websocket.Conn),
 	unregister:        make(chan *websocket.Conn),
 	joinBoard:         make(chan *ParticipantMessage),
@@ -114,6 +115,9 @@ func (h *Hub) Run() {
 		case message := <-h.broadcast:
 			h.mutex.RLock()
 			for conn := range h.clients {
+				// Set write deadline to prevent blocking if client is slow/dead
+				// This is critical for preventing the Hub from locking up
+				conn.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
 				err := conn.WriteMessage(websocket.TextMessage, message)
 				if err != nil {
 					log.Printf("Error broadcasting to client: %v", err)
@@ -195,7 +199,13 @@ func BroadcastMessage(messageType string, data interface{}) {
 		log.Printf("Error marshaling broadcast message: %v", err)
 		return
 	}
-	hub.broadcast <- jsonData
+
+	// Non-blocking send
+	select {
+	case hub.broadcast <- jsonData:
+	default:
+		log.Println("Hub broadcast channel full, dropping message to prevent deadlock.")
+	}
 }
 
 // HandleWebSocket handles WebSocket connections
