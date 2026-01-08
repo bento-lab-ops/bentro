@@ -59,6 +59,7 @@ func main() {
 		api.POST("/boards/:id/join", handlers.JoinBoard)
 		api.POST("/boards/:id/leave", handlers.LeaveBoard)
 		api.GET("/boards/:id/participants", handlers.GetBoardParticipants)
+		api.PUT("/boards/:id/teams", handlers.AuthMiddleware(), handlers.UpdateBoardTeams)
 
 		// Column routes
 		api.POST("/boards/:id/columns", handlers.CreateColumn)

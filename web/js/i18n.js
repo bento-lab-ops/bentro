@@ -269,6 +269,17 @@ const translations = {
         'label.assignee': 'Assignee',
         'label.owner': 'Owner',
         'label.actions': 'Actions',
+        'modal.manage_teams_title': 'Manage Participating Teams',
+        'text.manage_teams_desc': 'Add or remove teams from this board.',
+        'label.current_teams': 'Current Teams',
+        'label.add_team': 'Add Team',
+        'label.select_team': 'Select a team...',
+        'btn.add_team': 'Add',
+        'msg.no_teams': 'No teams added yet.',
+        'confirm.remove_team': 'Are you sure you want to remove this team?',
+        'msg.team_added': 'Team added successfully',
+        'msg.team_removed': 'Team removed successfully',
+        'btn.manage_teams': 'Manage Teams',
     },
     'pt-BR': {
         // Queue/Dashboard
@@ -524,6 +535,20 @@ const translations = {
         'phase.voting': 'Fase de Votação',
         'phase.completed': 'Finalizada',
         'phase.discuss': 'Fase de Discussão',
+        'label.team_optional': 'Time (Opcional)',
+        'option.no_team': 'Sem Time (Pessoal)',
+        'btn.manage_teams': 'Gerenciar Times',
+        'heading.manage_teams': 'Gerenciar Times',
+        'modal.manage_teams_title': 'Gerenciar Times Participantes',
+        'text.manage_teams_desc': 'Adicione ou remova times deste quadro.',
+        'btn.add_team': 'Adicionar Time',
+        'msg.team_added': 'Time adicionado com sucesso',
+        'msg.team_removed': 'Time removido com sucesso',
+        'label.current_teams': 'Times Atuais',
+        'label.add_team': 'Adicionar Time',
+        'label.select_team': 'Selecione um time...',
+        'msg.no_teams': 'Nenhum time adicionado.',
+        'confirm.remove_team': 'Tem certeza que deseja remover este time?',
     }
 };
 

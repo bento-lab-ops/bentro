@@ -59,6 +59,23 @@ func InitDB() error {
 	}
 
 	log.Println("Database migration completed")
+
+	// Migrate existing TeamID to Many-to-Many table
+	// This is a one-time migration for v0.10.x upgrade
+	// We use raw SQL to ensure it runs even if GORM structs change later
+	err = DB.Exec(`
+		INSERT INTO board_teams (board_id, team_id)
+		SELECT id, team_id FROM boards 
+		WHERE team_id IS NOT NULL 
+		AND id NOT IN (SELECT board_id FROM board_teams)
+	`).Error
+	if err != nil {
+		log.Printf("Warning: Failed to migrate legacy team_id to board_teams: %v", err)
+		// Non-fatal, as it might be due to constraints or empty tables
+	} else {
+		log.Println("Migrated legacy team_id data to board_teams table")
+	}
+
 	return nil
 }
 

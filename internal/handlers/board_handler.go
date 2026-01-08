@@ -18,7 +18,8 @@ func CreateBoard(c *gin.Context) {
 		Name    string   `json:"name" binding:"required"`
 		Columns []string `json:"columns"`
 		Owner   string   `json:"owner"`
-		TeamID  string   `json:"team_id"`
+		TeamID  string   `json:"team_id"`  // Legacy: single team
+		TeamIDs []string `json:"team_ids"` // New: multiple teams
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -33,10 +34,41 @@ func CreateBoard(c *gin.Context) {
 		Owner:  input.Owner,
 	}
 
+	// Handle Teams (Many-to-Many)
+	var teams []models.Team
+
+	// Merge legacy TeamID into TeamIDs if present
 	if input.TeamID != "" {
-		if tid, err := uuid.Parse(input.TeamID); err == nil {
-			teamID := tid
-			board.TeamID = &teamID
+		input.TeamIDs = append(input.TeamIDs, input.TeamID)
+	}
+
+	// Deduplicate and Fetch Teams
+	if len(input.TeamIDs) > 0 {
+		// Use a map to deduplicate IDs
+		uniqueIDs := make(map[string]bool)
+		for _, id := range input.TeamIDs {
+			if _, err := uuid.Parse(id); err == nil {
+				uniqueIDs[id] = true
+			}
+		}
+
+		var validIDs []string
+		for id := range uniqueIDs {
+			validIDs = append(validIDs, id)
+		}
+
+		if len(validIDs) > 0 {
+			if err := database.DB.Where("id IN ?", validIDs).Find(&teams).Error; err != nil {
+				fmt.Printf("Warning: Failed to fetch teams for board creation: %v\n", err)
+			}
+			board.Teams = teams
+
+			// Set legacy TeamID to the first team for backward compatibility if needed
+			// But ideally we stop using it.
+			if len(teams) > 0 {
+				firstTeamID := teams[0].ID
+				board.TeamID = &firstTeamID
+			}
 		}
 	}
 
@@ -145,6 +177,7 @@ func GetBoard(c *gin.Context) {
 		Preload("Columns.Cards.Reactions").
 		Preload("Columns.Cards.MergedCards").
 		Preload("Members").
+		Preload("Teams").
 		First(&board, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
 		return
@@ -174,8 +207,8 @@ func ListBoards(c *gin.Context) {
 	var boards []models.Board
 	// Use Unscoped to find deleted boards for admin, but basic ListBoards usually filters them out.
 	// For Admin use, we might want a separate endpoint or query param. For now, keep as is.
-	// Preload members to populate participants
-	if err := database.DB.Preload("Members").Order("created_at DESC").Find(&boards).Error; err != nil {
+	// Preload members and teams
+	if err := database.DB.Preload("Members").Preload("Teams").Order("created_at DESC").Find(&boards).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch boards"})
 		return
 	}
@@ -202,37 +235,11 @@ func ListBoards(c *gin.Context) {
 	// Build response
 	type BoardResponse struct {
 		models.Board
-		ActionItemCount  int64  `json:"action_item_count"`
-		ParticipantCount int    `json:"participant_count"`
-		TeamName         string `json:"team_name,omitempty"`
-		IsParticipant    bool   `json:"is_participant"`
+		ActionItemCount  int64         `json:"action_item_count"`
+		ParticipantCount int           `json:"participant_count"`
+		TeamName         string        `json:"team_name,omitempty"` // Deprecated: Use Teams
+		Teams            []models.Team `json:"teams,omitempty"`
 	}
-
-	// Get current user from context (if set by auth middleware) or query param for now?
-	// Since ListBoards is public/protected, we might need a way to know WHO is asking.
-	// For now, let's assume the frontend filters "IsParticipant" manually using the list?
-	// NO, the frontend doesn't have the full list if we don't send it.
-	// BUT `models.Board` struct HAS `Participants []Participant`.
-	// So frontend HAS the list of participants in `b.Participants`.
-	// WE DO NOT NEED `IsParticipant` in the Go struct if `Participants` is already sent!
-	// Let's check `models.Board` in `models.go`. Yes, `Participants []Participant`.
-	// SO `ListBoards` returns `Participants` array. Frontend can check `count` and `isParticipant`.
-
-	// WAIT. `ListBoards` in `board_handler.go` uses `models.Board`.
-	// Does `database.DB.Find(&boards)` load the JSONB field? Yes.
-
-	// However, for ACTIVE boards, the "real-time" participants are in the HUB, but we are moving towards PERSISTENT participants.
-	// If we use Persistent Participants (DB), then `b.Participants` is the source of truth for "Joined".
-	// The Hub tracks "Online" users.
-	// The Request was: "Join/Leave" buttons.
-	// So we should use the DB list for "Membership".
-
-	// We will sync Hub count with DB count?
-	// User said: "manter o usuario ativo naquela retro ... até que a pessoa decida usar o botão leave board".
-	// This implies DB persistence.
-
-	// So `ParticipantCount` should be `len(b.Participants)` (DB) + maybe Hub online ones?
-	// Let's stick to DB Participants for the "Count" on dashboard to match the "Join" button state.
 
 	response := make([]BoardResponse, len(boards))
 	for i, b := range boards {
@@ -249,8 +256,16 @@ func ListBoards(c *gin.Context) {
 		// Count is persistent membership
 		participantCount := len(b.Participants)
 
+		// Create unified team name string for legacy support
 		var teamName string
-		if b.TeamID != nil {
+		if len(b.Teams) > 0 {
+			teamName = b.Teams[0].Name
+			if len(b.Teams) > 1 {
+				teamName += fmt.Sprintf(" +%d", len(b.Teams)-1)
+			}
+		} else if b.TeamID != nil {
+			// Fallback to legacy TeamID lookup if Teams relation is empty but TeamID is set
+			// (Should not happen after migration, but safe to keep)
 			var team models.Team
 			if err := database.DB.Select("name").First(&team, b.TeamID).Error; err == nil {
 				teamName = team.Name
@@ -262,7 +277,7 @@ func ListBoards(c *gin.Context) {
 			ActionItemCount:  counts[b.ID],
 			ParticipantCount: participantCount,
 			TeamName:         teamName,
-			// IsParticipant calculated on frontend from b.Participants + current user
+			Teams:            b.Teams,
 		}
 	}
 
@@ -287,14 +302,33 @@ func DeleteBoard(c *gin.Context) {
 }
 
 // GetBoardParticipants retrieves the list of active participants for a board
+// Now returns persistent members from DB to match Join/Leave logic
 func GetBoardParticipants(c *gin.Context) {
-	boardID := c.Param("id")
-	if boardID == "" {
+	boardID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
 		return
 	}
 
-	participants := hub.GetBoardParticipants(boardID)
+	var members []models.BoardMember
+	if err := database.DB.Where("board_id = ?", boardID).Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch participants"})
+		return
+	}
+
+	participants := make([]models.Participant, len(members))
+	for i, m := range members {
+		participants[i] = models.Participant{
+			Username: m.Username,
+			Avatar:   m.Avatar,
+			JoinedAt: m.JoinedAt,
+		}
+	}
+	// Check if any active connections are missing from DB?
+	// For now, Persistent membership is the source of truth.
+	// We could merge with hub.GetBoardParticipants(boardID.String()) if we wanted "Online Guests"
+	// but purely DB is safer for "Joined" state consistency.
+
 	c.JSON(http.StatusOK, participants)
 }
 

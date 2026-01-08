@@ -64,7 +64,8 @@ type Board struct {
 	Phase        string         `gorm:"default:'input'" json:"phase"` // input, voting, discuss
 	VoteLimit    int            `gorm:"default:0" json:"vote_limit"`  // 0 = unlimited
 	BlindVoting  bool           `gorm:"default:false" json:"blind_voting"`
-	TeamID       *uuid.UUID     `gorm:"type:uuid;index" json:"team_id,omitempty"` // Nullable, as personal boards exist
+	TeamID       *uuid.UUID     `gorm:"type:uuid;index" json:"team_id,omitempty"` // Deprecated: Use Teams instead
+	Teams        []Team         `gorm:"many2many:board_teams;" json:"teams,omitempty"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 

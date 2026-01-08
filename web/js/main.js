@@ -379,30 +379,12 @@ function setupEventListeners() {
     //     }
     // });
 
-    document.getElementById('newBoardBtn')?.addEventListener('click', () => {
+    document.getElementById('newBoardBtn')?.addEventListener('click', async () => {
         document.getElementById('newBoardModal').style.display = 'block';
+        await populateBoardTeamSelect();
     });
 
-
-
-    // Board Template Selector
-    document.getElementById('boardTemplate')?.addEventListener('change', (e) => {
-        const template = e.target.value;
-        const columnNamesTextarea = document.getElementById('columnNames');
-
-        if (template === 'custom') {
-            columnNamesTextarea.value = '';
-            columnNamesTextarea.placeholder = i18n.t('template.custom_placeholder') || "Enter column names, one per line";
-        } else if (BOARD_TEMPLATES[template]) {
-            // Translate columns
-            const cols = BOARD_TEMPLATES[template].map((col, index) => {
-                const colKey = `template.${template}.col${index + 1}`;
-                const translatedCol = i18n.t(colKey);
-                return (translatedCol && translatedCol !== colKey) ? translatedCol : col;
-            });
-            columnNamesTextarea.value = cols.join('\n');
-        }
-    });
+    // ...
 
     document.getElementById('newBoardForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -410,16 +392,20 @@ function setupEventListeners() {
         const columnsText = document.getElementById('columnNames').value.trim();
         const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
 
-        // Check if we are in a team context
+        // Check if we are in a team context OR a team was selected in the dropdown
         // currentTeamId is set in teams.js when opening team details
-        const teamId = window.currentTeamId || null;
+        const selectedTeamId = document.getElementById('boardTeamSelect')?.value;
+        const teamId = window.currentTeamId || (selectedTeamId !== '' ? selectedTeamId : null);
 
         await createBoard(name, columns, teamId);
         closeModals();
 
-        // If we are in team view, refresh the team details to show the new board
-        if (teamId && typeof loadTeamDetails === 'function') {
-            await loadTeamDetails(teamId);
+        // If we are in team view, refresh the team details
+        if (window.currentTeamId && typeof loadTeamDetails === 'function') {
+            await loadTeamDetails(window.currentTeamId);
+        } else {
+            // If dashboard view, reload boards to show new board (with team label)
+            if (typeof loadBoards === 'function') loadBoards();
         }
     });
 
@@ -596,6 +582,40 @@ function setupKeyboardShortcuts() {
 
 // Avatar Selection Functions
 function populateAvatarSelector() {
+    /*
+    // Helper to populate teams in New Board modal
+    async function populateBoardTeamSelect() {
+        const select = document.getElementById('boardTeamSelect');
+        if (!select) return;
+
+        // Clear existing (keep first option)
+        select.innerHTML = `<option value="" data-i18n="option.no_team">${i18n.t('option.no_team') || 'No Team (Personal)'}</option>`;
+
+        try {
+            const userTeams = await apiCall('/teams'); // Use cached or new call
+            // Sort alphabetically
+            userTeams.sort((a, b) => a.name.localeCompare(b.name));
+
+            userTeams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                select.appendChild(option);
+            });
+
+            // If inside a team view, select it and disable
+            if (window.currentTeamId) {
+                select.value = window.currentTeamId;
+                select.disabled = true;
+            } else {
+                select.disabled = false;
+            }
+
+        } catch (error) {
+            console.error('Failed to load teams for dropdown:', error);
+        }
+    } 
+    */
     const selector = document.getElementById('avatarSelector');
     if (!selector) return;
 
@@ -622,7 +642,142 @@ function selectAvatar(avatar) {
         clickedElement.classList.add('selected');
     }
 
-    // Update hidden input
     document.getElementById('selectedAvatar').value = avatar;
     setUserAvatar(avatar);
 }
+
+// Helper to populate teams in New Board modal
+async function populateBoardTeamSelect() {
+    const select = document.getElementById('boardTeamSelect');
+    if (!select) return;
+
+    // Clear existing (keep first option)
+    select.innerHTML = `<option value="" data-i18n="option.no_team">${i18n.t('option.no_team') || 'No Team (Personal)'}</option>`;
+
+    try {
+        const userTeams = await apiCall('/teams'); // Use cached or new call
+        // Sort alphabetically
+        userTeams.sort((a, b) => a.name.localeCompare(b.name));
+
+        userTeams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.id;
+            option.textContent = team.name;
+            select.appendChild(option);
+        });
+
+        // If inside a team view, select it and disable
+        if (window.currentTeamId) {
+            select.value = window.currentTeamId;
+            select.disabled = true;
+        } else {
+            select.disabled = false;
+        }
+
+    } catch (error) {
+        console.error('Failed to load teams for dropdown:', error);
+    }
+}
+
+// Manage Teams Modal Logic
+window.openManageTeamsModal = function () {
+    document.getElementById('manageTeamsModal').style.display = 'block';
+    populateManageTeamsModal();
+};
+
+window.closeManageTeamsModal = function () {
+    document.getElementById('manageTeamsModal').style.display = 'none';
+};
+
+async function populateManageTeamsModal() {
+    if (!window.currentBoard) return;
+
+    const list = document.getElementById('manageTeamsList');
+    const select = document.getElementById('manageTeamsSelect');
+
+    list.innerHTML = '<div class="spinner"></div>';
+
+    try {
+        // Fetch User's Teams for Dropdown
+        const userTeams = await apiCall('/teams');
+
+        // Populate Dropdown
+        select.innerHTML = `<option value="" disabled selected>${i18n.t('label.select_team') || 'Select a team...'}</option>`;
+        userTeams.forEach(team => {
+            // Check if team is already in board
+            const isMember = window.currentBoard.teams && window.currentBoard.teams.some(t => t.id === team.id);
+            if (!isMember) {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                select.appendChild(option);
+            }
+        });
+
+        // Render List
+        list.innerHTML = '';
+        if (window.currentBoard.teams && window.currentBoard.teams.length > 0) {
+            window.currentBoard.teams.forEach(team => {
+                const div = document.createElement('div');
+                div.className = 'team-item';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '8px';
+                div.style.borderBottom = '1px solid var(--border-color)';
+
+                div.innerHTML = `
+                    <span>${team.name}</span>
+                    <button class="btn btn-outline btn-small btn-danger" onclick="removeTeamFromBoard('${team.id}')">Remove</button>
+                `;
+                list.appendChild(div);
+            });
+        } else {
+            list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 10px;">${i18n.t('msg.no_teams') || 'No teams added yet.'}</div>`;
+        }
+
+    } catch (error) {
+        console.error('Failed to populate manage teams:', error);
+        list.innerHTML = `<div class="error">Failed to load teams</div>`;
+    }
+}
+
+window.addTeamToBoard = async function () {
+    const select = document.getElementById('manageTeamsSelect');
+    const teamId = select.value;
+    if (!teamId || !window.currentBoard) return;
+
+    try {
+        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
+        if (!currentTeamIds.includes(teamId)) {
+            const newTeamIds = [...currentTeamIds, teamId];
+
+            const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
+            window.currentBoard = updatedBoard;
+            alert(i18n.t('msg.team_added') || 'Team added successfully');
+            populateManageTeamsModal();
+            if (typeof renderBoardHeader === 'function') renderBoardHeader();
+        }
+    } catch (error) {
+        console.error('Failed to add team:', error);
+        alert(error.message || 'Failed to add team');
+    }
+};
+
+window.removeTeamFromBoard = async function (teamId) {
+    if (!window.currentBoard || !confirm(i18n.t('confirm.remove_team') || 'Are you sure you want to remove this team?')) return;
+
+    try {
+        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
+        const newTeamIds = currentTeamIds.filter(id => id !== teamId);
+
+        const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
+        window.currentBoard = updatedBoard;
+        alert(i18n.t('msg.team_removed') || 'Team removed successfully');
+        populateManageTeamsModal();
+        if (typeof renderBoardHeader === 'function') renderBoardHeader();
+    } catch (error) {
+        console.error('Failed to remove team:', error);
+        alert(error.message || 'Failed to remove team');
+    }
+};

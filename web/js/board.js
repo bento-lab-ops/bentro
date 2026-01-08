@@ -51,8 +51,17 @@ function renderDashboard(boards) {
         const myUser = (window.currentUser || '').toLowerCase();
         const isOwner = (board.owner || '').toLowerCase() === myUser;
         const isMember = board.participants && board.participants.some(p => (p.username || '').toLowerCase() === myUser);
-        const isTeamBoard = !!board.team_id;
-        const hasTeam = !!board.team_name;
+
+        // Multi-team logic
+        const teams = board.teams || [];
+        const isTeamBoard = teams.length > 0 || !!board.team_id;
+
+        // Display Name Logic
+        let displayTeamName = board.team_name || ''; // Default to legacy
+        if (teams.length > 0) {
+            displayTeamName = teams.map(t => t.name).join(', ');
+        }
+        const hasTeam = !!displayTeamName;
 
         // Add filter attributes
         card.dataset.myBoard = isOwner ? 'true' : 'false';
@@ -97,10 +106,10 @@ function renderDashboard(boards) {
                     <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.owner') || 'Owner'}:</span>
                     <span>${escapeHtml(board.owner || '-')}</span>
                 </div>
-                ${board.team_name ? `
+                ${hasTeam ? `
                 <div class="meta-row">
                     <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.team') || 'Team'}:</span>
-                    <span title="${escapeHtml(board.team_name)}">${escapeHtml(board.team_name)}</span>
+                    <span title="${escapeHtml(displayTeamName)}" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(displayTeamName)}</span>
                 </div>` : ''}
             </div>
 
@@ -254,7 +263,25 @@ async function loadBoard(boardId) {
         if (document.getElementById('newBoardBtn')) document.getElementById('newBoardBtn').style.display = 'none'; // Fix: Hide New Board button
 
 
-        document.getElementById('boardTitle').textContent = board.name;
+        const titleEl = document.getElementById('boardTitle');
+        titleEl.textContent = board.name; // Fallback text
+
+        // Team Badge Logic
+        const teams = board.teams || [];
+        let teamBadge = '';
+        if (teams.length > 0) {
+            const teamNames = teams.map(t => t.name).join(', ');
+            teamBadge = ` <span class="board-header-team-badge" title="Participating Teams: ${escapeHtml(teamNames)}">👥 ${teams.length} Team${teams.length > 1 ? 's' : ''}</span>`;
+        } else if (board.team_name) {
+            // Legacy fallback
+            teamBadge = ` <span class="board-header-team-badge" title="Team: ${escapeHtml(board.team_name)}">👥 1 Team</span>`;
+        }
+
+        if (teamBadge) {
+            titleEl.innerHTML = `${escapeHtml(board.name)}${teamBadge}`;
+        } else {
+            titleEl.textContent = board.name;
+        }
 
         renderBoard(board);
         updateBoardStatusUI(board.status);
@@ -549,6 +576,30 @@ function updateBoardStatusUI(status) {
         } else {
             claimBtn.style.display = 'none';
         }
+    }
+
+    // Manage Teams Button Injection
+    let manageTeamsBtn = document.getElementById('manageTeamsBtn');
+    if (!manageTeamsBtn) {
+        manageTeamsBtn = document.createElement('button');
+        manageTeamsBtn.id = 'manageTeamsBtn';
+        manageTeamsBtn.className = 'btn btn-outline btn-sm';
+        manageTeamsBtn.style.marginLeft = '8px';
+        manageTeamsBtn.onclick = openManageTeamsModal; // Global from main.js
+        manageTeamsBtn.innerHTML = '👥 ' + (i18n.t('btn.manage_teams') || 'Teams');
+
+        const boardHeaderSection = document.querySelector('.board-header-section');
+        if (boardHeaderSection) {
+            boardHeaderSection.appendChild(manageTeamsBtn);
+        }
+    }
+
+    if (isOwner || isCoOwner || isAdmin) {
+        manageTeamsBtn.style.display = 'inline-block';
+        manageTeamsBtn.disabled = isFinished;
+        if (isFinished) manageTeamsBtn.style.opacity = '0.5';
+    } else {
+        manageTeamsBtn.style.display = 'none';
     }
 
     if (isFinished) {
@@ -1228,9 +1279,15 @@ function updateParticipantsDisplay(participants) {
             badge += '<span class="role-badge" title="Access: Admin">🛡️</span>';
         }
 
+        let avatarHtml = p.avatar || '👤';
+        // Detect if avatar is an image URL (Google Auth)
+        if (avatarHtml && (avatarHtml.startsWith('http') || avatarHtml.startsWith('/') || avatarHtml.startsWith('data:'))) {
+            avatarHtml = `<img src="${avatarHtml}" alt="${escapeHtml(p.username)}" class="participant-avatar-img" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        }
+
         return `
         <div class="participant-avatar" title="${escapeHtml(p.username)}">
-            ${p.avatar || '👤'}
+            ${avatarHtml}
             ${badge ? `<div class="participant-badges">${badge}</div>` : ''}
         </div>
     `}).join('');

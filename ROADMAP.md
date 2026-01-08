@@ -10,8 +10,13 @@
 **Focus:** Stability, UX Polish, and Real-world usage.
 - [ ] **Peek Mode**: Allow users to view a board as read-only before joining ("Peek" button).
 - [ ] **Data Export**: Export board data to CSV/PDF (Backend implementation).
-- [ ] **Team-filtered Dashboard (Backend)**: Refactor to support Many-to-Many Board-Team relations for "Hybrid" filtering.
+- [x] Team-filtered Dashboard (Backend)
+- [x] Team-filtered Dashboard (Frontend)
+- [x] Fix: Board Participants List (Persistent)
+- [x] Feature: Board Teams Visual Count Many-to-Many Board-Team relations for "Hybrid" filtering.
 - [ ] **Advanced Action Items Filtering**: Filter by Period, Team/Board, or Owner.
+- [ ] **Board Header Redesign**: Consolidate actions (Active/Teams/Settings) for a premium look.
+- [ ] **Hide Vote Buttons**: Hide Like/Dislike controls until Voting Phase to reduce clutter.
 
 ### v1.0.0 - Semantic Release
 **Goal:** Official release after field testing validation.
