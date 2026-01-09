@@ -1,7 +1,7 @@
 // App Initialization
-async function initApp() {
+// App Initialization
+async function initUI() {
     console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
-    console.log('%c👤 User Status', 'color: #2196F3; font-weight: bold;', window.currentUser ? `✓ Logged in as: ${window.currentUser}` : '✗ No user found');
 
     // Load board templates from JSON
     loadBoardTemplates();
@@ -16,7 +16,24 @@ async function initApp() {
 
     initWebSocket();
 
-    // Initialize User State
+    // Initialize Theme
+    initTheme();
+
+    // Initialize i18n
+    if (window.i18n) {
+        window.i18n.init();
+    }
+
+    console.log('%c✅ UI Initialized', 'color: #4CAF50; font-weight: bold;');
+}
+
+async function initApp() {
+    // 1. Initialize UI Skeleton first (Independent of Auth/Data)
+    await initUI();
+
+    // 2. Initialize User State (Auth)
+    console.log('%c👤 Checking User Status...', 'color: #2196F3;');
+
     // First, check if we have a server-side session (Google Auth)
     try {
         const response = await fetch('/api/user/me');
@@ -44,13 +61,17 @@ async function initApp() {
         }
     }
 
-    // Handle URL Hash for persistence (After user is restored)
-    handleUrlHash();
+    // 3. Handle Routing & View State (Dependent on User State)
 
     // Listen for back/forward navigation AND hash changes
+    // We add listeners here to avoid handling events before we are ready
     window.addEventListener('popstate', handleUrlHash);
     window.addEventListener('hashchange', handleUrlHash);
 
+    // Initial Route Handle
+    handleUrlHash(); // This will handle "popstate" logic for initial load
+
+    // 4. Final UI Adjustments based on User State
     if (!window.currentUser) {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
         document.getElementById('userModal').style.display = 'block';
@@ -58,7 +79,8 @@ async function initApp() {
         // User is logged in via JWT - skip welcome modal
         updateUserDisplay();
 
-        if (!window.location.hash.startsWith('#board/')) {
+        // If we are at root or dashboard, ensure dashboard is shown
+        if (!window.location.hash || window.location.hash === '#dashboard') {
             // Load dashboard directly ensuring UI state is correct (buttons, views)
             console.log('%c👋 User authenticated, showing dashboard', 'color: #4CAF50; font-style: italic;');
             showDashboard();
@@ -69,14 +91,6 @@ async function initApp() {
     const versionSpan = document.getElementById('appVersion');
     if (versionSpan) {
         versionSpan.textContent = APP_VERSION;
-    }
-
-    // Initialize Theme
-    initTheme();
-
-    // Initialize i18n
-    if (window.i18n) {
-        window.i18n.init();
     }
 }
 

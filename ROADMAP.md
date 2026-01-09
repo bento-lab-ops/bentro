@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.10.64
+## Current Version: v0.10.65
 
 ---
 
@@ -50,6 +50,11 @@
 ---
 
 ## ✅ Completed Features
+
+### v0.10.65 (Robust Initialization)
+- [x] **Refactor**: Split `initUI()` from `initApp()` for immediate rendering.
+- [x] **Stability**: UI skeleton loads before network/auth calls.
+- [x] **Verified**: Browser logs confirm improved execution order.
 
 ### v0.10.64 (Stabilization Hotfixes)
 - [x] **UI Restoration**: Restored missing script tags (`main.js`, `teams.js`) and fixed initialization logic.
