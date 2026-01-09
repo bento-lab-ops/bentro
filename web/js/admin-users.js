@@ -1,6 +1,8 @@
 // Admin User Management Functions
+import { i18n } from './i18n.js';
+import { escapeHtml } from './utils.js';
 
-async function openAdminUsersModal() {
+export async function openAdminUsersModal() {
     const modal = document.getElementById('adminUsersModal');
     if (!modal) {
         console.error('Admin Users Modal not found');
@@ -16,14 +18,14 @@ async function openAdminUsersModal() {
     }
 }
 
-function closeAdminUsersModal() {
+export function closeAdminUsersModal() {
     const modal = document.getElementById('adminUsersModal');
     if (modal) {
         modal.style.display = 'none';
     }
 }
 
-async function loadAllUsers() {
+export async function loadAllUsers() {
     try {
         const response = await fetch('/api/admin/users', {
             credentials: 'include'
@@ -42,7 +44,7 @@ async function loadAllUsers() {
     }
 }
 
-function renderUsersTable(users) {
+export function renderUsersTable(users) {
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
 
@@ -82,7 +84,7 @@ function renderUsersTable(users) {
     `).join('');
 }
 
-async function updateUserRole(userId, newRole, userName) {
+export async function updateUserRole(userId, newRole, userName) {
     if (!confirm(`Change ${userName}'s role to ${newRole}?`)) {
         // Reload to reset dropdown
         await loadAllUsers();
@@ -111,7 +113,7 @@ async function updateUserRole(userId, newRole, userName) {
     }
 }
 
-async function resetUserPassword(userId, userName) {
+export async function resetUserPassword(userId, userName) {
     if (!confirm(`Reset password for ${userName}?\n\nThe password will be reset to "bentro" and the user will be required to change it on next login.`)) {
         return;
     }
@@ -134,7 +136,7 @@ async function resetUserPassword(userId, userName) {
     }
 }
 
-async function deleteUser(userId, userName) {
+export async function deleteUser(userId, userName) {
     if (!confirm(`⚠️ DELETE USER: ${userName}?\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`)) {
         return;
     }

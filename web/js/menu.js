@@ -1,8 +1,14 @@
 // Menu & Navigation Management
+import { i18n } from './i18n.js';
+import { logout } from './api.js';
+import { loadBoard } from './board.js';
 
-function toggleMenu() {
+// No direct import to showDashboard to avoid cycle if possible, use window global
+// or import it if main.js is an entry point module
+
+export function toggleMenu() {
     const sidebar = document.getElementById('appSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    // const overlay = document.getElementById('sidebarOverlay');
     const isOpen = sidebar.classList.contains('open');
 
     if (isOpen) {
@@ -20,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function openMenu() {
+export function openMenu() {
     const sidebar = document.getElementById('appSidebar');
     const overlay = document.getElementById('sidebarOverlay');
 
@@ -31,7 +37,7 @@ function openMenu() {
     renderMenuLinks();
 }
 
-function closeMenu() {
+export function closeMenu() {
     const sidebar = document.getElementById('appSidebar');
     const overlay = document.getElementById('sidebarOverlay');
 
@@ -39,9 +45,9 @@ function closeMenu() {
     overlay.classList.remove('visible');
 }
 
-function renderMenuLinks() {
+export function renderMenuLinks() {
     const menuList = document.getElementById('menuList');
-    const currentHash = window.location.hash;
+    // const currentHash = window.location.hash;
     const adminToken = localStorage.getItem('adminToken');
 
     let html = '';
@@ -108,7 +114,7 @@ function renderMenuLinks() {
     menuList.innerHTML = html;
 }
 
-function handleUserLogout() {
+export function handleUserLogout() {
     // Call logout API
     logout().then(() => {
         // Clear user data
@@ -129,10 +135,10 @@ function handleUserLogout() {
     });
 }
 
-function navigateTo(route) {
+export function navigateTo(route) {
     if (route === '') {
         window.location.hash = '';
-        showDashboard();
+        if (window.showDashboard) window.showDashboard();
     } else {
         window.location.hash = `#${route}`;
         // Main router handles the rest
@@ -140,14 +146,14 @@ function navigateTo(route) {
 }
 
 // Settings Modal Logic
-function openHelpModal() {
+export function openHelpModal() {
     const modal = document.getElementById('helpModal');
     if (modal) {
         modal.style.display = 'block';
     }
 }
 
-function openSettingsModal() {
+export function openSettingsModal() {
     const modal = document.getElementById('settingsModal');
     if (modal) {
         modal.style.display = 'block';
@@ -155,8 +161,9 @@ function openSettingsModal() {
     }
 }
 
-function closeSettingsModal() {
-    document.getElementById('settingsModal').style.display = 'none';
+export function closeSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function renderSettingsContent() {
@@ -178,6 +185,7 @@ function renderSettingsContent() {
         
         <div class="settings-section">
             <h4>🛡️ ${i18n.t('settings.administration')}</h4>
+            <div class="admin-panel-link">
     `;
 
     // Check if user is JWT admin or has K8s admin token
@@ -210,18 +218,21 @@ function renderSettingsContent() {
         `;
     }
 
-    html += `</div>`;
+    html += `</div></div>`; // Close admin-panel-link and settings-section
 
     container.innerHTML = html;
 }
 
-function toggleThemeFromSettings(isDark) {
+export function toggleThemeFromSettings(isDark) {
     const newTheme = isDark ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    // Update main icon if exists
+    // window.updateThemeIcon(newTheme); // main.js shim
+    if (window.updateThemeIcon) window.updateThemeIcon(newTheme);
 }
 
-async function handleSettingsAdminLogin(e) {
+export async function handleSettingsAdminLogin(e) {
     e.preventDefault();
     const password = document.getElementById('settingsAdminPass').value;
 
@@ -248,10 +259,24 @@ async function handleSettingsAdminLogin(e) {
     }
 }
 
-function logoutAdminInSettings() {
+export function logoutAdminInSettings() {
     localStorage.removeItem('adminToken');
     renderSettingsContent();
     if (window.currentBoard) {
         loadBoard(window.currentBoard.id);
     }
 }
+
+// Global Shims
+window.toggleMenu = toggleMenu;
+window.openMenu = openMenu;
+window.closeMenu = closeMenu;
+window.renderMenuLinks = renderMenuLinks;
+window.handleUserLogout = handleUserLogout;
+window.navigateTo = navigateTo;
+window.openHelpModal = openHelpModal;
+window.openSettingsModal = openSettingsModal;
+window.closeSettingsModal = closeSettingsModal;
+window.toggleThemeFromSettings = toggleThemeFromSettings;
+window.handleSettingsAdminLogin = handleSettingsAdminLogin;
+window.logoutAdminInSettings = logoutAdminInSettings;

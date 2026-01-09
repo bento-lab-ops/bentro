@@ -1,8 +1,12 @@
 // Auth UI Logic
+import { login, register, apiCall } from './api.js';
+import { loadBoard } from './board.js';
+import { i18n } from './i18n.js';
 
-function openLoginModal() {
+export function openLoginModal() {
     closeRegisterModal();
-    document.getElementById('loginModal').style.display = 'block';
+    const modal = document.getElementById('loginModal');
+    if (modal) modal.style.display = 'block';
 
     // Check if we are inside userModal context and hide it if so
     const userModal = document.getElementById('userModal');
@@ -12,17 +16,19 @@ function openLoginModal() {
     }
 }
 
-function closeLoginModal() {
-    document.getElementById('loginModal').style.display = 'none';
+export function closeLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) modal.style.display = 'none';
     if (window.returnToUserModal) {
         document.getElementById('userModal').style.display = 'block';
         window.returnToUserModal = false;
     }
 }
 
-function openRegisterModal() {
+export function openRegisterModal() {
     closeLoginModal();
-    document.getElementById('registerModal').style.display = 'block';
+    const modal = document.getElementById('registerModal');
+    if (modal) modal.style.display = 'block';
 
     // Check if we are inside userModal context and hide it if so
     const userModal = document.getElementById('userModal');
@@ -32,34 +38,36 @@ function openRegisterModal() {
     }
 }
 
-function closeRegisterModal() {
-    document.getElementById('registerModal').style.display = 'none';
+export function closeRegisterModal() {
+    const modal = document.getElementById('registerModal');
+    if (modal) modal.style.display = 'none';
     if (window.returnToUserModal) {
         document.getElementById('userModal').style.display = 'block';
         window.returnToUserModal = false;
     }
 }
 
-function switchToRegister() {
+export function switchToRegister() {
     // Keep returnToUserModal state
     const returnState = window.returnToUserModal;
     closeLoginModal();
     window.returnToUserModal = returnState; // Restore state after close
     openRegisterModal();
-    // Prevent openRegister from resetting the state (it sets it to true if userModal is visible, which it isn't now)
-    // Actually openRegister handles logic correctly if userModal is hidden. 
-    // We just need to ensure we don't return to userModal in between switch.
     // Simplest: direct display manipulation
-    document.getElementById('loginModal').style.display = 'none';
-    document.getElementById('registerModal').style.display = 'block';
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    if (loginModal) loginModal.style.display = 'none';
+    if (registerModal) registerModal.style.display = 'block';
 }
 
-function switchToLogin() {
-    document.getElementById('registerModal').style.display = 'none';
-    document.getElementById('loginModal').style.display = 'block';
+export function switchToLogin() {
+    const registerModal = document.getElementById('registerModal');
+    const loginModal = document.getElementById('loginModal');
+    if (registerModal) registerModal.style.display = 'none';
+    if (loginModal) loginModal.style.display = 'block';
 }
 
-function toggleGuestForm() {
+export function toggleGuestForm() {
     const form = document.getElementById('userForm');
     if (form.style.display === 'none') {
         form.style.display = 'block';
@@ -68,7 +76,7 @@ function toggleGuestForm() {
     }
 }
 
-async function handleLoginSubmit(event) {
+export async function handleLoginSubmit(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
@@ -89,7 +97,8 @@ async function handleLoginSubmit(event) {
         if (response.require_password_change) {
             closeLoginModal();
             closeRegisterModal();
-            document.getElementById('userModal').style.display = 'none';
+            const userModal = document.getElementById('userModal');
+            if (userModal) userModal.style.display = 'none';
             openChangePasswordModal(true); // Forced password change
             return;
         }
@@ -98,14 +107,16 @@ async function handleLoginSubmit(event) {
         closeLoginModal();
         closeRegisterModal();
         // Close user modal if it was underlying
-        document.getElementById('userModal').style.display = 'none';
+        const userModal = document.getElementById('userModal');
+        if (userModal) userModal.style.display = 'none';
 
-        // Refresh UI
-        updateUserDisplay();
+        // Refresh UI via window global (main.js)
+        if (window.updateUserDisplay) window.updateUserDisplay();
 
-        // Refresh menu to show logout option
-        if (typeof renderMenuLinks === 'function') {
-            renderMenuLinks();
+        // Refresh menu via module or window
+        // Ensure menu.js is loaded and renderMenuLinks is global
+        if (window.renderMenuLinks) {
+            window.renderMenuLinks();
         }
 
         // If on board, join it
@@ -114,7 +125,7 @@ async function handleLoginSubmit(event) {
             const boardId = hash.split('/')[1];
             loadBoard(boardId);
         } else {
-            showDashboard();
+            if (window.showDashboard) window.showDashboard();
         }
 
         console.log('✅ Login successful!');
@@ -124,7 +135,7 @@ async function handleLoginSubmit(event) {
     }
 }
 
-async function handleRegisterSubmit(event) {
+export async function handleRegisterSubmit(event) {
     event.preventDefault();
     const firstName = document.getElementById('registerFirstName').value;
     const lastName = document.getElementById('registerLastName').value;
@@ -154,7 +165,7 @@ async function handleRegisterSubmit(event) {
 }
 
 // User Profile Modal
-function openUserProfileModal() {
+export function openUserProfileModal() {
     const modal = document.getElementById('userProfileModal');
     if (!window.currentUserId) {
         openLoginModal();
@@ -184,12 +195,13 @@ function openUserProfileModal() {
     }
 }
 
-function closeUserProfileModal() {
-    document.getElementById('userProfileModal').style.display = 'none';
+export function closeUserProfileModal() {
+    const modal = document.getElementById('userProfileModal');
+    if (modal) modal.style.display = 'none';
 }
 
 // Avatar Selection Functions
-function populateProfileAvatarSelector() {
+export function populateProfileAvatarSelector() {
     const selector = document.getElementById('profileAvatarSelector');
     if (!selector) return;
 
@@ -208,14 +220,14 @@ function populateProfileAvatarSelector() {
     ).join('');
 }
 
-function toggleProfileAvatarSelector() {
+export function toggleProfileAvatarSelector() {
     const selector = document.getElementById('profileAvatarSelector');
     if (selector) {
         selector.style.display = selector.style.display === 'none' ? 'grid' : 'none';
     }
 }
 
-function selectProfileAvatar(avatar) {
+export function selectProfileAvatar(avatar) {
     window.selectedProfileAvatar = avatar;
     const display = document.getElementById('profileAvatarDisplay');
     if (display) {
@@ -231,7 +243,7 @@ function selectProfileAvatar(avatar) {
     }
 }
 
-async function saveProfileChanges() {
+export async function saveProfileChanges() {
     try {
         const response = await apiCall('/auth/profile', 'PUT', {
             avatar_url: window.selectedProfileAvatar
@@ -241,7 +253,7 @@ async function saveProfileChanges() {
         window.currentUserAvatar = window.selectedProfileAvatar;
 
         // Update UI
-        updateUserDisplay();
+        if (window.updateUserDisplay) window.updateUserDisplay();
 
         alert('Profile updated successfully!');
         closeUserProfileModal();
@@ -253,7 +265,7 @@ async function saveProfileChanges() {
 // Change Password Modal
 let isPasswordChangeForced = false;
 
-function openChangePasswordModal(forced = false) {
+export function openChangePasswordModal(forced = false) {
     isPasswordChangeForced = forced;
     const modal = document.getElementById('changePasswordModal');
     const warningDiv = document.getElementById('passwordChangeRequired');
@@ -272,16 +284,17 @@ function openChangePasswordModal(forced = false) {
     modal.style.display = 'block';
 }
 
-function closeChangePasswordModal() {
+export function closeChangePasswordModal() {
     if (isPasswordChangeForced) {
         alert('You must change your password before continuing.');
         return;
     }
-    document.getElementById('changePasswordModal').style.display = 'none';
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) modal.style.display = 'none';
     document.getElementById('changePasswordForm').reset();
 }
 
-async function handleChangePasswordSubmit(event) {
+export async function handleChangePasswordSubmit(event) {
     event.preventDefault();
 
     const currentPassword = document.getElementById('currentPassword').value;

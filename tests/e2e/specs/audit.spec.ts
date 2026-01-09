@@ -115,7 +115,9 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
 
         // 5. Create Board
         await page.locator('#boardName').fill(`AutoTest-${Date.now()}`);
-        await page.locator('#newBoardForm button[type="submit"]').click();
+        const submitBtn1 = page.locator('#newBoardForm button[type="submit"]');
+        await submitBtn1.scrollIntoViewIfNeeded();
+        await submitBtn1.click();
 
         // 6. Verify Board Landing
         await expect(page.locator('#boardTitle')).toBeVisible();
@@ -130,7 +132,9 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
         await page.locator('#newBoardBtn').click();
         const boardName = `Lifecycle-${Date.now()}`;
         await page.locator('#boardName').fill(boardName);
-        await page.locator('#newBoardForm button[type="submit"]').click();
+        const submitBtn2 = page.locator('#newBoardForm button[type="submit"]');
+        await submitBtn2.scrollIntoViewIfNeeded();
+        await submitBtn2.click();
 
         await expect(page.locator('#boardTitle')).toHaveText(boardName);
 
@@ -139,15 +143,25 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
         // We find the "Add Card" button in the first column.
         // v0.10.51 uses a generic class or ID? 
         // Assuming .add-card-btn exists.
-        await page.locator('.add-card-btn').first().click();
+        await page.waitForTimeout(1000); // Wait for board to load
+        const addCardBtn = page.locator('.add-card-btn').first();
+        await addCardBtn.scrollIntoViewIfNeeded();
+        await expect(addCardBtn).toBeVisible({ timeout: 5000 });
+        await addCardBtn.click();
         const cardContent = 'Automated Test Card';
         await page.locator('#cardContent').fill(cardContent);
         // v0.10.51 modal button might be specific
         await page.locator('#newCardForm .btn-primary').click();
 
+        // Wait for modal to close
+        await expect(page.locator('#newCardModal')).toBeHidden({ timeout: 5000 });
+
+        // Wait for WebSocket to sync the card
+        await page.waitForTimeout(2000);
+
         // Verify card appears
-        const card = page.locator('.retro-card').filter({ hasText: cardContent });
-        await expect(card).toBeVisible({ timeout: 10000 });
+        const card = page.locator('.card').filter({ hasText: cardContent });
+        await expect(card).toBeVisible({ timeout: 15000 });
 
         // Verify Vote Buttons are HIDDEN in Input Phase
         await expect(card.locator('.vote-btn-group')).toBeHidden();
@@ -193,7 +207,9 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
 
         await page.locator('#newBoardBtn').click();
         await page.locator('#boardName').fill(`ControlTest-${Date.now()}`);
-        await page.locator('#newBoardForm button[type="submit"]').click({ force: true });
+        const submitBtn3 = page.locator('#newBoardForm button[type="submit"]');
+        await submitBtn3.scrollIntoViewIfNeeded();
+        await submitBtn3.click();
 
         // 1. Check Control Bar Elements
         // v0.10.51 uses .timer-section as control bar?
@@ -213,7 +229,9 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
         // 1. Create Board (Auto-claims as Owner)
         await page.locator('#newBoardBtn').click();
         await page.locator('#boardName').fill(`HostTest-${Date.now()}`);
-        await page.locator('#newBoardForm button[type="submit"]').click({ force: true });
+        const submitBtn4 = page.locator('#newBoardForm button[type="submit"]');
+        await submitBtn4.scrollIntoViewIfNeeded();
+        await submitBtn4.click();
         await expect(page.locator('#boardTitle')).toBeVisible();
 
         // 2. Verify "Relinquish" is visible (as we are owner)

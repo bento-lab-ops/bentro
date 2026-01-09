@@ -1,14 +1,22 @@
 // Action Items Dashboard Management
+import { apiCall, sendWebSocketMessage } from './api.js';
+import { stopParticipantPolling, loadBoard } from './board.js';
+import { i18n } from './i18n.js';
+import { escapeHtml } from './utils.js';
 
-async function loadActionItemsView() {
+export async function loadActionItemsView() {
     try {
         // Stop any board polling
         stopParticipantPolling();
         window.currentBoard = null;
 
         // Hide other views
-        document.getElementById('dashboardView').style.display = 'none';
-        document.getElementById('boardContainer').style.display = 'none';
+        const dashboardView = document.getElementById('dashboardView');
+        if (dashboardView) dashboardView.style.display = 'none';
+
+        const boardContainer = document.getElementById('boardContainer');
+        if (boardContainer) boardContainer.style.display = 'none';
+
         const adminView = document.getElementById('adminView');
         if (adminView) adminView.style.display = 'none';
 
@@ -49,7 +57,7 @@ async function loadActionItemsView() {
     }
 }
 
-async function fetchAndRenderActionItems(filter = 'pending') {
+export async function fetchAndRenderActionItems(filter = 'pending') {
     const container = document.getElementById('actionItemsList');
     container.innerHTML = '<div class="loading-spinner">Loading...</div>'; // Can translate "Loading..." if needed, but it's transient
 
@@ -66,7 +74,7 @@ async function fetchAndRenderActionItems(filter = 'pending') {
     }
 }
 
-function renderActionItemsTable(items, currentFilter) {
+export function renderActionItemsTable(items, currentFilter) {
     const container = document.getElementById('actionItemsList');
 
     // Render Filter Tabs first
@@ -144,7 +152,7 @@ function renderActionItemsTable(items, currentFilter) {
                 <td class="text-muted">${createdDate}</td>
                 <td>
                     ${!item.completed ?
-                `<button class="btn btn-small btn-success" onclick="markActionItemDone('${item.id}', '${currentFilter}')">${i18n.t('action.mark_done')}</button>` :
+                `<button class="btn btn-small btn-success" onclick="markActionItemDone('${item.id}', true)">${i18n.t('action.mark_done')}</button>` :
                 `<div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-small btn-secondary" onclick="markActionItemUndone('${item.id}', '${currentFilter}')">${i18n.t('action.reopen')}</button>
                             ${(item.completion_link || item.completion_desc) ?
@@ -161,10 +169,7 @@ function renderActionItemsTable(items, currentFilter) {
     container.innerHTML = html;
 }
 
-// Helper to toggle status from dashboard
-// Helper to toggle status from dashboard
-// Make global for board.js access
-window.markActionItemDone = function (cardId, fromDashboard = false) {
+export function openCompleteActionItemModal(cardId, fromDashboard = false) {
     const modal = document.getElementById('completeActionItemModal');
     // Store if we came from dashboard to refresh it later
     window.actionItemSource = fromDashboard ? 'dashboard' : 'board';
@@ -179,9 +184,9 @@ window.markActionItemDone = function (cardId, fromDashboard = false) {
     document.getElementById('completeActionItemDesc').value = '';
 
     if (modal) modal.style.display = 'block';
-};
+}
 
-window.submitActionItemCompletion = async function (e) {
+export async function submitActionItemCompletion(e) {
     e.preventDefault();
     const cardId = document.getElementById('completeActionItemId').value;
     const dateStr = document.getElementById('completeActionItemDate').value;
@@ -196,7 +201,7 @@ window.submitActionItemCompletion = async function (e) {
             completion_desc: desc
         });
 
-        window.closeCompleteActionItemModal();
+        closeCompleteActionItemModal();
 
         // Refresh based on source
         if (window.actionItemSource === 'dashboard') {
@@ -211,14 +216,14 @@ window.submitActionItemCompletion = async function (e) {
     } catch (error) {
         alert('Failed to complete item: ' + error.message);
     }
-};
+}
 
-window.closeCompleteActionItemModal = function () {
+export function closeCompleteActionItemModal() {
     const modal = document.getElementById('completeActionItemModal');
     if (modal) modal.style.display = 'none';
-};
+}
 
-window.openActionItemDetails = function (id, link, desc) {
+export function openActionItemDetails(id, link, desc) {
     const modal = document.getElementById('actionItemDetailsModal');
     if (!modal) {
         alert("Details: \n" + link + "\n" + desc);
@@ -239,14 +244,14 @@ window.openActionItemDetails = function (id, link, desc) {
 
     descEl.textContent = desc || 'No description provided.';
     modal.style.display = 'block';
-};
+}
 
-window.closeActionItemDetailsModal = function () {
+export function closeActionItemDetailsModal() {
     const modal = document.getElementById('actionItemDetailsModal');
     if (modal) modal.style.display = 'none';
-};
+}
 
-window.markActionItemUndone = async function (cardId, currentFilter) {
+export async function markActionItemUndone(cardId, currentFilter) {
     try {
         await apiCall(`/cards/${cardId}`, 'PUT', { completed: false, completion_date: null });
         // Refresh list
@@ -254,6 +259,16 @@ window.markActionItemUndone = async function (cardId, currentFilter) {
     } catch (error) {
         alert('Failed to update item: ' + error.message);
     }
-};
+}
 
+// Global Shims
 window.loadActionItemsView = loadActionItemsView;
+window.fetchAndRenderActionItems = fetchAndRenderActionItems;
+window.renderActionItemsTable = renderActionItemsTable;
+window.openCompleteActionItemModal = openCompleteActionItemModal;
+window.markActionItemDone = openCompleteActionItemModal; // Alias for Action Items View context
+window.submitActionItemCompletion = submitActionItemCompletion;
+window.closeCompleteActionItemModal = closeCompleteActionItemModal;
+window.openActionItemDetails = openActionItemDetails;
+window.closeActionItemDetailsModal = closeActionItemDetailsModal;
+window.markActionItemUndone = markActionItemUndone;

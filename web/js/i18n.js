@@ -556,7 +556,7 @@ const translations = {
     }
 };
 
-class I18n {
+export class I18n {
     constructor() {
         this.currentLang = localStorage.getItem('bentro_lang') || 'en';
     }
@@ -612,16 +612,18 @@ class I18n {
 }
 
 // Global instance
-const i18n = new I18n();
+export const i18n = new I18n();
 
 // Make it available globally
 window.i18n = i18n;
 
 // Language Menu Logic
-window.toggleLangMenu = function () {
+function toggleLangMenu() {
     const menu = document.getElementById('langMenu');
     if (menu) menu.classList.toggle('show');
-};
+}
+
+window.toggleLangMenu = toggleLangMenu;
 
 // Close dropdown when clicking outside
 document.addEventListener('click', function (event) {

@@ -38,9 +38,15 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Serve static files
-	router.Static("/static", "./web")
-	router.StaticFile("/", "./web/index.html")
+	// Serve static files from Vite build (dist)
+	// /assets is for hashed JS/CSS from Vite
+	router.Static("/assets", "./web/dist/assets")
+	// /static is used for legacy compat and public files (images, json, html partials)
+	// Vite copies public/* to dist root. So we serve dist root as /static.
+	router.Static("/static", "./web/dist")
+
+	// Serve index.html for root
+	router.StaticFile("/", "./web/dist/index.html")
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})

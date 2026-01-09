@@ -1,6 +1,9 @@
 // Timer and Phase Management
+import { sendWebSocketMessage } from './api.js';
+import { loadBoard, isBoardManager } from './board.js';
+import { i18n } from './i18n.js';
 
-function startTimer() {
+export function startTimer() {
     const minutes = parseInt(document.getElementById('timerMinutes').value) || 5;
     window.timerSeconds = minutes * 60;
 
@@ -8,12 +11,13 @@ function startTimer() {
     startTimerUI(window.timerSeconds);
 }
 
-function startTimerUI(seconds) {
+export function startTimerUI(seconds) {
     window.timerSeconds = seconds;
 
-    const isManager = typeof isBoardManager === 'function' && isBoardManager();
-    document.getElementById('startTimerBtn').style.display = 'none';
-    document.getElementById('stopTimerBtn').style.display = isManager ? 'inline-block' : 'none';
+    const isManager = typeof isBoardManager === 'function' ? isBoardManager() : false;
+    // Safe check if elements exist
+    if (document.getElementById('startTimerBtn')) document.getElementById('startTimerBtn').style.display = 'none';
+    if (document.getElementById('stopTimerBtn')) document.getElementById('stopTimerBtn').style.display = isManager ? 'inline-block' : 'none';
 
     if (window.timerInterval) clearInterval(window.timerInterval);
 
@@ -29,41 +33,44 @@ function startTimerUI(seconds) {
     }, 1000);
 }
 
-function stopTimer() {
+export function stopTimer() {
     sendWebSocketMessage('timer_stop', {});
     stopTimerUI();
 }
 
-function stopTimerUI() {
+export function stopTimerUI() {
     if (window.timerInterval) {
         clearInterval(window.timerInterval);
         window.timerInterval = null;
     }
 
-    const isManager = typeof isBoardManager === 'function' && isBoardManager();
-    document.getElementById('startTimerBtn').style.display = isManager ? 'inline-block' : 'none';
-    document.getElementById('stopTimerBtn').style.display = 'none';
+    const isManager = typeof isBoardManager === 'function' ? isBoardManager() : false;
+    if (document.getElementById('startTimerBtn')) document.getElementById('startTimerBtn').style.display = isManager ? 'inline-block' : 'none';
+    if (document.getElementById('stopTimerBtn')) document.getElementById('stopTimerBtn').style.display = 'none';
     window.timerSeconds = 0;
     updateTimerDisplay(0);
 }
 
-function updateTimerDisplay(seconds) {
+export function updateTimerDisplay(seconds) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    document.getElementById('timerDisplay').textContent =
-        `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const display = document.getElementById('timerDisplay');
+    if (display) {
+        display.textContent = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
 }
 
-function switchPhase() {
+export function switchPhase() {
     window.currentPhase = window.currentPhase === 'input' ? 'voting' : 'input';
     updatePhase(window.currentPhase);
     sendWebSocketMessage('phase_change', { phase: window.currentPhase });
 }
 
-function updatePhase(phase) {
+export function updatePhase(phase) {
     window.currentPhase = phase;
     const phaseLabel = phase === 'input' ? i18n.t('phase.input') : (phase === 'voting' ? i18n.t('phase.voting') : (i18n.t('phase.' + phase) || phase));
-    document.getElementById('currentPhase').textContent = phaseLabel;
+    const currentPhaseEl = document.getElementById('currentPhase');
+    if (currentPhaseEl) currentPhaseEl.textContent = phaseLabel;
 
     // Update button text
     const switchBtn = document.getElementById('switchPhaseBtn');
@@ -81,7 +88,7 @@ function updatePhase(phase) {
 }
 
 // Timer Sound Notification
-function playTimerSound() {
+export function playTimerSound() {
     try {
         // Create audio context for beep sound
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -113,8 +120,21 @@ function playTimerSound() {
 }
 
 // Request notification permission
-function requestNotificationPermission() {
+export function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
 }
+
+// Global Shims
+window.startTimer = startTimer;
+window.startTimerUI = startTimerUI;
+window.stopTimer = stopTimer;
+window.stopTimerUI = stopTimerUI;
+window.updateTimerDisplay = updateTimerDisplay;
+window.switchPhase = switchPhase;
+window.updatePhase = updatePhase;
+window.playTimerSound = playTimerSound;
+window.requestNotificationPermission = requestNotificationPermission;
+
+// End of Module

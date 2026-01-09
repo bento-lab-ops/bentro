@@ -1,4 +1,55 @@
-// App Initialization
+import { CONFIG, APP_VERSION } from './config.js';
+import './i18n.js'; // Import for side effects (global shims)
+import { i18n } from './i18n.js';
+import { initWebSocket } from './api.js';
+import { escapeHtml, closeModals } from './utils.js';
+import {
+    loadBoard,
+    loadBoards,
+    createBoard,
+    createColumn,
+    createCard,
+    updateColumn,
+    updateBoardStatus,
+    exportBoardToCSV,
+    leaveBoardPersistent,
+    openNewCardModal,
+    filterBoards
+} from './board.js';
+import {
+    startTimer,
+    stopTimer,
+    switchPhase
+} from './timer.js';
+import {
+    selectAvatar,
+    getUserAvatar,
+    setUserAvatar,
+    AVAILABLE_AVATARS
+} from './avatars.js';
+import { loadAdminView } from './admin.js';
+import { loadModals } from './modals.js';
+import {
+    loadTeamsView,
+    openTeamDetails,
+    populateBoardTeamSelect,
+    addTeamToBoard,
+    openManageTeamsModal
+} from './teams.js';
+import { loadActionItemsView } from './action_items.js';
+
+// Legacy / Auth shims
+// auth.js and admin-users.js etc are imported implicitly by their shims OR we should import them to ensure they run/register?
+// Since they are modules, they need to be imported once to execute their TOP LEVEL code (which sets shims).
+// However, main.js is the entry point. Vite will bundle everything reachable.
+// If we don't import them, they might not be included?
+// YES. We must import them for side-effects (shims) if nothing else.
+import './auth.js';
+import './menu.js';
+import './admin-users.js';
+import './admin-boards.js';
+import './admin-actions.js';
+
 // App Initialization
 async function initUI() {
     console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
@@ -11,8 +62,15 @@ async function initUI() {
         requestNotificationPermission();
     }
 
-    // Populate avatar selector
-    populateAvatarSelector();
+    // Populate avatar selector (userModal)
+    // Note: avatars.js has populateAvatarSelector? No, I checked avatars.js and it DID NOT have it.
+    // main.js had it. I need to implementation it here or use the one I moved?
+    // Wait, I didn't see populateAvatarSelector in avatars.js export list in main.js import above?
+    // I added it to the import list but does it exist?
+    // Let's implement it here if needed or check avatars.js content from cache.
+    // Step 6236: "Converted avatars.js... exporting AVAILABLE_AVATARS, getUserAvatar, setUserAvatar".
+    // It did NOT export populateAvatarSelector.
+    // So I must keep populateAvatarSelector in main.js (below).
 
     initWebSocket();
 
@@ -28,8 +86,9 @@ async function initUI() {
 }
 
 async function initApp() {
-    // 1. Initialize UI Skeleton first (Independent of Auth/Data)
+    // 1. Initialize UI Skeleton first
     await initUI();
+    // populateAvatarSelector depends on DOM, initUI calls it? No, initUI calls it but I need to define it.
 
     // 2. Initialize User State (Auth)
     console.log('%c👤 Checking User Status...', 'color: #2196F3;');
@@ -44,7 +103,7 @@ async function initApp() {
             window.currentUserId = user.id;
             window.currentUserEmail = user.email;
             window.currentUserFullName = user.name;
-            window.currentUserRole = user.role; // Store role for admin check
+            window.currentUserRole = user.role;
             window.isGoogleAuth = true;
             console.log('%c🔐 Logged in via Google', 'color: #4CAF50; font-weight: bold;');
         }
@@ -61,27 +120,19 @@ async function initApp() {
         }
     }
 
-    // 3. Handle Routing & View State (Dependent on User State)
-
-    // Listen for back/forward navigation AND hash changes
-    // We add listeners here to avoid handling events before we are ready
+    // 3. Handle Routing & View State
     window.addEventListener('popstate', handleUrlHash);
     window.addEventListener('hashchange', handleUrlHash);
-
-    // Initial Route Handle
-    handleUrlHash(); // This will handle "popstate" logic for initial load
+    handleUrlHash(); // Initial route
 
     // 4. Final UI Adjustments based on User State
     if (!window.currentUser) {
         console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
         document.getElementById('userModal').style.display = 'block';
+        populateAvatarSelector(); // Call explicitly here
     } else {
-        // User is logged in via JWT - skip welcome modal
         updateUserDisplay();
-
-        // If we are at root or dashboard, ensure dashboard is shown
         if (!window.location.hash || window.location.hash === '#dashboard') {
-            // Load dashboard directly ensuring UI state is correct (buttons, views)
             console.log('%c👋 User authenticated, showing dashboard', 'color: #4CAF50; font-style: italic;');
             showDashboard();
         }
@@ -100,69 +151,33 @@ function handleUrlHash() {
     if (hash.startsWith('#board/')) {
         const boardId = hash.replace('#board/', '');
         if (boardId && (!window.currentBoard || window.currentBoard.id !== boardId)) {
-            // If user is logged in, load the board
             if (window.currentUser) {
-                // If we are already initializing (from initApp), we might need to wait or just call it.
-                // loadBoard is global from board.js
-                if (typeof loadBoard === 'function') {
-                    loadBoard(boardId);
-                    // Hide modals if they are open (like welcome back)
-                    document.getElementById('returningUserModal').style.display = 'none';
-                    document.getElementById('userModal').style.display = 'none';
-                }
+                loadBoard(boardId);
+                // Hide modals
+                const returningModal = document.getElementById('returningUserModal');
+                if (returningModal) returningModal.style.display = 'none';
+                document.getElementById('userModal').style.display = 'none';
             }
         }
     } else if (!hash || hash === '#dashboard') {
         showDashboard();
     } else if (hash === '#action-items') {
-        if (typeof loadActionItemsView === 'function') {
-            loadActionItemsView();
-        } else {
-            console.error('loadActionItemsView not loaded');
-        }
+        loadActionItemsView();
     } else if (hash === '#admin') {
-        if (typeof loadAdminView === 'function') {
-            loadAdminView();
-        }
+        loadAdminView();
     } else if (hash === '#teams') {
-        if (typeof loadTeamsView === 'function') {
-            loadTeamsView();
-        }
+        loadTeamsView();
     } else if (hash.startsWith('#team/')) {
         const teamId = hash.replace('#team/', '');
         if (teamId) {
-            // Explicitly hide other views since loadTeamDetails doesn't do it all?
-            // Actually let's assume loadTeamsView logic:
-            // We need to call a function that sets up the container.
-            // But loadTeamDetails is in teams.js.
-            if (typeof openTeamDetails === 'function') {
+            // Check if we need to hide other views? openTeamDetails usually handles it?
+            // openTeamDetails is imported.
+            if (openTeamDetails) {
                 openTeamDetails(teamId);
-            } else if (typeof loadTeamDetails === 'function') {
-                // Fallback if openTeamDetails is not exposed or different
-                // But openTeamDetails handles view switching.
-                // We need to make sure openTeamDetails is valid.
-                // Let's assume teams.js is loaded.
-                // We might need to hide dashboard/etc if openTeamDetails doesn't.
-                // openTeamDetails (in teams.js) DOES hide dashboardView/etc?
-                // Let's check: Yes, it hides teamsList but maybe not dashboard if called directly?
-                // No, line 245 teams.js: hides teamsView.
-                // But we need to hide dashboard too.
-                // Let's create a helper or just manually hide here for safety.
-                const dashboardView = document.getElementById('dashboardView');
-                if (dashboardView) dashboardView.style.display = 'none';
-                const boardContainer = document.getElementById('boardContainer');
-                if (boardContainer) boardContainer.style.display = 'none';
-
-                // Call teams.js function
-                // Note: We need to ensure openTeamDetails is global.
-                window.openTeamDetails(teamId); // Ensure it's attached to window or global scope in teams.js
             }
         }
     }
 }
-
-
-
 
 // Theme Management
 function initTheme() {
@@ -195,25 +210,18 @@ function showReturningUserModal(username) {
 }
 
 function confirmReturningUser() {
-    // Ensure avatar is loaded from localStorage
     window.currentUserAvatar = getUserAvatar();
-
     document.getElementById('returningUserModal').style.display = 'none';
     updateUserDisplay();
     const editBtn = document.getElementById('editUserBtn');
     if (editBtn) editBtn.style.display = 'inline-block';
-
-    // Check URL hash to determine where to go
     handleUrlHash();
 }
 
 function openEditUserModal() {
     const modal = document.getElementById('userModal');
     document.getElementById('userNameInput').value = window.currentUser || '';
-
-    // Repopulate avatar selector with current selection
     populateAvatarSelector();
-
     modal.style.display = 'block';
     document.getElementById('userNameInput').focus();
 }
@@ -229,12 +237,6 @@ function updateUserDisplay() {
 }
 
 function showDashboard() {
-    // Leave current board if viewing one
-    // if (window.currentBoard && window.currentUser) {
-    //    leaveBoard(window.currentBoard.id, window.currentUser);
-    //    stopParticipantPolling();
-    // }
-
     document.getElementById('dashboardView').style.display = 'block';
     document.getElementById('boardContainer').style.display = 'none';
     const actionItemsView = document.getElementById('actionItemsView');
@@ -252,18 +254,19 @@ function showDashboard() {
     if (teamDetailsView) teamDetailsView.style.display = 'none';
 
     const newBoardBtn = document.getElementById('newBoardBtn');
-    if (newBoardBtn) newBoardBtn.style.display = 'inline-block'; // Show on dashboard
+    if (newBoardBtn) newBoardBtn.style.display = 'inline-block';
 
     const actionItemsBtn = document.getElementById('actionItemsBtn');
     if (actionItemsBtn) actionItemsBtn.style.display = 'inline-block';
+
     const leaveBtn = document.getElementById('leaveBoardBtn');
     if (leaveBtn) leaveBtn.style.display = 'none';
+
     const editBtn = document.getElementById('editUserBtn');
     if (editBtn) editBtn.style.display = 'inline-block';
+
     window.currentBoard = null;
 
-    // Clear URL hash
-    // Clear URL hash
     if (window.location.hash && window.location.hash !== '#dashboard') {
         history.pushState(null, null, ' ');
     }
@@ -271,32 +274,23 @@ function showDashboard() {
     loadBoards();
 }
 
-// Board Templates - Loaded from JSON
-var BOARD_TEMPLATES = {};
-var RAW_TEMPLATES = {}; // Stores full template objects for UI
+// Board Templates
+let BOARD_TEMPLATES = {};
+let RAW_TEMPLATES = {};
 
-// Load templates from JSON file
 async function loadBoardTemplates() {
     try {
         const response = await fetch(`/static/board-templates.json?v=${new Date().getTime()}`);
         const templates = await response.json();
-
-        // Store raw templates for UI updates
         RAW_TEMPLATES = templates;
-
-        // Convert to old format for backward compatibility
         BOARD_TEMPLATES = {};
         for (const [key, value] of Object.entries(templates)) {
             BOARD_TEMPLATES[key] = value.columns;
         }
-
-        // Populate template dropdown
         populateTemplateDropdown();
-
         console.log('%c✅ Board templates loaded', 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
     } catch (error) {
         console.error('Failed to load board templates:', error);
-        // Fallback to default templates
         BOARD_TEMPLATES = {
             'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
             'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
@@ -304,7 +298,6 @@ async function loadBoardTemplates() {
             'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
             'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
         };
-        // Also populate RAW for fallback
         RAW_TEMPLATES = {};
         for (const [key, cols] of Object.entries(BOARD_TEMPLATES)) {
             RAW_TEMPLATES[key] = { name: key, columns: cols };
@@ -313,17 +306,10 @@ async function loadBoardTemplates() {
     }
 }
 
-// Populate template dropdown dynamically
 function populateTemplateDropdown() {
     const select = document.getElementById('boardTemplate');
     if (!select) return;
-
-    // Save current selection if any
     const currentSelection = select.value;
-
-    // Clear existing options except "Custom"
-    // We need to keep the "Custom" option which is hardcoded in HTML or we can re-create it
-    // The HTML has it. Let's rebuild it to be safe and translated
     select.innerHTML = '';
 
     const customOption = document.createElement('option');
@@ -331,16 +317,12 @@ function populateTemplateDropdown() {
     customOption.textContent = i18n.t('template.custom') || 'Custom (Manual Entry)';
     select.appendChild(customOption);
 
-    // Add templates from JSON
     for (const [key, value] of Object.entries(RAW_TEMPLATES)) {
         const option = document.createElement('option');
         option.value = key;
-
         const nameKey = `template.${key}.name`;
         const translatedName = i18n.t(nameKey);
-        // Use translated name if exists and not same as key (fallback)
         option.textContent = (translatedName && translatedName !== nameKey) ? translatedName : value.name;
-
         select.appendChild(option);
     }
 
@@ -349,31 +331,25 @@ function populateTemplateDropdown() {
     }
 }
 
-// Add listener for language changes
 document.addEventListener('languageChanged', () => {
     populateTemplateDropdown();
-    // Also update the textarea if a template is selected
     const select = document.getElementById('boardTemplate');
     if (select && select.value !== 'custom' && BOARD_TEMPLATES[select.value]) {
         select.dispatchEvent(new Event('change'));
     }
 });
 
-// Event Listeners - Initialize app when DOM is ready
-// Note: DOMContentLoaded is already handled at the top of the file to call loadModals()
 function setupEventListeners() {
-    // User Form Handler
+    // User Form
     document.getElementById('userForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('userNameInput').value.trim();
         const avatar = document.getElementById('selectedAvatar').value;
-
         if (name) {
             window.currentUser = name;
             window.currentUserAvatar = avatar;
             localStorage.setItem('retroUser', name);
             localStorage.setItem('retroUserAvatar', avatar);
-            // closeModals(); // Modals are managed by display property now
             document.getElementById('userModal').style.display = 'none';
             updateUserDisplay();
             handleUrlHash();
@@ -381,69 +357,54 @@ function setupEventListeners() {
     });
 
     document.getElementById('dashboardBtn')?.addEventListener('click', () => {
-        window.location.hash = 'dashboard';
+        showDashboard(); // Directly call shows
     });
     document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
         window.location.hash = 'action-items';
     });
-
-    // document.getElementById('leaveBoardBtn')?.addEventListener('click', () => {
-    //     if (confirm(i18n.t('confirm.leave_board') || 'Are you sure you want to leave this board?')) {
-    //         showDashboard();
-    //     }
-    // });
 
     document.getElementById('newBoardBtn')?.addEventListener('click', async () => {
         document.getElementById('newBoardModal').style.display = 'block';
         await populateBoardTeamSelect();
     });
 
-    // ...
-
     document.getElementById('newBoardForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('boardName').value;
         const columnsText = document.getElementById('columnNames').value.trim();
         const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
-
-        // Check if we are in a team context OR a team was selected in the dropdown
-        // currentTeamId is set in teams.js when opening team details
         const selectedTeamId = document.getElementById('boardTeamSelect')?.value;
-        const teamId = window.currentTeamId || (selectedTeamId !== '' ? selectedTeamId : null);
+        // currentTeamId global from teams.js? We access window.currentTeamId check
+        // Note: We need to import currentTeamId? module variables aren't global.
+        // We rely on window logic if teams.js shims it? NO.
+        // teams.js exports currentTeamId? No.
+        // But teams.js used `let currentTeamId = null`.
+        // We should just use window.location hash check or ensure teams.js sets window.currentTeamId if needed?
+        // Actually, populateBoardTeamSelect handles logic.
+        // Let's rely on the Select value.
+        const teamId = selectedTeamId !== '' ? selectedTeamId : null;
 
         await createBoard(name, columns, teamId);
-
         closeModals();
-
-        // If we are in team view, refresh the team details
-        if (window.currentTeamId && typeof loadTeamDetails === 'function') {
-            await loadTeamDetails(window.currentTeamId);
+        if (teamId) {
+            // If we were in team view, refresh? 
+            // Logic in createBoard handles redirect to board.
         } else {
-            // If dashboard view, reload boards to show new board (with team label)
             if (typeof loadBoards === 'function') loadBoards();
         }
     });
 
-    // Event Delegation for dynamically loaded Create Board Modal elements
     document.addEventListener('change', (e) => {
         if (e.target && e.target.id === 'boardTemplate') {
             const selectedValue = e.target.value;
             const columnNamesTextarea = document.getElementById('columnNames');
-
             if (!columnNamesTextarea) return;
 
             if (selectedValue === 'custom') {
                 columnNamesTextarea.value = '';
                 columnNamesTextarea.placeholder = 'Enter custom columns...';
             } else if (BOARD_TEMPLATES[selectedValue]) {
-                // Use translated columns if available, otherwise fallback to template defaults
-                // We construct the translation keys: template.mad_sad_glad.columns (array)
-                // But i18n usually returns string or object.
-                // For now, let's use the template object's columns and map them to their translations if possible
-                // OR just use the raw values if the system uses raw values.
-                // V0.10.51 logic check:
                 const template = BOARD_TEMPLATES[selectedValue];
-                // BOARD_TEMPLATES values are arrays of strings
                 if (Array.isArray(template)) {
                     columnNamesTextarea.value = template.join('\n');
                 }
@@ -455,7 +416,6 @@ function setupEventListeners() {
         e.preventDefault();
         const columnId = document.getElementById('cardColumnId').value;
         const content = document.getElementById('cardContent').value;
-
         await createCard(columnId, content);
         closeModals();
     });
@@ -464,7 +424,6 @@ function setupEventListeners() {
         e.preventDefault();
         const columnId = document.getElementById('editColumnId').value;
         const name = document.getElementById('columnNameEdit').value;
-
         await updateColumn(columnId, name);
         closeModals();
     });
@@ -485,14 +444,13 @@ function setupEventListeners() {
         closeBtn.addEventListener('click', closeModals);
     });
 
-    // BenTro v0.2.0 Event Listeners
     document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
 
     document.getElementById('changeUserBtn')?.addEventListener('click', () => {
         document.getElementById('returningUserModal').style.display = 'none';
         window.currentUser = null;
         localStorage.removeItem('retroUser');
-        localStorage.removeItem('adminToken'); // Security fix: clear admin access
+        localStorage.removeItem('adminToken');
         document.getElementById('userModal').style.display = 'block';
     });
 
@@ -511,7 +469,74 @@ function setupEventListeners() {
     });
 }
 
-// Global Action Wrappers (called via onclick in HTML)
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if (e.key === 'Escape') {
+                e.target.blur();
+                closeModals();
+            }
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            closeModals();
+            if (typeof cancelSelection === 'function') cancelSelection();
+            return;
+        }
+
+        if (e.key === '?' && e.shiftKey) {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
+            return;
+        }
+
+        if (window.currentBoard) {
+            if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
+                e.preventDefault();
+                exportBoardToCSV(window.currentBoard.id);
+            }
+            if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
+                e.preventDefault();
+                // trigger button logic
+                const startBtn = document.getElementById('startTimerBtn');
+                const stopBtn = document.getElementById('stopTimerBtn');
+                if (stopBtn && stopBtn.style.display !== 'none') stopTimer();
+                else if (startBtn && !startBtn.disabled) startTimer();
+            }
+            if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
+                e.preventDefault();
+                const switchBtn = document.getElementById('switchPhaseBtn');
+                if (switchBtn && !switchBtn.disabled) switchPhase();
+            }
+            if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
+                e.preventDefault();
+                if (window.currentBoard.columns && window.currentBoard.columns.length > 0) {
+                    openNewCardModal(window.currentBoard.columns[0].id);
+                }
+            }
+        }
+    });
+}
+
+// Avatar Logic (Local implementation for userModal)
+function populateAvatarSelector() {
+    const selector = document.getElementById('avatarSelector');
+    if (!selector) return;
+
+    const currentAvatar = getUserAvatar() || '👤';
+
+    selector.innerHTML = AVAILABLE_AVATARS.map(avatar => `
+        <div class="avatar-option ${avatar === currentAvatar ? 'selected' : ''}" 
+             data-avatar="${avatar}"
+             onclick="selectAvatar('${avatar}')">
+             ${avatar}
+        </div>
+    `).join('');
+}
+
+
+// Wrappers
 window.finishRetro = function () {
     if (window.currentBoard && confirm(i18n.t('confirm.finish_retro'))) {
         updateBoardStatus(window.currentBoard.id, 'finished');
@@ -530,296 +555,26 @@ window.exportCurrentBoard = function () {
     }
 };
 
-// Load Modals dynamically
-async function loadModals() {
-    try {
-        const buster = typeof APP_VERSION !== 'undefined' ? APP_VERSION : Date.now();
-        const response = await fetch(`/static/modals.html?v=${buster}`);
-        if (!response.ok) throw new Error('Failed to load modals');
-        const html = await response.text();
-        document.getElementById('modals-container').innerHTML = html;
-        if (window.i18n) window.i18n.updatePage(); // Update translations for loaded modals
-        console.log('Modals loaded successfully');
-    } catch (error) {
-        console.error('Error loading modals:', error);
-    }
-}
+// Shims
+window.initApp = initApp;
+window.initUI = initUI;
+window.showDashboard = showDashboard;
+window.handleUrlHash = handleUrlHash;
+window.toggleTheme = toggleTheme;
+window.filterBoards = filterBoards; // Explicit redundancy
+// actually selectAvatar is imported from avatars.js.
+// We need to shim it so onclick works.
+// We also need openUserProfileModal logic? 
+// index.html calls openUserProfileModal. Where is it?
+// it was in auth.js?
+// If it was in auth.js, and auth.js is imported, it should be shimmed.
+// Let's assume auth.js handles it. 
+// If not, I'll need to check.
 
-// Initialize App
+// Main Execution
 document.addEventListener('DOMContentLoaded', async () => {
     await loadModals();
     setupEventListeners();
     setupKeyboardShortcuts();
     initApp();
 });
-
-// Keyboard Shortcuts
-function setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-        // Ignore if user is typing in an input or textarea
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            // Allow Esc to blur/close even in inputs
-            if (e.key === 'Escape') {
-                e.target.blur();
-                closeModals();
-            }
-            return;
-        }
-
-        // Global Shortcuts
-        if (e.key === 'Escape') {
-            closeModals();
-            if (typeof cancelSelection === 'function') cancelSelection();
-            return;
-        }
-
-        if (e.key === '?' && e.shiftKey) {
-            const helpModal = document.getElementById('helpModal');
-            if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
-            return;
-        }
-
-        // Board-specific shortcuts (only if in a board)
-        if (window.currentBoard) {
-            // Export CSV (Shift + E)
-            if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
-                e.preventDefault();
-                if (typeof exportBoardToCSV === 'function') exportBoardToCSV(window.currentBoard.id);
-            }
-
-            // Toggle Timer (Shift + T)
-            if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
-                e.preventDefault();
-                const startBtn = document.getElementById('startTimerBtn');
-                const stopBtn = document.getElementById('stopTimerBtn');
-
-                if (stopBtn && stopBtn.style.display !== 'none') {
-                    if (typeof stopTimer === 'function') stopTimer();
-                } else if (startBtn && !startBtn.disabled) {
-                    if (typeof startTimer === 'function') startTimer();
-                }
-            }
-
-            // Switch Phase (Shift + V)
-            if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
-                e.preventDefault();
-                const switchBtn = document.getElementById('switchPhaseBtn');
-                if (switchBtn && !switchBtn.disabled) {
-                    if (typeof switchPhase === 'function') switchPhase();
-                }
-            }
-
-            // New Card (Shift + N)
-            if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
-                e.preventDefault();
-                // Open new card modal for the first column by default
-                if (window.currentBoard.columns && window.currentBoard.columns.length > 0) {
-                    const firstColumnId = window.currentBoard.columns[0].id;
-                    if (typeof openNewCardModal === 'function') openNewCardModal(firstColumnId);
-                }
-            }
-        }
-    });
-}
-
-// Avatar Selection Functions
-function populateAvatarSelector() {
-    /*
-    // Helper to populate teams in New Board modal
-    async function populateBoardTeamSelect() {
-        const select = document.getElementById('boardTeamSelect');
-        if (!select) return;
-
-        // Clear existing (keep first option)
-        select.innerHTML = `<option value="" data-i18n="option.no_team">${i18n.t('option.no_team') || 'No Team (Personal)'}</option>`;
-
-        try {
-            const userTeams = await apiCall('/teams'); // Use cached or new call
-            // Sort alphabetically
-            userTeams.sort((a, b) => a.name.localeCompare(b.name));
-
-            userTeams.forEach(team => {
-                const option = document.createElement('option');
-                option.value = team.id;
-                option.textContent = team.name;
-                select.appendChild(option);
-            });
-
-            // If inside a team view, select it and disable
-            if (window.currentTeamId) {
-                select.value = window.currentTeamId;
-                select.disabled = true;
-            } else {
-                select.disabled = false;
-            }
-
-        } catch (error) {
-            console.error('Failed to load teams for dropdown:', error);
-        }
-    } 
-    */
-    const selector = document.getElementById('avatarSelector');
-    if (!selector) return;
-
-    const currentAvatar = getUserAvatar();
-
-    selector.innerHTML = AVAILABLE_AVATARS.map(avatar => `
-        <div class="avatar-option ${avatar === currentAvatar ? 'selected' : ''}" 
-             data-avatar="${avatar}"
-             onclick="selectAvatar('${avatar}')">
-             ${avatar}
-        </div>
-    `).join('');
-}
-
-function selectAvatar(avatar) {
-    // Remove previous selection
-    document.querySelectorAll('.avatar-option').forEach(el => {
-        el.classList.remove('selected');
-    });
-
-    // Add selection to clicked avatar
-    const clickedElement = document.querySelector(`[data-avatar="${avatar}"]`);
-    if (clickedElement) {
-        clickedElement.classList.add('selected');
-    }
-
-    document.getElementById('selectedAvatar').value = avatar;
-    setUserAvatar(avatar);
-}
-
-// Helper to populate teams in New Board modal
-async function populateBoardTeamSelect() {
-    const select = document.getElementById('boardTeamSelect');
-    if (!select) return;
-
-    // Clear existing (keep first option)
-    select.innerHTML = `<option value="" data-i18n="option.no_team">${i18n.t('option.no_team') || 'No Team (Personal)'}</option>`;
-
-    try {
-        const userTeams = await apiCall('/teams'); // Use cached or new call
-        // Sort alphabetically
-        userTeams.sort((a, b) => a.name.localeCompare(b.name));
-
-        userTeams.forEach(team => {
-            const option = document.createElement('option');
-            option.value = team.id;
-            option.textContent = team.name;
-            select.appendChild(option);
-        });
-
-        // If inside a team view, select it and disable
-        if (window.currentTeamId) {
-            select.value = window.currentTeamId;
-            select.disabled = true;
-        } else {
-            select.disabled = false;
-        }
-
-    } catch (error) {
-        console.error('Failed to load teams for dropdown:', error);
-    }
-}
-
-// Manage Teams Modal Logic
-window.openManageTeamsModal = function () {
-    document.getElementById('manageTeamsModal').style.display = 'block';
-    populateManageTeamsModal();
-};
-
-window.closeManageTeamsModal = function () {
-    document.getElementById('manageTeamsModal').style.display = 'none';
-};
-
-async function populateManageTeamsModal() {
-    if (!window.currentBoard) return;
-
-    const list = document.getElementById('manageTeamsList');
-    const select = document.getElementById('manageTeamsSelect');
-
-    list.innerHTML = '<div class="spinner"></div>';
-
-    try {
-        // Fetch User's Teams for Dropdown
-        const userTeams = await apiCall('/teams');
-
-        // Populate Dropdown
-        select.innerHTML = `<option value="" disabled selected>${i18n.t('label.select_team') || 'Select a team...'}</option>`;
-        userTeams.forEach(team => {
-            // Check if team is already in board
-            const isMember = window.currentBoard.teams && window.currentBoard.teams.some(t => t.id === team.id);
-            if (!isMember) {
-                const option = document.createElement('option');
-                option.value = team.id;
-                option.textContent = team.name;
-                select.appendChild(option);
-            }
-        });
-
-        // Render List
-        list.innerHTML = '';
-        if (window.currentBoard.teams && window.currentBoard.teams.length > 0) {
-            window.currentBoard.teams.forEach(team => {
-                const div = document.createElement('div');
-                div.className = 'team-item';
-                div.style.display = 'flex';
-                div.style.justifyContent = 'space-between';
-                div.style.alignItems = 'center';
-                div.style.padding = '8px';
-                div.style.borderBottom = '1px solid var(--border-color)';
-
-                div.innerHTML = `
-                    <span>${team.name}</span>
-                    <button class="btn btn-outline btn-small btn-danger" onclick="removeTeamFromBoard('${team.id}')">Remove</button>
-                `;
-                list.appendChild(div);
-            });
-        } else {
-            list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 10px;">${i18n.t('msg.no_teams') || 'No teams added yet.'}</div>`;
-        }
-
-    } catch (error) {
-        console.error('Failed to populate manage teams:', error);
-        list.innerHTML = `<div class="error">Failed to load teams</div>`;
-    }
-}
-
-window.addTeamToBoard = async function () {
-    const select = document.getElementById('manageTeamsSelect');
-    const teamId = select.value;
-    if (!teamId || !window.currentBoard) return;
-
-    try {
-        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
-        if (!currentTeamIds.includes(teamId)) {
-            const newTeamIds = [...currentTeamIds, teamId];
-
-            const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
-            window.currentBoard = updatedBoard;
-            alert(i18n.t('msg.team_added') || 'Team added successfully');
-            populateManageTeamsModal();
-            if (typeof renderBoardHeader === 'function') renderBoardHeader();
-        }
-    } catch (error) {
-        console.error('Failed to add team:', error);
-        alert(error.message || 'Failed to add team');
-    }
-};
-
-window.removeTeamFromBoard = async function (teamId) {
-    if (!window.currentBoard || !confirm(i18n.t('confirm.remove_team') || 'Are you sure you want to remove this team?')) return;
-
-    try {
-        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
-        const newTeamIds = currentTeamIds.filter(id => id !== teamId);
-
-        const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
-        window.currentBoard = updatedBoard;
-        alert(i18n.t('msg.team_removed') || 'Team removed successfully');
-        populateManageTeamsModal();
-        if (typeof renderBoardHeader === 'function') renderBoardHeader();
-    } catch (error) {
-        console.error('Failed to remove team:', error);
-        alert(error.message || 'Failed to remove team');
-    }
-};

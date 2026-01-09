@@ -1,49 +1,30 @@
-# Compiled binaries
+# Binaries for programs and plugins
 *.exe
+*.exe~
 *.dll
 *.so
 *.dylib
 
-# Test binaries
+# Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool
+# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories
-vendor/
+# Dependency directories (remove the comment below to include it)
+# vendor/
 
 # Go workspace file
 go.work
+bin/
 
-# Environment variables
-.env
-.env.local
+# IDEs
+.idea
+.vscode
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Uploads
-web/static/uploads/
-
-# Logs
+# Frontend
+web/node_modules/
+web/dist/
+coverage/
 *.log
-
-# Database
-*.db
-*.sqlite
-
-# Node modules (if using any frontend tooling)
-node_modules/
-
-# Build artifacts
-dist/
-build/
+.DS_Store

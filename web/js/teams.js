@@ -1,4 +1,7 @@
 // Team Management Logic
+import { apiCall } from './api.js';
+import { escapeHtml, showToast } from './utils.js';
+
 
 let currentTeamId = null;
 
@@ -7,7 +10,8 @@ async function loadTeamsView() {
     // Hide other views
     document.getElementById('dashboardView').style.display = 'none';
     document.getElementById('boardContainer').style.display = 'none';
-    document.getElementById('actionItemsView').style.display = 'none';
+    const actionItemsView = document.getElementById('actionItemsView');
+    if (actionItemsView) actionItemsView.style.display = 'none';
     const adminView = document.getElementById('adminView');
     if (adminView) adminView.style.display = 'none';
     document.getElementById('teamDetailsView').style.display = 'none';
@@ -249,9 +253,9 @@ async function handleCreateTeam(e) {
     }
 }
 
+
 // Team Details View
-// Team Details View
-window.openTeamDetails = async function (teamId) {
+async function openTeamDetails(teamId) {
     currentTeamId = teamId;
 
     // Update Hash if not already
@@ -267,7 +271,8 @@ window.openTeamDetails = async function (teamId) {
     // Hide other main views just in case (redundant if router handles it but safe)
     document.getElementById('dashboardView').style.display = 'none';
     document.getElementById('boardContainer').style.display = 'none';
-    document.getElementById('actionItemsView').style.display = 'none';
+    const actionItemsView = document.getElementById('actionItemsView');
+    if (actionItemsView) actionItemsView.style.display = 'none';
 
     const detailsView = document.getElementById('teamDetailsView');
     detailsView.style.display = 'block';
@@ -278,6 +283,8 @@ window.openTeamDetails = async function (teamId) {
 
     await loadTeamDetails(teamId);
 }
+
+window.openTeamDetails = openTeamDetails;
 
 async function loadTeamDetails(teamId) {
     const container = document.getElementById('teamDetailsContent');
@@ -524,7 +531,8 @@ async function deleteTeam(teamId) {
     }
 }
 
-async function promoteMember(teamId, userId, userName) {
+// ... (functions)
+export async function promoteMember(teamId, userId, userName) {
     if (confirm(`Are you sure you want to promote ${userName} to Owner? They will have full control over this team.`)) {
         try {
             await apiCall(`/teams/${teamId}/members/${userId}/role`, 'PUT', { role: 'owner' });
@@ -536,3 +544,196 @@ async function promoteMember(teamId, userId, userName) {
         }
     }
 }
+
+// Manage Teams Logic for Board (Moved from main.js)
+export function openManageTeamsModal() {
+    document.getElementById('manageTeamsModal').style.display = 'block';
+    populateManageTeamsModal();
+};
+
+export function closeManageTeamsModal() {
+    document.getElementById('manageTeamsModal').style.display = 'none';
+};
+
+export async function populateManageTeamsModal() {
+    if (!window.currentBoard) return;
+
+    const list = document.getElementById('manageTeamsList');
+    const select = document.getElementById('manageTeamsSelect');
+
+    list.innerHTML = '<div class="spinner"></div>';
+
+    try {
+        // Fetch User's Teams for Dropdown
+        const userTeams = await apiCall('/teams');
+
+        // Populate Dropdown
+        select.innerHTML = `<option value="" disabled selected>${i18n.t('label.select_team') || 'Select a team...'}</option>`;
+        userTeams.forEach(team => {
+            // Check if team is already in board
+            const isMember = window.currentBoard.teams && window.currentBoard.teams.some(t => t.id === team.id);
+            if (!isMember) {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                select.appendChild(option);
+            }
+        });
+
+        // Render List
+        list.innerHTML = '';
+        if (window.currentBoard.teams && window.currentBoard.teams.length > 0) {
+            window.currentBoard.teams.forEach(team => {
+                const div = document.createElement('div');
+                div.className = 'team-item';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                div.style.padding = '8px';
+                div.style.borderBottom = '1px solid var(--border-color)';
+
+                div.innerHTML = `
+                    <span>${team.name}</span>
+                    <button class="btn btn-outline btn-small btn-danger" onclick="removeTeamFromBoard('${team.id}')">Remove</button>
+                `;
+                list.appendChild(div);
+            });
+        } else {
+            list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 10px;">${i18n.t('msg.no_teams') || 'No teams added yet.'}</div>`;
+        }
+
+    } catch (error) {
+        console.error('Failed to populate manage teams:', error);
+        list.innerHTML = `<div class="error">Failed to load teams</div>`;
+    }
+}
+
+export async function addTeamToBoard() {
+    const select = document.getElementById('manageTeamsSelect');
+    const teamId = select.value;
+    if (!teamId || !window.currentBoard) return;
+
+    try {
+        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
+        if (!currentTeamIds.includes(teamId)) {
+            const newTeamIds = [...currentTeamIds, teamId];
+
+            const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
+            window.currentBoard = updatedBoard;
+            alert(i18n.t('msg.team_added') || 'Team added successfully');
+            populateManageTeamsModal();
+            // Assuming renderBoardHeader is in main.js or globally available?
+            // Actually main.js had it inline, checking if function exists.
+            if (window.renderBoardHeader) window.renderBoardHeader();
+        }
+    } catch (error) {
+        console.error('Failed to add team:', error);
+        alert(error.message || 'Failed to add team');
+    }
+};
+
+export async function removeTeamFromBoard(teamId) {
+    if (!window.currentBoard || !confirm(i18n.t('confirm.remove_team') || 'Are you sure you want to remove this team?')) return;
+
+    try {
+        const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
+        const newTeamIds = currentTeamIds.filter(id => id !== teamId);
+
+        const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
+        window.currentBoard = updatedBoard;
+        alert(i18n.t('msg.team_removed') || 'Team removed successfully');
+        populateManageTeamsModal();
+        if (window.renderBoardHeader) window.renderBoardHeader();
+    } catch (error) {
+        console.error('Failed to remove team:', error);
+        alert(error.message || 'Failed to remove team');
+    }
+};
+
+
+// Exported functions need to be global for onclick events in HTML strings (which we are generating)
+// AND for other files calling them via window (if any)
+window.loadTeamsView = loadTeamsView;
+
+window.joinTeam = joinTeam;
+window.openCreateTeamModal = openCreateTeamModal;
+window.closeCreateTeamModal = closeCreateTeamModal;
+window.handleCreateTeam = handleCreateTeam;
+window.openAddMemberModal = openAddMemberModal;
+window.closeAddMemberModal = closeAddMemberModal;
+window.handleAddMember = handleAddMember;
+window.openEditTeamModal = openEditTeamModal;
+window.closeEditTeamModal = closeEditTeamModal;
+window.handleEditTeam = handleEditTeam;
+window.removeTeamMember = removeTeamMember;
+window.deleteTeam = deleteTeam;
+window.promoteMember = promoteMember;
+window.selectUserForTeam = selectUserForTeam;
+window.handleUserSearch = handleUserSearch;
+window.switchTeamTab = switchTeamTab; // Added
+window.addTeamToBoard = addTeamToBoard;
+window.removeTeamFromBoard = removeTeamFromBoard;
+window.openManageTeamsModal = openManageTeamsModal;
+window.closeManageTeamsModal = closeManageTeamsModal;
+
+// Helper to populate teams in New Board modal
+export async function populateBoardTeamSelect() {
+    const select = document.getElementById('boardTeamSelect');
+    if (!select) return;
+
+    // Clear existing (keep first option)
+    select.innerHTML = `<option value="" data-i18n="option.no_team">${i18n.t('option.no_team') || 'No Team (Personal)'}</option>`;
+
+    try {
+        const userTeams = await apiCall('/teams'); // Use cached or new call
+        // Sort alphabetically
+        userTeams.sort((a, b) => a.name.localeCompare(b.name));
+
+        userTeams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.id;
+            option.textContent = team.name;
+            select.appendChild(option);
+        });
+
+        // If inside a team view, select it and disable
+        // window.currentTeamId is set in teams.js logic
+        if (window.location.hash.startsWith('#team/') && currentTeamId) {
+            select.value = currentTeamId;
+            select.disabled = true;
+        } else {
+            select.disabled = false;
+        }
+
+    } catch (error) {
+        console.error('Failed to load teams for dropdown:', error);
+    }
+}
+
+// Check imports
+import { i18n } from './i18n.js';
+
+// Exports
+export {
+    loadTeamsView,
+    openTeamDetails,
+    joinTeam,
+    openCreateTeamModal,
+    closeCreateTeamModal,
+    handleCreateTeam,
+    openAddMemberModal,
+    closeAddMemberModal,
+    handleAddMember,
+    openEditTeamModal,
+    closeEditTeamModal,
+    handleEditTeam,
+    removeTeamMember,
+    deleteTeam,
+    handleUserSearch,
+    selectUserForTeam,
+    switchTeamTab
+};
+
+// Add to window shim
+window.populateBoardTeamSelect = populateBoardTeamSelect;
+

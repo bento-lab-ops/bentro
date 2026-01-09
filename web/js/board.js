@@ -1,4 +1,7 @@
 // Board Management
+import { apiCall, sendWebSocketMessage, joinBoard, leaveBoard, toggleReaction } from './api.js';
+import { escapeHtml, showToast, closeModals } from './utils.js';
+import { i18n } from './i18n.js';
 
 let allBoardsCache = [];
 let currentFilter = 'active';
@@ -263,25 +266,7 @@ async function loadBoard(boardId) {
         if (document.getElementById('newBoardBtn')) document.getElementById('newBoardBtn').style.display = 'none'; // Fix: Hide New Board button
 
 
-        const titleEl = document.getElementById('boardTitle');
-        titleEl.textContent = board.name; // Fallback text
-
-        // Team Badge Logic
-        const teams = board.teams || [];
-        let teamBadge = '';
-        if (teams.length > 0) {
-            const teamNames = teams.map(t => t.name).join(', ');
-            teamBadge = ` <span class="board-header-team-badge" title="Participating Teams: ${escapeHtml(teamNames)}">👥 ${teams.length} Team${teams.length > 1 ? 's' : ''}</span>`;
-        } else if (board.team_name) {
-            // Legacy fallback
-            teamBadge = ` <span class="board-header-team-badge" title="Team: ${escapeHtml(board.team_name)}">👥 1 Team</span>`;
-        }
-
-        if (teamBadge) {
-            titleEl.innerHTML = `${escapeHtml(board.name)}${teamBadge}`;
-        } else {
-            titleEl.textContent = board.name;
-        }
+        renderBoardHeader(board);
 
         renderBoard(board);
         updateBoardStatusUI(board.status);
@@ -595,6 +580,30 @@ function updateBoardStatusUI(status) {
         container.classList.remove('read-only');
     }
 }
+
+function renderBoardHeader(board = window.currentBoard) {
+    if (!board) return;
+    const titleEl = document.getElementById('boardTitle');
+    if (!titleEl) return;
+
+    // Team Badge Logic
+    const teams = board.teams || [];
+    let teamBadge = '';
+    if (teams.length > 0) {
+        const teamNames = teams.map(t => t.name).join(', ');
+        teamBadge = ` <span class="board-header-team-badge" title="Participating Teams: ${escapeHtml(teamNames)}">👥 ${teams.length} Team${teams.length > 1 ? 's' : ''}</span>`;
+    } else if (board.team_name) {
+        // Legacy fallback
+        teamBadge = ` <span class="board-header-team-badge" title="Team: ${escapeHtml(board.team_name)}">👥 1 Team</span>`;
+    }
+
+    if (teamBadge) {
+        titleEl.innerHTML = `${escapeHtml(board.name)}${teamBadge}`;
+    } else {
+        titleEl.textContent = board.name;
+    }
+}
+
 
 function updateVoteStatusUI(board) {
     const display = document.getElementById('voteStatusDisplay');
@@ -913,7 +922,7 @@ function createCardHTML(card) {
 }
 
 // Make reaction functions global
-window.toggleCardReaction = async function (cardId, type) {
+async function toggleCardReaction(cardId, type) {
     try {
         await toggleReaction(cardId, type);
         // Refresh board to show changes
@@ -923,9 +932,12 @@ window.toggleCardReaction = async function (cardId, type) {
         console.error('Failed to toggle reaction:', error);
         alert(error.message);
     }
-};
+}
 
-window.showReactionPicker = function (btn, cardId) {
+window.toggleCardReaction = toggleCardReaction;
+
+
+function showReactionPicker(btn, cardId) {
     // Hide all other pickers first
     document.querySelectorAll('.reaction-picker').forEach(p => p.style.display = 'none');
 
@@ -943,12 +955,17 @@ window.showReactionPicker = function (btn, cardId) {
         };
         setTimeout(() => document.addEventListener('click', closePicker), 0);
     }
-};
+}
 
-window.hideReactionPicker = function (el) {
+window.showReactionPicker = showReactionPicker;
+
+
+function hideReactionPicker(el) {
     const picker = el.closest('.reaction-picker');
     if (picker) picker.style.display = 'none';
-};
+}
+
+window.hideReactionPicker = hideReactionPicker;
 
 // Select-to-Merge Logic
 function selectCard(cardId) {
@@ -1401,7 +1418,7 @@ window.stopParticipantPolling = stopParticipantPolling;
 window.loadBoards = loadBoards;
 
 // Action Item Logic
-window.openActionItemModal = function (cardId) {
+function openActionItemModal(cardId) {
     const card = findCardById(cardId);
     if (!card) return;
 
@@ -1440,9 +1457,12 @@ window.openActionItemModal = function (cardId) {
     }
 
     document.getElementById('actionItemModal').style.display = 'block';
-};
+}
 
-window.saveActionItem = async function () {
+window.openActionItemModal = openActionItemModal;
+
+
+async function saveActionItem() {
     const cardId = document.getElementById('actionItemCardId').value;
     const owner = document.getElementById('actionItemOwner').value;
     const dueDate = document.getElementById('actionItemDueDate').value;
@@ -1461,9 +1481,12 @@ window.saveActionItem = async function () {
         console.error('Failed to save action item:', error);
         alert('Failed to save action item: ' + error.message);
     }
-};
+}
 
-window.toggleActionItemCompletion = async function (cardId, isChecked) {
+window.saveActionItem = saveActionItem;
+
+
+async function toggleActionItemCompletion(cardId, isChecked) {
     if (!isChecked) {
         if (!confirm(i18n.t('confirm.reopen_action_item'))) {
             // Revert checkbox state immediately
@@ -1489,9 +1512,12 @@ window.toggleActionItemCompletion = async function (cardId, isChecked) {
         // Revert checkbox if failed
         await loadBoard(window.currentBoard.id);
     }
-};
+}
 
-window.removeActionItem = async function () {
+window.toggleActionItemCompletion = toggleActionItemCompletion;
+
+
+async function removeActionItem() {
     const cardId = document.getElementById('actionItemCardId').value;
     if (!confirm(i18n.t('confirm.remove_action_item'))) return;
 
@@ -1510,16 +1536,115 @@ window.removeActionItem = async function () {
         console.error('Failed to remove action item:', error);
         alert('Failed to remove action item: ' + error.message);
     }
-};
-
-// Helper: Find card by ID in current board
-function findCardById(cardId) {
-    if (!window.currentBoard || !window.currentBoard.columns) return null;
-    for (const column of window.currentBoard.columns) {
-        if (column.cards) {
-            const card = column.cards.find(c => c.id === cardId);
-            if (card) return card;
-        }
-    }
-    return null;
 }
+
+window.removeActionItem = removeActionItem;
+
+
+
+
+// Alias for legacy support in HTML strings
+const markActionItemDone = function (cardId, status) {
+    // legacy call was (cardId, boolean?), current toggle is (cardId, boolean)
+    return toggleActionItemCompletion(cardId, !status); // Wait, toggleActionItemCompletion(cardId, isChecked)
+    // The HTML was: this.checked ? markActionItemDone(..., false) ??
+    // onchange="this.checked ? markActionItemDone('${card.id}', false) : toggleActionItemCompletion('${card.id}', false)"
+    // This logic in HTML seems flawed or I misread it. 
+    // If checked (became true), we want to set true.
+    // Let's just point global markActionItemDone to toggleActionItemCompletion
+    return toggleActionItemCompletion(cardId, true);
+}
+
+// Global Shims
+window.loadBoards = loadBoards;
+window.renderDashboard = renderDashboard;
+window.joinBoardPersistent = joinBoardPersistent;
+window.leaveBoardPersistent = leaveBoardPersistent;
+window.createBoard = createBoard;
+window.loadBoard = loadBoard;
+window.updateBoardStatus = updateBoardStatus;
+window.deleteBoard = deleteBoard;
+window.claimManagerAction = claimManagerAction;
+window.unclaimManagerAction = unclaimManagerAction;
+window.openBoardSettings = openBoardSettings;
+window.closeBoardSettingsModal = closeBoardSettingsModal;
+window.saveBoardSettings = saveBoardSettings;
+window.sortColumnByVotes = sortColumnByVotes;
+window.createCard = createCard;
+window.deleteCard = deleteCard;
+window.voteCard = voteCard;
+window.createColumn = createColumn;
+window.updateColumn = updateColumn;
+window.deleteColumn = deleteColumn;
+window.openNewCardModal = openNewCardModal;
+window.openEditColumnModal = openEditColumnModal;
+window.exportBoardToCSV = exportBoardToCSV;
+window.openUnmergeModal = openUnmergeModal;
+window.unmergeCard = unmergeCard;
+window.selectCard = selectCard;
+window.cancelSelection = cancelSelection;
+window.mergeCard = mergeCard;
+
+
+
+window.startParticipantPolling = startParticipantPolling;
+window.stopParticipantPolling = stopParticipantPolling;
+window.initDashboardFilters = initDashboardFilters;
+window.applyDashboardFilters = applyDashboardFilters;
+window.openActionItemModal = openActionItemModal;
+
+
+window.removeActionItem = removeActionItem;
+window.markActionItemDone = window.toggleActionItemCompletion; // Alias fix
+window.markActionItemDone = window.toggleActionItemCompletion; // Alias fix
+window.isBoardManager = isBoardManager;
+window.renderBoardHeader = renderBoardHeader;
+window.filterBoards = filterBoards;
+
+// Exports
+export {
+    loadBoards,
+    renderDashboard,
+    joinBoardPersistent,
+    leaveBoardPersistent,
+    createBoard,
+    loadBoard,
+    updateBoardStatus,
+    deleteBoard,
+    claimManagerAction,
+    unclaimManagerAction,
+    openBoardSettings,
+    closeBoardSettingsModal,
+    saveBoardSettings,
+    sortColumnByVotes,
+    createCard,
+    deleteCard,
+    voteCard,
+    createColumn,
+    updateColumn,
+    deleteColumn,
+    openNewCardModal,
+    openEditColumnModal,
+    exportBoardToCSV,
+    openUnmergeModal,
+    unmergeCard,
+    selectCard,
+    cancelSelection,
+    mergeCard,
+    toggleCardReaction,
+    showReactionPicker,
+    hideReactionPicker,
+    updateParticipantsDisplay,
+    startParticipantPolling,
+    stopParticipantPolling,
+    initDashboardFilters,
+    applyDashboardFilters,
+    openActionItemModal,
+    saveActionItem,
+    toggleActionItemCompletion,
+    removeActionItem,
+
+    isBoardManager,
+    renderBoardHeader,
+    filterBoards
+};

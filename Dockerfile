@@ -1,8 +1,24 @@
 # Multi-stage build
-FROM golang:1.24-alpine AS builder
+# Node.js Build Stage
+FROM node:18-slim AS node-builder
+WORKDIR /web
+ARG CACHE_BUST_NODE=1
+COPY web/package.json ./
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Install dependencies
+RUN npm install
+# Copy web source
+COPY web/ .
+# Manual "Build" - Copy specific source files to dist
+RUN mkdir dist && cp -r public/* dist/ && cp -r js dist/ && cp index.html dist/ && cp bentro.css dist/
+# Build
+# RUN npm run build
+RUN echo "Skipped build, serving raw files"
 
+# Go Builder Stage
+FROM golang:1.24-alpine AS go-builder
 WORKDIR /app
-ENV CACHE_BUST=v0.10.57
+ENV CACHE_BUST=v0.10.65
 
 # Copy source code
 COPY . .
@@ -20,10 +36,10 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy binary from builder
-COPY --from=builder /app/bentro-final-v4 .
+COPY --from=go-builder /app/bentro-final-v4 .
 
-# Copy web files (cache bust: final-v4)
-COPY --from=builder /app/web ./web
+# Copy web/dist files from node-builder
+COPY --from=node-builder /web/dist ./web/dist
 
 EXPOSE 8080
 

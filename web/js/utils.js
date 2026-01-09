@@ -1,26 +1,21 @@
 // Utility Functions
-function escapeHtml(text) {
+export function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-function closeModals() {
+export function closeModals() {
     document.querySelectorAll('.modal').forEach(modal => {
         if (modal.id === 'userModal' && !window.currentUser) return;
         modal.style.display = 'none';
     });
 }
 
-function showToast(message, type = 'success') {
+export function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     // Simple toast styling (ensure CSS exists or specific toast class)
-    // Assuming .toast class is defined in bentro.css or styles.css.
-    // If not, we might need to add inline styles or check CSS. 
-    // Based on subagent, it was missing functionality, not style.
-
-    // Using inline styles for safety if class missing
     toast.style.position = 'fixed';
     toast.style.bottom = '20px';
     toast.style.right = '20px';
@@ -43,4 +38,8 @@ function showToast(message, type = 'success') {
         }, 3000);
     }, 100);
 }
+
+// Global Shims
+window.escapeHtml = escapeHtml;
+window.closeModals = closeModals;
 window.showToast = showToast;

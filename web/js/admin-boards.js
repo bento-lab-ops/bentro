@@ -1,8 +1,9 @@
 // Admin Board Management Logic
+import { i18n } from './i18n.js';
 
 let allBoards = [];
 
-function openAdminBoardsModal(initialFilter = 'all') {
+export function openAdminBoardsModal(initialFilter = 'all') {
     const modal = document.getElementById('adminBoardsModal');
     if (modal) {
         modal.style.display = 'block';
@@ -17,11 +18,11 @@ function openAdminBoardsModal(initialFilter = 'all') {
     }
 }
 
-function closeAdminBoardsModal() {
+export function closeAdminBoardsModal() {
     document.getElementById('adminBoardsModal').style.display = 'none';
 }
 
-async function loadAdminBoards() {
+export async function loadAdminBoards() {
     const tbody = document.getElementById('adminBoardsList');
     tbody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="loading-spinner"></div> Loading boards...</td></tr>';
 
@@ -45,7 +46,7 @@ async function loadAdminBoards() {
     }
 }
 
-function renderAdminBoards(boards) {
+export function renderAdminBoards(boards) {
     const tbody = document.getElementById('adminBoardsList');
     tbody.innerHTML = '';
 
@@ -113,7 +114,7 @@ function formatDuration(ms) {
     return 'Just now';
 }
 
-function filterAdminBoards() {
+export function filterAdminBoards() {
     const searchTerm = document.getElementById('adminBoardSearch').value.toLowerCase();
     const statusFilter = document.getElementById('adminBoardFilter').value;
 
@@ -127,7 +128,7 @@ function filterAdminBoards() {
     renderAdminBoards(filtered);
 }
 
-async function handleToggleBoardStatus(id, newStatus) {
+export async function handleToggleBoardStatus(id, newStatus) {
     if (!confirm(`Are you sure you want to change status to ${newStatus.toUpperCase()}?`)) return;
 
     try {
@@ -145,7 +146,7 @@ async function handleToggleBoardStatus(id, newStatus) {
     }
 }
 
-async function handleDeleteBoard(id, name) {
+export async function handleDeleteBoard(id, name) {
     if (!confirm(`Are you sure you want to DELETE board "${name}"?\nThis action cannot be undone.`)) return;
 
     try {
@@ -160,3 +161,12 @@ async function handleDeleteBoard(id, name) {
         alert('Error: ' + error.message);
     }
 }
+
+// Global Shims
+window.openAdminBoardsModal = openAdminBoardsModal;
+window.closeAdminBoardsModal = closeAdminBoardsModal;
+window.loadAdminBoards = loadAdminBoards;
+window.renderAdminBoards = renderAdminBoards;
+window.filterAdminBoards = filterAdminBoards;
+window.handleToggleBoardStatus = handleToggleBoardStatus;
+window.handleDeleteBoard = handleDeleteBoard;

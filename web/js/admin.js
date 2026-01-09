@@ -1,14 +1,30 @@
 // Admin Dashboard Management
+import { apiCall } from './api.js';
+import { loadBoard } from './board.js';
+import { joinBoard } from './api.js';
+import { i18n } from './i18n.js';
+import { openAdminBoardsModal, loadAdminBoards } from './admin-boards.js';
+import { openAdminActionItemsModal, loadAdminActions } from './admin-actions.js';
+import { openAdminUsersModal, loadAllUsers } from './admin-users.js';
 
-async function loadAdminView() {
+export async function loadAdminView() {
     // Check if user is admin via JWT or has K8s admin token
     const token = localStorage.getItem('adminToken');
     const isJWTAdmin = window.currentUserRole === 'admin';
 
     // Hide other views
-    document.getElementById('dashboardView').style.display = 'none';
-    document.getElementById('boardContainer').style.display = 'none';
-    document.getElementById('actionItemsView').style.display = 'none';
+    const dashboardView = document.getElementById('dashboardView');
+    if (dashboardView) dashboardView.style.display = 'none';
+    const boardContainer = document.getElementById('boardContainer');
+    if (boardContainer) boardContainer.style.display = 'none';
+    const actionItemsView = document.getElementById('actionItemsView');
+    if (actionItemsView) actionItemsView.style.display = 'none';
+
+    // Hide Team Views
+    const teamsView = document.getElementById('teamsView');
+    if (teamsView) teamsView.style.display = 'none';
+    const teamDetailsView = document.getElementById('teamDetailsView');
+    if (teamDetailsView) teamDetailsView.style.display = 'none';
 
     const adminView = document.getElementById('adminView');
     if (!adminView) {
@@ -18,7 +34,9 @@ async function loadAdminView() {
     adminView.style.display = 'block';
 
     // Update Header
-    document.getElementById('dashboardBtn').style.display = 'inline-block';
+    const dashboardBtn = document.getElementById('dashboardBtn');
+    if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+
     const newBoardBtn = document.getElementById('newBoardBtn');
     if (newBoardBtn) newBoardBtn.style.display = 'none'; // Fix: Hide New Board button
 
@@ -31,7 +49,7 @@ async function loadAdminView() {
     }
 }
 
-function showAdminLogin() {
+export function showAdminLogin() {
     const container = document.getElementById('adminContent');
     container.innerHTML = `
         <div class="admin-login-card">
@@ -45,7 +63,7 @@ function showAdminLogin() {
     `;
 }
 
-async function handleAdminLogin(e) {
+export async function handleAdminLogin(e) {
     e.preventDefault();
     const password = document.getElementById('adminPassword').value;
 
@@ -77,7 +95,7 @@ async function handleAdminLogin(e) {
     }
 }
 
-async function showAdminDashboard() {
+export async function showAdminDashboard() {
     const container = document.getElementById('adminContent');
     container.innerHTML = '<div class="loading-spinner">Loading admin data...</div>';
 
@@ -105,11 +123,11 @@ async function showAdminDashboard() {
                         <span class="stat-value">${stats.boards.active}</span>
                         <span class="stat-label">${i18n.t('admin.stat_active_boards')}</span>
                     </div>
-                    <div class="stat-card clickable" onclick="openAdminActionsModal()" style="cursor: pointer;">
+                    <div class="stat-card clickable" onclick="openAdminActionItemsModal()" style="cursor: pointer;">
                         <span class="stat-value">${stats.action_items.total}</span>
                         <span class="stat-label">${i18n.t('admin.stat_total_actions')}</span>
                     </div>
-                    <div class="stat-card clickable" onclick="openAdminActionsModal()" style="cursor: pointer;">
+                    <div class="stat-card clickable" onclick="openAdminActionItemsModal()" style="cursor: pointer;">
                         <span class="stat-value">${stats.action_items.completed}</span>
                         <span class="stat-label">${i18n.t('admin.stat_completed_actions')}</span>
                     </div>
@@ -132,9 +150,14 @@ async function showAdminDashboard() {
     }
 }
 
-function logoutAdmin() {
+export function logoutAdmin() {
     localStorage.removeItem('adminToken');
     showAdminLogin();
 }
 
-// End of admin.js
+// Global Shims
+window.loadAdminView = loadAdminView;
+window.showAdminLogin = showAdminLogin;
+window.handleAdminLogin = handleAdminLogin;
+window.showAdminDashboard = showAdminDashboard;
+window.logoutAdmin = logoutAdmin;

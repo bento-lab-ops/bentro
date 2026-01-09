@@ -1,9 +1,15 @@
 // API and WebSocket Handling
+import { CONFIG } from './config.js'; // Import dependency
+
+const API_BASE = CONFIG.API_BASE; // Local constant for module use
 
 // Initialize WebSocket
-function initWebSocket() {
-    window.ws = new WebSocket(WS_URL);
+export function initWebSocket() {
+    const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const WS_URL = `${WS_PROTOCOL}//${window.location.host}/ws`;
 
+    window.ws = new WebSocket(WS_URL);
+    // ... (rest of initWebSocket body is identical, but we attach variables to window inside)
     window.ws.onopen = () => {
         console.log('%c🔌 WebSocket Connected', 'background: #4CAF50; color: white; padding: 2px 6px; border-radius: 3px;');
     };
@@ -23,71 +29,63 @@ function initWebSocket() {
     };
 }
 
-function handleWebSocketMessage(message) {
+export function handleWebSocketMessage(message) {
+    // ... (rest of function)
     switch (message.type) {
         case 'timer_update':
-            updateTimerDisplay(message.data.seconds);
+            if (window.updateTimerDisplay) window.updateTimerDisplay(message.data.seconds);
             break;
         case 'timer_start':
-            startTimerUI(message.data.seconds);
+            if (window.startTimerUI) window.startTimerUI(message.data.seconds);
             break;
         case 'timer_stop':
-            stopTimerUI();
+            if (window.stopTimerUI) window.stopTimerUI();
             break;
         case 'phase_change':
-            updatePhase(message.data.phase);
+            if (window.updatePhase) window.updatePhase(message.data.phase);
             break;
         case 'board_update':
-            // console.log('[WS] Board Update received:', message.data);
-            // Refresh dashboard lists if we are potentially viewing them
-            // We remove strict display check to ensure robustness
-            if (document.getElementById('dashboardView')) {
-                loadBoards();
+            if (document.getElementById('dashboardView') && window.loadBoards) {
+                window.loadBoards();
             }
-            if (window.currentBoard && window.currentBoard.id === message.data.board_id) {
-                // If we are IN the board, reload it to get new participants
-                loadBoard(window.currentBoard.id);
+            if (window.currentBoard && window.currentBoard.id === message.data.board_id && window.loadBoard) {
+                window.loadBoard(window.currentBoard.id);
             }
             break;
         case 'participants_update':
-            if (window.currentBoard && window.currentBoard.id === message.data.board_id) {
-                updateParticipantsDisplay(message.data.participants);
+            if (window.currentBoard && window.currentBoard.id === message.data.board_id && window.updateParticipantsDisplay) {
+                window.updateParticipantsDisplay(message.data.participants);
             }
             break;
     }
 }
 
-function sendWebSocketMessage(type, data) {
+export function sendWebSocketMessage(type, data) {
     if (window.ws && window.ws.readyState === WebSocket.OPEN) {
         window.ws.send(JSON.stringify({ type, data }));
     }
 }
 
-function joinBoard(boardId, username, avatar) {
+export function joinBoard(boardId, username, avatar) {
     if (window.ws && window.ws.readyState === WebSocket.OPEN) {
         window.ws.send(JSON.stringify({
             type: 'join_board',
             board_id: boardId,
             username: username,
-            avatar: avatar || getUserAvatar(),
+            avatar: avatar || (window.getUserAvatar ? window.getUserAvatar() : ''),
             is_admin: !!localStorage.getItem('adminToken')
         }));
     }
 }
 
-function toggleReaction(cardId, reactionType) {
-    if (window.ws && window.ws.readyState === WebSocket.OPEN) {
-        // Optimistic update via WebSocket logic is handled by backend broadcasting 'board_update'
-        // But for this feature we use REST API primarily, similar to votes
-    }
-    // We'll use REST API for the toggle action
+export function toggleReaction(cardId, reactionType) {
     return apiCall(`/cards/${cardId}/reactions`, 'POST', {
         user_name: window.currentUser,
         reaction_type: reactionType
     });
 }
 
-function leaveBoard(boardId, username) {
+export function leaveBoard(boardId, username) {
     if (window.ws && window.ws.readyState === WebSocket.OPEN) {
         window.ws.send(JSON.stringify({
             type: 'leave_board',
@@ -98,21 +96,18 @@ function leaveBoard(boardId, username) {
 }
 
 // API Functions
-async function apiCall(endpoint, method = 'GET', body = null) {
+export async function apiCall(endpoint, method = 'GET', body = null) {
+    // ... (rest is same)
     const options = {
         method,
-        headers: {}, // Initialize headers object
+        headers: {},
     };
 
-    // Add Content-Type if body exists
     if (body) {
         options.body = JSON.stringify(body);
         options.headers['Content-Type'] = 'application/json';
     }
 
-    // Add Auth Token from Cookie (if user is logged in via Google)
-    // The browser automatically sends cookies, but some APIs might expect Bearer token
-    // For now, we rely on the httpOnly cookie sent automatically by the browser.
     const authToken = document.cookie.split('; ').find(row => row.startsWith('auth_token='));
     if (authToken) {
         options.headers['Authorization'] = `Bearer ${authToken.split('=')[1]}`;
@@ -137,16 +132,28 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 }
 
 // Auth API
-function login(email, password) {
+export function login(email, password) {
     return apiCall('/auth/login', 'POST', { email, password });
 }
 
-function register(data) {
+export function register(data) {
     return apiCall('/auth/register', 'POST', data);
 }
 
-function logout() {
+export function logout() {
     return apiCall('/auth/logout', 'POST');
 }
+
+// Global Shims
+window.initWebSocket = initWebSocket;
+window.handleWebSocketMessage = handleWebSocketMessage;
+window.sendWebSocketMessage = sendWebSocketMessage;
+window.joinBoard = joinBoard;
+window.toggleReaction = toggleReaction;
+window.leaveBoard = leaveBoard;
+window.apiCall = apiCall;
+window.login = login;
+window.register = register;
+window.logout = logout;
 
 

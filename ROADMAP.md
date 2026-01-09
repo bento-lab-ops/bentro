@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.10.65
+## Current Version: **v0.10.77**
 
 ---
 
@@ -13,10 +13,23 @@
     - [x] **Layout**: Relocate to Control Bar (alongside other actions).
     - [x] **Testing**: Add E2E tests for Claim/Relinquish flow & button visibility.
     - [x] **Fix**: Verify/Add `confirm.unclaim_board` translation key.
+- [ ] **Code Architecture Improvements** (from Critical Analysis v0.10.64):
+    - [ ] **Refactor to Component/Module Pattern**: Break `main.js` into feature modules (`DashboardController`, `BoardController`, `NavController`) to reduce coupling
+    - [ ] **Visual Regression Testing**: Add assertions for key element visibility (`#newBoardBtn`, `#dashboardGrid`) in E2E tests
 - [ ] **CI/CD Guardrails**:
     - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
     - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
     - [ ] **Backend Lint**: Add `golangci-lint` to catch Go errors before compile.
+    - [ ] **Pre-commit Hooks**: Implement hooks for syntax validation, linting, and preventing bad commits
+    - [ ] **E2E Test Selector Validation**: Add CSS selector validation to CI/CD pipeline
+- [ ] **Documentation**:
+    - [ ] **ES Module Migration Guide**: Document learnings from v0.10.65-v0.10.77 migration
+    - [ ] **E2E Test Maintenance**: Document CSS selectors in test comments for maintainability
+- [ ] **Dockerfile Security Hardening** (Production):
+    - [ ] Add non-root user for runtime security
+    - [ ] Implement build cache mounts (`--mount=type=cache`) for faster builds
+    - [ ] Add security scanning (e.g., `trivy` or `grype`)
+    - [ ] Minimize final image size (multi-stage optimization)
 - [ ] **Feature Flags**: Decouple "Hide Vote" and other experimental features.
 - [ ] **Automated Audit**: Browser-based regression testing checklist.
     - [x] Initial Playwright Setup (`tests/e2e`).
@@ -35,6 +48,7 @@
 - [ ] **Advanced Action Items Filtering**: Filter by Period, Team/Board, or Owner.
 - [ ] **Board Header Redesign**: Consolidate actions (Active/Teams/Settings) for a premium look.
 - [ ] **Hide Vote Buttons**: Hide Like/Dislike controls until Voting Phase to reduce clutter.
+- [ ] **Fix: Phase Switching UI Indicator**: `#currentPhase` element doesn't update text when switching phases (voting functionality works correctly, only visual indicator affected).
 
 ### v1.0.0 - Semantic Release
 **Goal:** Official release after field testing validation.
