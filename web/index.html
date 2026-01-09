@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.10.77">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.11.0-rc12">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -339,11 +339,12 @@
             <form onsubmit="handleLoginSubmit(event)">
                 <div class="form-group">
                     <label data-i18n="label.email">Email</label>
-                    <input type="email" id="loginEmail" class="form-input" required>
+                    <input type="email" id="loginEmail" class="form-input" required autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.password">Password</label>
-                    <input type="password" id="loginPassword" class="form-input" required>
+                    <input type="password" id="loginPassword" class="form-input" required
+                        autocomplete="current-password">
                 </div>
                 <div class="modal-footer"
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
@@ -366,11 +367,11 @@
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.email">Email</label>
-                    <input type="email" id="regEmail" class="form-input" required>
+                    <input type="email" id="regEmail" class="form-input" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label data-i18n="label.password">Password</label>
-                    <input type="password" id="regPassword" class="form-input" required>
+                    <input type="password" id="regPassword" class="form-input" required autocomplete="new-password">
                 </div>
                 <div class="modal-footer"
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
@@ -385,7 +386,7 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script type="module" src="/static/js/main.js?v=v0.10.77"></script>
+    <script type="module" src="/static/js/main.js?v=v0.11.0-rc12"></script>
     </script>
 </body>
 

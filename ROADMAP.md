@@ -14,7 +14,7 @@
     - [x] **Testing**: Add E2E tests for Claim/Relinquish flow & button visibility.
     - [x] **Fix**: Verify/Add `confirm.unclaim_board` translation key.
 - [ ] **Code Architecture Improvements** (from Critical Analysis v0.10.64):
-    - [ ] **Refactor to Component/Module Pattern**: Break `main.js` into feature modules (`DashboardController`, `BoardController`, `NavController`) to reduce coupling
+    - [x] **Refactor to Component/Module Pattern**: Break `main.js` into feature modules (`DashboardController`, `NavController`, `Router`, `BoardService`) to reduce coupling
     - [ ] **Visual Regression Testing**: Add assertions for key element visibility (`#newBoardBtn`, `#dashboardGrid`) in E2E tests
 - [ ] **CI/CD Guardrails**:
     - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
@@ -80,6 +80,12 @@
 - [x] **Build Restoration**: Docker ARM64 build pipeline stabilized.
 - [x] **E2E Stabilization**: Fix flaky tests, modal handling, and template selection.
 - [x] **Claim/Relinquish UI**: Glassmorphic buttons, improved logic, and tests.
+
+### v0.11.0 - Modular Architecture (Phase 3)
+- [x] **Modular Controllers** - Split monolithic logic into `DashboardController` and `NavController`.
+- [x] **Router Implementation** - Hash-based client-side routing.
+- [x] **Service Layer** - Decoupled API calls (`BoardService`).
+- [x] **Stability Fixes** - Resolved cyclic dependencies and legacy global scope issues.
 
 ### v0.11.0 - Participant Metadata & Stability checks.
 - [x] **Multiple Team Owners** - Support for multiple owners per team.

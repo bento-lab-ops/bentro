@@ -3,243 +3,13 @@ import { apiCall, sendWebSocketMessage, joinBoard, leaveBoard, toggleReaction } 
 import { escapeHtml, showToast, closeModals } from './utils.js';
 import { i18n } from './i18n.js';
 
-let allBoardsCache = [];
-let currentFilter = 'active';
+// loadBoards moved to DashboardController
+// let allBoardsCache = []; // Removed
+// let currentFilter = 'active'; // Removed
 
-async function loadBoards() {
-    try {
-        const boards = await apiCall('/boards');
-        console.log('[loadBoards] Fetched boards:', boards.length, boards.map(b => ({ id: b.id, name: b.name, part_count: b.participant_count, participants: b.participants })));
-        allBoardsCache = boards;
-        filterBoards(currentFilter || 'active');
-    } catch (error) {
-        console.error('Failed to load boards:', error);
-    }
-}
+// filterBoards, renderDashboard, joinBoardPersistent, leaveBoardPersistent moved to DashboardController
 
-function filterBoards(status) {
-    currentFilter = status;
-
-    // Update Filter UI
-    document.querySelectorAll('.team-nav-tab').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(status === 'active' ? 'filterActiveBtn' : 'filterFinishedBtn');
-    if (activeBtn) activeBtn.classList.add('active');
-
-    // Filter Data
-    const filtered = allBoardsCache.filter(b => b.status === status);
-    renderDashboard(filtered);
-}
-
-function renderDashboard(boards) {
-    const grid = document.getElementById('dashboardGrid');
-    grid.innerHTML = '';
-
-    if (boards.length === 0) {
-        document.getElementById('emptyDashboard').style.display = 'flex';
-        return;
-    }
-
-    document.getElementById('emptyDashboard').style.display = 'none';
-
-    boards.forEach(board => {
-        const card = document.createElement('div');
-        card.className = 'board-card';
-        card.onclick = (e) => {
-            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I' && !e.target.closest('button')) {
-                loadBoard(board.id);
-            }
-        };
-
-        // Determine flags
-        const myUser = (window.currentUser || '').toLowerCase();
-        const isOwner = (board.owner || '').toLowerCase() === myUser;
-        const isMember = board.participants && board.participants.some(p => (p.username || '').toLowerCase() === myUser);
-
-        // Multi-team logic
-        const teams = board.teams || [];
-        const isTeamBoard = teams.length > 0 || !!board.team_id;
-
-        // Display Name Logic
-        let displayTeamName = board.team_name || ''; // Default to legacy
-        if (teams.length > 0) {
-            displayTeamName = teams.map(t => t.name).join(', ');
-        }
-        const hasTeam = !!displayTeamName;
-
-        // Add filter attributes
-        card.dataset.myBoard = isOwner ? 'true' : 'false';
-        card.dataset.participating = isMember ? 'true' : 'false';
-        card.dataset.teamBoard = isTeamBoard ? 'true' : 'false';
-
-        // Action Item Logic
-        const actionItemCount = board.action_item_count || 0;
-        const hasActionItems = actionItemCount > 0;
-        const isActive = board.status === 'active';
-        const statusClass = isActive ? 'status-active' : 'status-finished';
-        const actionItemBadge = hasActionItems
-            ? `<span class="action-item-dashboard-badge" title="${actionItemCount} Action Items">⚡ ${actionItemCount}</span>`
-            : '';
-
-        let deleteTitle = i18n.t('modal.delete');
-        if (hasActionItems) {
-            deleteTitle = i18n.t('alert.cannot_delete_items');
-        } else if (isActive) {
-            deleteTitle = i18n.t('alert.cannot_delete_active') || 'Finish board to delete';
-        }
-
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
-                <h3 title="${escapeHtml(board.name)}" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 70%;">${escapeHtml(board.name)}</h3>
-                <div style="display:flex; gap:0.5rem; align-items:center;">
-                    ${actionItemBadge}
-                    <span class="board-status ${statusClass}">${i18n.t('status.' + board.status) || board.status}</span>
-                </div>
-            </div>
-            
-            <div class="board-meta" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <div class="meta-row">
-                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.created_at') || 'Created'}:</span>
-                    <span>${new Date(board.created_at).toLocaleDateString()}</span>
-                </div>
-                <div class="meta-row">
-                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.participants') || 'Participants'}:</span>
-                    <span>${board.participant_count}</span>
-                </div>
-                <div class="meta-row">
-                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.owner') || 'Owner'}:</span>
-                    <span>${escapeHtml(board.owner || '-')}</span>
-                </div>
-                ${hasTeam ? `
-                <div class="meta-row">
-                    <span style="font-weight:600; color:var(--text-secondary); width: 80px;">${i18n.t('label.team') || 'Team'}:</span>
-                    <span title="${escapeHtml(displayTeamName)}" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(displayTeamName)}</span>
-                </div>` : ''}
-            </div>
-
-            <div class="dashboard-actions">
-                ${(() => {
-                const myUser = (window.currentUser || '').toLowerCase();
-                const isMember = board.participants && board.participants.some(p => (p.username || '').toLowerCase() === myUser);
-                const isOwner = (board.owner || '').toLowerCase() === myUser;
-
-                if (board.status === 'finished') {
-                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.view_results') || 'View Results'}">
-                             <i class="fas fa-chart-bar"></i> ${i18n.t('btn.view')}
-                        </button>`;
-                }
-
-                if (isMember || isOwner) {
-                    return `<button class="btn btn-primary btn-sm" onclick="loadBoard('${board.id}')" title="${i18n.t('btn.return') || 'Return'}">
-                             <i class="fas fa-arrow-right"></i> ${i18n.t('btn.return') || 'Retornar'}
-                        </button>`;
-                } else {
-                    return `<button class="btn btn-success btn-sm" onclick="joinBoardPersistent('${board.id}')" title="${i18n.t('btn.join')}">
-                             <i class="fas fa-sign-in-alt"></i> ${i18n.t('btn.enter') || 'Entrar'}
-                        </button>`;
-                }
-            })()}
-
-                ${board.status === 'finished' ?
-                `<button class="btn btn-warning btn-sm" onclick="updateBoardStatus('${board.id}', 'active')" title="${i18n.t('btn.reopen')}"><i class="fas fa-sync-alt"></i></button>` : ''}
-                
-                ${board.status === 'finished' ?
-                `<button class="btn btn-danger btn-sm" 
-                    onclick="deleteBoard('${board.id}')" 
-                    title="${deleteTitle}">
-                    <i class="fas fa-trash"></i>
-                </button>` : ''}
-            </div>
-        `;
-
-        grid.appendChild(card);
-    });
-
-    // Apply client-side filters (text search, toggles) after rendering
-    if (typeof applyDashboardFilters === 'function') {
-        applyDashboardFilters();
-    }
-}
-
-async function joinBoardPersistent(boardId) {
-    if (!window.currentUser) {
-        alert("Please log in to join a board.");
-        return;
-    }
-    try {
-        await apiCall(`/boards/${boardId}/join`, 'POST', {
-            username: window.currentUser,
-            avatar: window.currentUserAvatar
-        });
-        await loadBoard(boardId);
-    } catch (error) {
-        console.error('Failed to join board:', error);
-        alert('Failed to join board: ' + error.message);
-    }
-}
-
-async function leaveBoardPersistent(boardId) {
-    const id = boardId || (window.currentBoard ? window.currentBoard.id : null);
-    if (!id) {
-        console.error("No board ID found for leave action");
-        return;
-    }
-    if (!window.currentUser) {
-        window.location.hash = '#dashboard';
-        showDashboard();
-        return;
-    }
-
-    if (!confirm(i18n.t('confirm.leave_board') || "Are you sure you want to leave this board?")) return;
-    try {
-        await apiCall(`/boards/${id}/leave`, 'POST', {
-            username: window.currentUser
-        });
-
-        // Success: Redirect to dashboard
-        window.location.hash = '#dashboard';
-
-        // Ensure UI update
-        if (typeof showDashboard === 'function') {
-            showDashboard();
-        } else {
-            // Fallback if showDashboard is not available or hash change didn't trigger
-            document.getElementById('board-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'block';
-            loadBoards();
-        }
-
-        // Refresh data
-        setTimeout(loadBoards, 50);
-    } catch (error) {
-        console.error('Failed to leave board:', error);
-        // If error is "user not participant", we should probably just return to dashboard anyway?
-        // For now, alert logic is fine.
-        alert('Failed to leave board: ' + error.message);
-    }
-}
-
-async function createBoard(name, columns, teamId = null) {
-    try {
-        const payload = {
-            name,
-            columns,
-            owner: window.currentUser
-        };
-        if (teamId) {
-            payload.team_id = teamId;
-        }
-
-        const board = await apiCall('/boards', 'POST', payload);
-        // Auto-join handled by backend
-        // await apiCall(`/boards/${board.id}/join`...
-
-        await loadBoard(board.id);
-        return board;
-    } catch (error) {
-        console.error('Failed to create board:', error);
-        alert(i18n.t('alert.failed_create_board') + ': ' + error.message);
-    }
-}
+// createBoard moved to BoardService (logic) and DashboardController (UI)
 
 async function loadBoard(boardId) {
     try {
@@ -1415,7 +1185,7 @@ function applyDashboardFilters() {
 window.initDashboardFilters = initDashboardFilters;
 window.applyDashboardFilters = applyDashboardFilters;
 window.stopParticipantPolling = stopParticipantPolling;
-window.loadBoards = loadBoards;
+// window.loadBoards = loadBoards; // Removed: Logic moved to DashboardController
 
 // Action Item Logic
 function openActionItemModal(cardId) {
@@ -1556,11 +1326,12 @@ const markActionItemDone = function (cardId, status) {
 }
 
 // Global Shims
-window.loadBoards = loadBoards;
-window.renderDashboard = renderDashboard;
-window.joinBoardPersistent = joinBoardPersistent;
-window.leaveBoardPersistent = leaveBoardPersistent;
-window.createBoard = createBoard;
+// Deprecated / Moved functions
+// window.loadBoards = loadBoards;
+// window.renderDashboard = renderDashboard;
+// window.joinBoardPersistent = joinBoardPersistent;
+// window.leaveBoardPersistent = leaveBoardPersistent;
+// window.createBoard = createBoard;
 window.loadBoard = loadBoard;
 window.updateBoardStatus = updateBoardStatus;
 window.deleteBoard = deleteBoard;
@@ -1599,15 +1370,11 @@ window.markActionItemDone = window.toggleActionItemCompletion; // Alias fix
 window.markActionItemDone = window.toggleActionItemCompletion; // Alias fix
 window.isBoardManager = isBoardManager;
 window.renderBoardHeader = renderBoardHeader;
-window.filterBoards = filterBoards;
+// window.filterBoards = filterBoards; // Moved to DashboardController
 
 // Exports
 export {
-    loadBoards,
-    renderDashboard,
-    joinBoardPersistent,
-    leaveBoardPersistent,
-    createBoard,
+    // loadBoards, renderDashboard, join/leaveBoardPersistent, createBoard removed
     loadBoard,
     updateBoardStatus,
     deleteBoard,
@@ -1646,5 +1413,5 @@ export {
 
     isBoardManager,
     renderBoardHeader,
-    filterBoards
+    // filterBoards removed
 };

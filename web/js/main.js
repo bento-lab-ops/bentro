@@ -5,17 +5,19 @@ import { initWebSocket } from './api.js';
 import { escapeHtml, closeModals } from './utils.js';
 import {
     loadBoard,
-    loadBoards,
-    createBoard,
+    // loadBoards, // Moved to DashboardController
+    // createBoard, // Moved to BoardService
     createColumn,
     createCard,
     updateColumn,
     updateBoardStatus,
     exportBoardToCSV,
-    leaveBoardPersistent,
+    // leaveBoardPersistent, // Moved to DashboardController (shimmed below if needed)
     openNewCardModal,
-    filterBoards
+    // filterBoards // Moved to DashboardController
 } from './board.js';
+import { dashboardController } from './controllers/DashboardController.js';
+import { boardService } from './services/BoardService.js';
 import {
     startTimer,
     stopTimer,
@@ -45,7 +47,7 @@ import { loadActionItemsView } from './action_items.js';
 // If we don't import them, they might not be included?
 // YES. We must import them for side-effects (shims) if nothing else.
 import './auth.js';
-import './menu.js';
+import { navController } from './controllers/NavController.js'; // Replaces ./menu.js
 import './admin-users.js';
 import './admin-boards.js';
 import './admin-actions.js';
@@ -81,6 +83,9 @@ async function initUI() {
     if (window.i18n) {
         window.i18n.init();
     }
+
+    // Initialize Navigation Controller
+    navController.init();
 
     console.log('%c✅ UI Initialized', 'color: #4CAF50; font-weight: bold;');
 }
@@ -234,44 +239,25 @@ function updateUserDisplay() {
     }
     const editBtn = document.getElementById('editUserBtn');
     if (editBtn) editBtn.style.display = 'inline-block';
-}
 
-function showDashboard() {
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('boardContainer').style.display = 'none';
-    const actionItemsView = document.getElementById('actionItemsView');
-    if (actionItemsView) actionItemsView.style.display = 'none';
-    const adminView = document.getElementById('adminView');
-    if (adminView) adminView.style.display = 'none';
-
-    const dashboardBtn = document.getElementById('dashboardBtn');
-    if (dashboardBtn) dashboardBtn.style.display = 'none';
-
-    // Hide Team Views
-    const teamsView = document.getElementById('teamsView');
-    if (teamsView) teamsView.style.display = 'none';
-    const teamDetailsView = document.getElementById('teamDetailsView');
-    if (teamDetailsView) teamDetailsView.style.display = 'none';
-
+    // Also show New Board button if on dashboard (or generic init)
     const newBoardBtn = document.getElementById('newBoardBtn');
     if (newBoardBtn) newBoardBtn.style.display = 'inline-block';
+}
 
-    const actionItemsBtn = document.getElementById('actionItemsBtn');
-    if (actionItemsBtn) actionItemsBtn.style.display = 'inline-block';
+// Replaced by DashboardController
+function showDashboard() {
+    dashboardController.showView();
+    dashboardController.init();
 
-    const leaveBtn = document.getElementById('leaveBoardBtn');
-    if (leaveBtn) leaveBtn.style.display = 'none';
-
-    const editBtn = document.getElementById('editUserBtn');
-    if (editBtn) editBtn.style.display = 'inline-block';
-
+    // Legacy cleanup that might still be needed if Controller doesn't handle global UI reset fully
+    // But Controller.showView does display block/none
+    document.getElementById('boardContainer').style.display = 'none'; // redundancy safe
     window.currentBoard = null;
 
     if (window.location.hash && window.location.hash !== '#dashboard') {
         history.pushState(null, null, ' ');
     }
-
-    loadBoards();
 }
 
 // Board Templates
@@ -374,23 +360,12 @@ function setupEventListeners() {
         const columnsText = document.getElementById('columnNames').value.trim();
         const columns = columnsText ? columnsText.split('\n').filter(c => c.trim()) : [];
         const selectedTeamId = document.getElementById('boardTeamSelect')?.value;
-        // currentTeamId global from teams.js? We access window.currentTeamId check
-        // Note: We need to import currentTeamId? module variables aren't global.
-        // We rely on window logic if teams.js shims it? NO.
-        // teams.js exports currentTeamId? No.
-        // But teams.js used `let currentTeamId = null`.
-        // We should just use window.location hash check or ensure teams.js sets window.currentTeamId if needed?
-        // Actually, populateBoardTeamSelect handles logic.
-        // Let's rely on the Select value.
         const teamId = selectedTeamId !== '' ? selectedTeamId : null;
 
-        await createBoard(name, columns, teamId);
+        await dashboardController.handleCreateBoard(name, columns, teamId);
         closeModals();
-        if (teamId) {
-            // If we were in team view, refresh? 
-            // Logic in createBoard handles redirect to board.
-        } else {
-            if (typeof loadBoards === 'function') loadBoards();
+        if (!teamId) {
+            dashboardController.init();
         }
     });
 
@@ -558,18 +533,19 @@ window.exportCurrentBoard = function () {
 // Shims
 window.initApp = initApp;
 window.initUI = initUI;
-window.showDashboard = showDashboard;
+window.showDashboard = () => dashboardController.showView();
 window.handleUrlHash = handleUrlHash;
 window.toggleTheme = toggleTheme;
-window.filterBoards = filterBoards; // Explicit redundancy
-// actually selectAvatar is imported from avatars.js.
-// We need to shim it so onclick works.
-// We also need openUserProfileModal logic? 
-// index.html calls openUserProfileModal. Where is it?
-// it was in auth.js?
-// If it was in auth.js, and auth.js is imported, it should be shimmed.
-// Let's assume auth.js handles it. 
-// If not, I'll need to check.
+window.filterBoards = (status) => dashboardController.filterBoards(status);
+window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
+// leaveBoardPersistent is usually called from within the board view, which is Phase 4.
+// But for now, if dashboard uses it? No, dashboard uses join.
+// The dashboard card has 'Return' or 'Join'.
+// 'Return' calls loadBoard(id).
+// 'Join' calls joinBoardPersistent(id).
+
+// Create Board is handled by listener, but let's shim it just in case logic uses it?
+// window.createBoard = undefined; // We don't want global usage if possible.
 
 // Main Execution
 document.addEventListener('DOMContentLoaded', async () => {
