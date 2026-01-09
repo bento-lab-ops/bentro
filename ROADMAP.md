@@ -1,10 +1,23 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.10.40
+## Current Version: v0.10.57
 
 ---
 
 ## 🎯 Immediate Priorities
+
+### v0.11.x - Stability & Guardrails (Current Focus)
+**Focus:** Reliability, Automated Testing, and DevEx.
+- [ ] **CI/CD Guardrails**:
+    - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
+    - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
+    - [ ] **Backend Lint**: Add `golangci-lint` to catch Go errors before compile.
+- [ ] **Feature Flags**: Decouple "Hide Vote" and other experimental features.
+- [ ] **Automated Audit**: Browser-based regression testing checklist.
+    - [x] Initial Playwright Setup (`tests/e2e`).
+    - [x] Run Playwright Audit Locally (via `run_tests.ps1` in Docker).
+    - [x] **Finish Retro Validation**: Automated check for board completion flow.
+- [ ] **Automated E2E Tests**: Run Playwright tests in CI.
 
 ### v0.10.x - Field Testing & Refinement
 **Focus:** Stability, UX Polish, and Real-world usage.
@@ -33,11 +46,10 @@
 
 ## ✅ Completed Features
 
-### v0.10.0 - v0.10.40 (Teams & UX Polish)
-- [x] **Dashboard UI Fixes** - Fixed "Leave Board" redirect, Button Labels ("Return"), and Filter Logic.
-- [x] **Board Participation Persistence** - Users can permanently join/leave boards, preserving history.
-- [x] **Dashboard UI Overhaul** - Improved card layout with metadata (Participants, Team, Owner).
-- [x] **Team Management** - Create teams, join teams (Invite Only), and assign boards to teams.
+### v0.10.50 - v0.10.57 (Stability & Polish)
+- [x] **Finish Retro Fixed (v0.10.57)** - Resolved 404 error, added glassmorphic styling, and restored ARM64 build.
+- [x] **Build Restoration** - Restored Go 1.24, fixed `go.sum` handling, and Dockerfile optimization.
+- [x] **E2E Stabilization** - Fixed Playwright selectors and added translation integrity checks.
 - [x] **Multiple Team Owners** - Support for multiple owners per team.
 - [x] **Concurrent Participation Fixes** - Locking mechanisms to prevent race conditions on Join.
 

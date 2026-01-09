@@ -1,0 +1,322 @@
+
+Running 5 tests using 5 workers
+
+[1A[2K[1/5] [chromium] ΓÇ║ login_debug.spec.ts:6:9 ΓÇ║ Debug Login Flow ΓÇ║ User Modal Interaction
+[1A[2K[2/5] [chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+[1A[2K[3/5] [chromium] ΓÇ║ audit.spec.ts:189:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Board Controls & Integrity
+[1A[2K[4/5] [chromium] ΓÇ║ audit.spec.ts:121:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Full Board Lifecycle - Card, Phases, Voting
+[1A[2K[5/5] [chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+BROWSER: Modals loaded successfully
+
+[1A[2KBROWSER: DEBUG: setupEventListeners called
+
+[1A[2KBROWSER: %c≡ƒÄ» BenTro v0.10.53  background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;
+
+[1A[2KBROWSER: %c≡ƒæñ User Status color: #2196F3; font-weight: bold; Γ£ù No user found
+
+[1A[2KBROWSER: %cΓ£à Board templates loaded color: #4CAF50; font-weight: bold; 5 templates
+
+[1A[2KBROWSER: Failed to load resource: the server responded with a status of 401 ()
+
+[1A[2KBROWSER: %c≡ƒô¥ Showing login modal color: #FF9800; font-style: italic;
+
+[1A[2KBROWSER: Failed to load boards: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at loadBoards (https://bentro.bento.lab/static/js/board.js?v=0.10.53:8:30)
+    at showDashboard (https://bentro.bento.lab/static/js/main.js?v=0.10.53:257:5)
+    at handleUrlHash (https://bentro.bento.lab/static/js/main.js?v=0.10.53:102:9)
+    at initApp (https://bentro.bento.lab/static/js/main.js?v=0.10.53:48:5)
+
+[1A[2KBROWSER: %c≡ƒöî WebSocket Connected background: #4CAF50; color: white; padding: 2px 6px; border-radius: 3px;
+
+[1A[2K[chromium] ΓÇ║ login_debug.spec.ts:6:9 ΓÇ║ Debug Login Flow ΓÇ║ User Modal Interaction
+User Modal Visible
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:189:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Board Controls & Integrity
+User Modal found. Checking for Guest option...
+
+[1A[2K[chromium] ΓÇ║ login_debug.spec.ts:6:9 ΓÇ║ Debug Login Flow ΓÇ║ User Modal Interaction
+Clicking Continue as Guest
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+BROWSER LOG: %c≡ƒÄ¿ Avatar Initialized color: #9C27B0; font-weight: bold; Avatar: ≡ƒÿÇ
+
+[1A[2KBROWSER LOG: Modals loaded successfully
+
+[1A[2KBROWSER LOG: DEBUG: setupEventListeners called
+
+[1A[2KBROWSER LOG: %c≡ƒÄ» BenTro v0.10.53  background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;
+
+[1A[2KBROWSER LOG: %c≡ƒæñ User Status color: #2196F3; font-weight: bold; Γ£ù No user found
+
+[1A[2KBROWSER LOG: Failed to load resource: the server responded with a status of 401 ()
+
+[1A[2KBROWSER LOG: %c≡ƒô¥ Showing login modal color: #FF9800; font-style: italic;
+
+[1A[2KBROWSER LOG: Failed to load boards: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at loadBoards (https://bentro.bento.lab/static/js/board.js?v=0.10.53:8:30)
+    at showDashboard (https://bentro.bento.lab/static/js/main.js?v=0.10.53:257:5)
+    at handleUrlHash (https://bentro.bento.lab/static/js/main.js?v=0.10.53:102:9)
+    at initApp (https://bentro.bento.lab/static/js/main.js?v=0.10.53:48:5)
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:121:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Full Board Lifecycle - Card, Phases, Voting
+User Modal found. Checking for Guest option...
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+BROWSER LOG: %cΓ£à Board templates loaded color: #4CAF50; font-weight: bold; 5 templates
+
+[1A[2KBROWSER LOG: DEBUG: Checking setupEventListeners...
+
+[1A[2KBROWSER LOG: DEBUG: setupEventListeners exists. Calling it manually.
+
+[1A[2KBROWSER LOG: DEBUG: setupEventListeners called
+
+[1A[2KUser Modal found. Checking for Guest option...
+
+[1A[2K[chromium] ΓÇ║ login_debug.spec.ts:6:9 ΓÇ║ Debug Login Flow ΓÇ║ User Modal Interaction
+User Form Visible
+
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+BROWSER: DEBUG: Global Change Event on: INPUT ID: userNameInput
+
+[1A[2KBROWSER: Failed to load boards: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at loadBoards (https://bentro.bento.lab/static/js/board.js?v=0.10.53:8:30)
+    at showDashboard (https://bentro.bento.lab/static/js/main.js?v=0.10.53:257:5)
+    at handleUrlHash (https://bentro.bento.lab/static/js/main.js?v=0.10.53:102:9)
+    at HTMLFormElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:366:13)
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:189:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Board Controls & Integrity
+Logged in successfully via Guest flow
+
+[1A[2K[chromium] ΓÇ║ login_debug.spec.ts:6:9 ΓÇ║ Debug Login Flow ΓÇ║ User Modal Interaction
+User Modal Hidden
+
+[1A[2KLocalStorage User: DebugUser
+
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+BROWSER: Failed to load teams for dropdown: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at populateBoardTeamSelect (https://bentro.bento.lab/static/js/main.js?v=0.10.53:692:33)
+    at HTMLButtonElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:385:15)
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+BROWSER LOG: DEBUG: Global Change Event on: INPUT ID: userNameInput
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: INPUT ID: userNameInput
+
+[1A[2KBROWSER LOG: Failed to load boards: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at loadBoards (https://bentro.bento.lab/static/js/board.js?v=0.10.53:8:30)
+    at showDashboard (https://bentro.bento.lab/static/js/main.js?v=0.10.53:257:5)
+    at handleUrlHash (https://bentro.bento.lab/static/js/main.js?v=0.10.53:102:9)
+    at HTMLFormElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:366:13)
+
+[1A[2KBROWSER LOG: Failed to load boards: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at loadBoards (https://bentro.bento.lab/static/js/board.js?v=0.10.53:8:30)
+    at showDashboard (https://bentro.bento.lab/static/js/main.js?v=0.10.53:257:5)
+    at handleUrlHash (https://bentro.bento.lab/static/js/main.js?v=0.10.53:102:9)
+    at HTMLFormElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:366:13)
+
+[1A[2KBROWSER LOG: %c≡ƒöî WebSocket Connected background: #4CAF50; color: white; padding: 2px 6px; border-radius: 3px;
+
+[1A[2KLogged in successfully via Guest flow
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:121:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Full Board Lifecycle - Card, Phases, Voting
+Logged in successfully via Guest flow
+
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+Selecting template...
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+BROWSER LOG: Failed to load teams for dropdown: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at populateBoardTeamSelect (https://bentro.bento.lab/static/js/main.js?v=0.10.53:692:33)
+    at HTMLButtonElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:385:15)
+
+[1A[2KBROWSER LOG: Failed to load teams for dropdown: ReferenceError: API_BASE is not defined
+    at apiCall (https://bentro.bento.lab/static/js/api.js?v=0.10.53:121:37)
+    at populateBoardTeamSelect (https://bentro.bento.lab/static/js/main.js?v=0.10.53:692:33)
+    at HTMLButtonElement.<anonymous> (https://bentro.bento.lab/static/js/main.js?v=0.10.53:385:15)
+
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+BROWSER: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2K[chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n
+BROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KDEBUG: Actual Columns Value: "Mad ≡ƒÿá\nSad ≡ƒÿó\nGlad ≡ƒÿè"
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2KBROWSER LOG: DEBUG: Global Change Event on: SELECT ID: boardTemplate
+
+[1A[2KBROWSER LOG: DEBUG: Template Change Event. Value: mad-sad-glad
+
+[1A[2KBROWSER LOG: DEBUG: BOARD_TEMPLATES keys: [start-stop-continue, mad-sad-glad, 4ls, wwn-badly-action, sailboat]
+
+[1A[2KBROWSER LOG: DEBUG: Template found: [Mad ≡ƒÿá, Sad ≡ƒÿó, Glad ≡ƒÿè]
+
+[1A[2K[chromium] ΓÇ║ create_board_debug.spec.ts:4:5 ΓÇ║ Create Board Template Logic Debug
+Final Column Value: "Mad ≡ƒÿá\nSad ≡ƒÿó\nGlad ≡ƒÿè"
+
+[1A[2K  1) [chromium] ΓÇ║ audit.spec.ts:121:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Full Board Lifecycle - Card, Phases, Voting 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('#btnCreateBoard')[22m
+
+
+      128 |         const boardName = `Lifecycle-${Date.now()}`;
+      129 |         await page.locator('#boardName').fill(boardName);
+    > 130 |         await page.locator('#btnCreateBoard').click();
+          |                                               ^
+      131 |
+      132 |         await expect(page.locator('#boardTitle')).toHaveText(boardName);
+      133 |
+
+        at /e2e/specs/audit.spec.ts:130:47
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Full-Board-Lifecycle---Card-Phases-Voting-chromium/test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Full-Board-Lifecycle---Card-Phases-Voting-chromium/video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+
+[1A[2K  2) [chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('#btnCreateBoard')[22m
+
+
+      113 |         // 5. Create Board
+      114 |         await page.locator('#boardName').fill(`AutoTest-${Date.now()}`);
+    > 115 |         await page.locator('#btnCreateBoard').click();
+          |                                               ^
+      116 |
+      117 |         // 6. Verify Board Landing
+      118 |         await expect(page.locator('#boardTitle')).toBeVisible();
+
+        at /e2e/specs/audit.spec.ts:115:47
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Create-Board-Modal---Template-i18n-chromium/test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Create-Board-Modal---Template-i18n-chromium/video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+
+[1A[2K  3) [chromium] ΓÇ║ audit.spec.ts:189:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Board Controls & Integrity 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('#btnCreateBoard')[22m
+
+
+      194 |         await page.locator('#newBoardBtn').click();
+      195 |         await page.locator('#boardName').fill(`ControlTest-${Date.now()}`);
+    > 196 |         await page.locator('#btnCreateBoard').click({ force: true });
+          |                                               ^
+      197 |
+      198 |         // 1. Check Control Bar Elements
+      199 |         // v0.10.51 uses .timer-section as control bar?
+
+        at /e2e/specs/audit.spec.ts:196:47
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Board-Controls-Integrity-chromium/test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    attachment #2: video (video/webm) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results/audit-BenTro-v0-10-52-Critical-Flows-Board-Controls-Integrity-chromium/video.webm
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+
+[1A[2K  3 failed
+    [chromium] ΓÇ║ audit.spec.ts:43:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Create Board Modal - Template & i18n 
+    [chromium] ΓÇ║ audit.spec.ts:121:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Full Board Lifecycle - Card, Phases, Voting 
+    [chromium] ΓÇ║ audit.spec.ts:189:9 ΓÇ║ BenTro v0.10.52 Critical Flows ΓÇ║ Board Controls & Integrity ΓöÇ
+  2 passed (30.9s)
+
+  Serving HTML report at http://localhost:34255. Press Ctrl+C to quit.

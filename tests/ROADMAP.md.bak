@@ -1,0 +1,108 @@
+# BenTro Roadmap 🗺️
+
+## Current Version: v0.10.40
+
+---
+
+## 🎯 Immediate Priorities
+
+### v0.11.x - Stability & Guardrails (Current Focus)
+**Focus:** Reliability, Automated Testing, and DevEx.
+- [ ] **CI/CD Guardrails**:
+    - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
+    - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
+    - [ ] **Backend Lint**: Add `golangci-lint` to catch Go errors before compile.
+- [ ] **Feature Flags**: Decouple "Hide Vote" and other experimental features.
+### v0.11.x - Stability & Guardrails (Current Focus)
+**Focus:** Reliability, Automated Testing, and DevEx.
+- [ ] **CI/CD Guardrails**:
+    - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
+    - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
+    - [ ] **Backend Lint**: Add `golangci-lint` to catch Go errors before compile.
+- [ ] **Feature Flags**: Decouple "Hide Vote" and other experimental features.
+- [ ] **Automated Audit**: Browser-based regression testing checklist.
+    - [x] Initial Playwright Setup (`tests/e2e`).
+    - [ ] Run Playwright Audit Locally (via `run_tests.ps1` in Docker).
+- [ ] **Automated E2E Tests**: Run Playwright tests in CI.
+
+### v0.10.x - Field Testing & Refinement
+**Focus:** Stability, UX Polish, and Real-world usage.
+- [ ] **Peek Mode**: Allow users to view a board as read-only before joining ("Peek" button).
+- [ ] **Data Export**: Export board data to CSV/PDF (Backend implementation).
+- [x] Team-filtered Dashboard (Backend)
+- [x] Team-filtered Dashboard (Frontend)
+- [x] Fix: Board Participants List (Persistent)
+- [x] Feature: Board Teams Visual Count Many-to-Many Board-Team relations for "Hybrid" filtering.
+- [ ] **Advanced Action Items Filtering**: Filter by Period, Team/Board, or Owner.
+- [ ] **Board Header Redesign**: Consolidate actions (Active/Teams/Settings) for a premium look.
+- [ ] **Hide Vote Buttons**: Hide Like/Dislike controls until Voting Phase to reduce clutter.
+
+### v1.0.0 - Semantic Release
+**Goal:** Official release after field testing validation.
+- [ ] **Production Readiness Review**: Stress testing and final security audit.
+- [ ] **User Documentation**: Complete guide for end-users and admins.
+
+### v1.0.0 - Integrations & Release Candidate
+**Effort:** XL (1-2 weeks)
+- [ ] **Jira Integration** - Create Jira tickets from action items.
+- [ ] **Slack Notifications** - Send retro summaries to Slack channels.
+- [ ] **Calendar Integration** - Schedule recurring retrospectives.
+
+---
+
+## ✅ Completed Features
+
+### v0.10.0 - v0.10.40 (Teams & UX Polish)
+- [x] **Dashboard UI Fixes** - Fixed "Leave Board" redirect, Button Labels ("Return"), and Filter Logic.
+- [x] **Board Participation Persistence** - Users can permanently join/leave boards, preserving history.
+- [x] **Dashboard UI Overhaul** - Improved card layout with metadata (Participants, Team, Owner).
+- [x] **Team Management** - Create teams, join teams (Invite Only), and assign boards to teams.
+- [x] **Multiple Team Owners** - Support for multiple owners per team.
+- [x] **Concurrent Participation Fixes** - Locking mechanisms to prevent race conditions on Join.
+
+### v0.9.x (Admin & User Management)
+- [x] **Admin Dashboard** - Premium Hero-style headers and clean layout.
+- [x] **User Management** - List, manage roles, reset passwords, delete users.
+- [x] **Unified Authentication** - Support for both JWT Admin Role and K8s Secret.
+- [x] **Action Item Statuses** - Green (Open), Yellow (Overdue), Red (Closed).
+
+### v0.9.0 (Authentication Base)
+- [x] **Native Email/Password Authentication** - Secure login with bcrypt.
+- [x] **User Registration** - Full registration flow.
+- [x] **Persistent Sessions** - 15-day JWT tokens.
+
+### v0.8.x (Board Controls)
+- [x] **Vote Limiting & Blind Voting**
+- [x] **Role-Based Access Control (RBAC)**
+- [x] **Dual Manager Support**
+
+### v0.7.x (Data Safety)
+- [x] **Soft Delete for Action Items**
+- [x] **Safe Delete Protection**
+
+### v0.6.x (Internationalization)
+- [x] **i18n Support** - Portuguese (pt-BR) and English.
+- [x] **Dynamic Board Templates**
+
+### v0.2.x - v0.5.x (Foundation)
+- [x] **Real-time WebSockets** - Live updates for boards.
+- [x] **Action Items** - Task tracking.
+- [x] **Themes** - Dark/Light mode.
+
+---
+
+## 📊 Priority Legend
+
+🔴 **Critical** - Blocks users or causes major issues  
+🟡 **High** - Important for user experience  
+🟢 **Medium** - Nice to have, improves experience  
+🔵 **Low** - Future enhancement
+
+---
+
+## ⏱️ Effort Estimation
+
+- **Small (S)** - 1-2 hours
+- **Medium (M)** - 3-8 hours  
+- **Large (L)** - 1-3 days
+- **Extra Large (XL)** - 1+ weeks

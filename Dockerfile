@@ -2,28 +2,15 @@
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
-ENV CACHE_BUST=v6
-
-# Copy go mod files
-COPY go.mod go.sum ./
-RUN go mod download
-
-# Copy force update file to bust cache
-COPY FORCE_UPDATE .
+ENV CACHE_BUST=v0.10.57
 
 # Copy source code
 COPY . .
-RUN ls -la internal/database/
-RUN ls -la cmd/server/
-RUN cat cmd/server/main.go
+RUN go mod tidy
 
 # Build the application
-ARG TARGETARCH
-# Force rebuild with unique binary name
-RUN ls -la internal/database/
-RUN ls -la cmd/server/
-RUN cat cmd/server/main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
+# Explicitly building for ARM64
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
 
 # Runtime stage
 FROM alpine:latest

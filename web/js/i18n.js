@@ -280,6 +280,8 @@ const translations = {
         'msg.team_added': 'Team added successfully',
         'msg.team_removed': 'Team removed successfully',
         'btn.manage_teams': 'Manage Teams',
+        'label.team_optional': 'Team (Optional)',
+        'option.no_team': 'No Team (Personal)',
     },
     'pt-BR': {
         // Queue/Dashboard

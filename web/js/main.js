@@ -258,13 +258,13 @@ function showDashboard() {
 }
 
 // Board Templates - Loaded from JSON
-let BOARD_TEMPLATES = {};
-let RAW_TEMPLATES = {}; // Stores full template objects for UI
+var BOARD_TEMPLATES = {};
+var RAW_TEMPLATES = {}; // Stores full template objects for UI
 
 // Load templates from JSON file
 async function loadBoardTemplates() {
     try {
-        const response = await fetch('/static/board-templates.json');
+        const response = await fetch(`/static/board-templates.json?v=${new Date().getTime()}`);
         const templates = await response.json();
 
         // Store raw templates for UI updates
@@ -398,6 +398,7 @@ function setupEventListeners() {
         const teamId = window.currentTeamId || (selectedTeamId !== '' ? selectedTeamId : null);
 
         await createBoard(name, columns, teamId);
+
         closeModals();
 
         // If we are in team view, refresh the team details
@@ -406,6 +407,33 @@ function setupEventListeners() {
         } else {
             // If dashboard view, reload boards to show new board (with team label)
             if (typeof loadBoards === 'function') loadBoards();
+        }
+    });
+
+    // Event Delegation for dynamically loaded Create Board Modal elements
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'boardTemplate') {
+            const selectedValue = e.target.value;
+            const columnNamesTextarea = document.getElementById('columnNames');
+
+            if (!columnNamesTextarea) return;
+
+            if (selectedValue === 'custom') {
+                columnNamesTextarea.value = '';
+                columnNamesTextarea.placeholder = 'Enter custom columns...';
+            } else if (BOARD_TEMPLATES[selectedValue]) {
+                // Use translated columns if available, otherwise fallback to template defaults
+                // We construct the translation keys: template.mad_sad_glad.columns (array)
+                // But i18n usually returns string or object.
+                // For now, let's use the template object's columns and map them to their translations if possible
+                // OR just use the raw values if the system uses raw values.
+                // V0.10.51 logic check:
+                const template = BOARD_TEMPLATES[selectedValue];
+                // BOARD_TEMPLATES values are arrays of strings
+                if (Array.isArray(template)) {
+                    columnNamesTextarea.value = template.join('\n');
+                }
+            }
         }
     });
 

@@ -814,3 +814,27 @@
     align-items: center;
     flex-wrap: wrap;
 }
+
+/* Glassmorphic Danger Button */
+.btn-glass-danger {
+    background: rgba(239, 68, 68, 0.15); /* Red tint */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-glass-danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #f87171;
+    color: white;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
