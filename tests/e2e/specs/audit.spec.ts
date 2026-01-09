@@ -206,4 +206,40 @@ test.describe('BenTro v0.10.52 Critical Flows', () => {
         await expect(page.locator('#leaveBoardBtn')).toBeVisible();
     });
 
+    test('Host Claim/Relinquish Flow', async ({ page }) => {
+        await page.goto('/');
+        await handleUserModal(page);
+
+        // 1. Create Board (Auto-claims as Owner)
+        await page.locator('#newBoardBtn').click();
+        await page.locator('#boardName').fill(`HostTest-${Date.now()}`);
+        await page.locator('#newBoardForm button[type="submit"]').click({ force: true });
+        await expect(page.locator('#boardTitle')).toBeVisible();
+
+        // 2. Verify "Relinquish" is visible (as we are owner)
+        // And "Claim" is hidden
+        const unclaimBtn = page.locator('#unclaimManagerBtn');
+        const claimBtn = page.locator('#claimManagerBtn');
+
+        await expect(unclaimBtn).toBeVisible();
+        await expect(claimBtn).toBeHidden();
+
+        // 3. Relinquish Host
+        page.once('dialog', dialog => dialog.accept());
+        await unclaimBtn.click();
+
+        // 4. Verify "Claim Host" becomes visible
+        // Wait for UI update (board reload)
+        await expect(claimBtn).toBeVisible({ timeout: 5000 });
+        await expect(unclaimBtn).toBeHidden();
+
+        // 5. Re-Claim Host
+        page.once('dialog', dialog => dialog.accept());
+        await claimBtn.click();
+
+        // 6. Verify "Relinquish" is visible again
+        await expect(unclaimBtn).toBeVisible({ timeout: 5000 });
+        await expect(claimBtn).toBeHidden();
+    });
+
 });

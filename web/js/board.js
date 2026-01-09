@@ -536,28 +536,15 @@ function updateBoardStatusUI(status) {
         }
     }
 
-    // Unclaim Button Injection (Custom Logic as it's not in HTML by default)
-    // We check if it exists, if not create it next to claim button or header controls
-    let unclaimBtn = document.getElementById('unclaimManagerBtn');
-    if (!unclaimBtn) {
-        unclaimBtn = document.createElement('button');
-        unclaimBtn.id = 'unclaimManagerBtn';
-        unclaimBtn.className = 'btn btn-outline btn-sm btn-danger-outline'; // Add custom class if needed
-        unclaimBtn.style.marginLeft = '8px';
-        unclaimBtn.onclick = unclaimManagerAction;
-        // Insert after claim button or append to header controls
-        // headerControls is in index.html, but claimBtn is in participants-wrapper usually? No, it's in board-header-section
-        const boardHeaderSection = document.querySelector('.board-header-section');
-        if (boardHeaderSection) {
-            boardHeaderSection.appendChild(unclaimBtn);
+    // Unclaim Button Visibility
+    const unclaimBtn = document.getElementById('unclaimManagerBtn');
+    if (unclaimBtn) {
+        if (isOwner || isCoOwner) {
+            unclaimBtn.style.display = 'inline-flex'; // Use inline-flex for glass buttons
+            // unclaimBtn.textContent = '❌ ' + (i18n.t('btn.unclaim') || 'Relinquish'); // Text is set in HTML
+        } else {
+            unclaimBtn.style.display = 'none';
         }
-    }
-
-    if (isOwner || isCoOwner) {
-        unclaimBtn.style.display = 'inline-block';
-        unclaimBtn.textContent = '❌ ' + (i18n.t('btn.unclaim') || 'Relinquish');
-    } else {
-        unclaimBtn.style.display = 'none';
     }
 
     if (claimBtn) {

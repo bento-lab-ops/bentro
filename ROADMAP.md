@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: v0.10.57
+## Current Version: v0.10.64
 
 ---
 
@@ -8,6 +8,11 @@
 
 ### v0.11.x - Stability & Guardrails (Current Focus)
 **Focus:** Reliability, Automated Testing, and DevEx.
+- [x] **UI Polish: Claim/Relinquish Host Button** (Completed v0.10.64)
+    - [x] **Style**: Apply Glassmorphic design (`.btn-glass`).
+    - [x] **Layout**: Relocate to Control Bar (alongside other actions).
+    - [x] **Testing**: Add E2E tests for Claim/Relinquish flow & button visibility.
+    - [x] **Fix**: Verify/Add `confirm.unclaim_board` translation key.
 - [ ] **CI/CD Guardrails**:
     - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
     - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
@@ -46,10 +51,18 @@
 
 ## ✅ Completed Features
 
-### v0.10.50 - v0.10.57 (Stability & Polish)
-- [x] **Finish Retro Fixed (v0.10.57)** - Resolved 404 error, added glassmorphic styling, and restored ARM64 build.
-- [x] **Build Restoration** - Restored Go 1.24, fixed `go.sum` handling, and Dockerfile optimization.
-- [x] **E2E Stabilization** - Fixed Playwright selectors and added translation integrity checks.
+### v0.10.64 (Stabilization Hotfixes)
+- [x] **UI Restoration**: Restored missing script tags (`main.js`, `teams.js`) and fixed initialization logic.
+- [x] **Global Scope Fix**: Resolved `APP_VERSION` ReferenceError in `config.js`.
+- [x] **Claim/Relinquish Host UI**: Glassmorphic buttons, improved logic, and tests.
+
+### v0.10.58 - Claim/Relinquish UI Polish
+- [x] **Finish Retro Fixed**: Backend 404 resolved and deployed.
+- [x] **Build Restoration**: Docker ARM64 build pipeline stabilized.
+- [x] **E2E Stabilization**: Fix flaky tests, modal handling, and template selection.
+- [x] **Claim/Relinquish UI**: Glassmorphic buttons, improved logic, and tests.
+
+### v0.11.0 - Participant Metadata & Stability checks.
 - [x] **Multiple Team Owners** - Support for multiple owners per team.
 - [x] **Concurrent Participation Fixes** - Locking mechanisms to prevent race conditions on Join.
 

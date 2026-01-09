@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
-    <link rel="icon" type="image/png" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/styles.css?v=1.0.6">
-    <link rel="stylesheet" href="/static/bentro.css?v=1.0.6">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.10.64">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
@@ -265,8 +265,6 @@
                 <span class="participants-label" data-i18n="label.active_participants">Active:</span>
                 <div id="participantsContainer" class="participants-container"></div>
             </div>
-            <button id="claimManagerBtn" class="btn btn-outline btn-sm" onclick="claimManagerAction()"
-                title="Claim Moderation" style="display: none;">👑 Claim Host</button>
             <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardSettings()"
                 title="Admin Settings" style="display: none;">⚙️</button>
         </div>
@@ -292,6 +290,13 @@
                 <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()"
                     style="display: none;" data-i18n="btn.export_csv">📊 Export
                     CSV</button>
+
+                <!-- Host Controls -->
+                <button id="claimManagerBtn" class="btn btn-glass" onclick="claimManagerAction()"
+                    title="Claim Moderation" style="display: none;">👑 Claim Host</button>
+                <button id="unclaimManagerBtn" class="btn btn-glass" onclick="unclaimManagerAction()"
+                    title="Relinquish Control" style="display: none;">❌ Relinquish</button>
+
                 <button id="finishRetroBtn" class="btn btn-glass-danger" onclick="finishRetro()" style="display: none;"
                     data-i18n="btn.finish_retro">Finish Retro</button>
                 <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" onclick="reopenRetro()"
@@ -380,25 +385,25 @@
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
 
-    <script src="/static/js/i18n.js?v=0.10.57"></script>
-    <script src="/static/js/config.js?v=0.10.57"></script>
-    <script src="/static/js/version.js?v=0.10.57"></script>
-    <script src="/static/js/avatars.js?v=0.10.57"></script>
-    <script src="/static/js/state.js?v=0.10.57"></script>
-    <script src="/static/js/utils.js?v=0.10.57"></script>
-    <script src="/static/js/api.js?v=0.10.57"></script>
-    <script src="/static/js/timer.js?v=0.10.57"></script>
-    <script src="/static/js/board.js?v=0.10.57"></script>
-    <script src="/static/js/action_items.js?v=0.10.57"></script>
-    <script src="/static/js/admin.js?v=0.10.57"></script>
-    <script src="/static/js/auth.js?v=0.10.57"></script>
-    <script src="/static/js/admin-users.js?v=0.10.57"></script>
-    <script src="/static/js/admin-boards.js?v=0.10.57"></script>
-    <script src="/static/js/admin-actions.js?v=0.10.57"></script>
+    <script src="/static/js/i18n.js?v=v0.10.62"></script>
+    <script src="/static/js/config.js?v=v0.10.62"></script>
+    <script src="/static/js/version.js?v=v0.10.62"></script>
+    <script src="/static/js/avatars.js?v=v0.10.62"></script>
+    <script src="/static/js/state.js?v=v0.10.62"></script>
+    <script src="/static/js/utils.js?v=v0.10.62"></script>
+    <script src="/static/js/api.js?v=v0.10.62"></script>
+    <script src="/static/js/timer.js?v=v0.10.62"></script>
+    <script src="/static/js/board.js?v=v0.10.62"></script>
+    <script src="/static/js/action_items.js?v=v0.10.62"></script>
+    <script src="/static/js/admin.js?v=v0.10.62"></script>
+    <script src="/static/js/auth.js?v=v0.10.62"></script>
+    <script src="/static/js/admin-users.js?v=v0.10.62"></script>
+    <script src="/static/js/admin-boards.js?v=v0.10.62"></script>
+    <script src="/static/js/admin-actions.js?v=v0.10.62"></script>
     <!-- drag-drop.js removed as it does not exist -->
-    <script src="/static/js/menu.js?v=0.10.57"></script>
-    <script src="/static/js/main.js?v=0.10.57"></script>
-    <script src="/static/js/teams.js?v=0.10.57"></script>
+    <script src="/static/js/menu.js?v=v0.10.62"></script>
+    <script src="/static/js/main.js?v=v0.10.62"></script>
+    <script src="/static/js/teams.js?v=v0.10.62"></script>
 </body>
 
 </html>

@@ -59,9 +59,9 @@ async function initApp() {
         updateUserDisplay();
 
         if (!window.location.hash.startsWith('#board/')) {
-            // Load dashboard directly without showing welcome modal
-            console.log('%c👋 User authenticated, loading dashboard', 'color: #4CAF50; font-style: italic;');
-            loadBoards();
+            // Load dashboard directly ensuring UI state is correct (buttons, views)
+            console.log('%c👋 User authenticated, showing dashboard', 'color: #4CAF50; font-style: italic;');
+            showDashboard();
         }
     }
 

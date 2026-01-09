@@ -116,6 +116,7 @@ const translations = {
         'confirm.delete_card': 'Are you sure you want to delete this card?',
         'confirm.delete_column': 'Are you sure you want to delete this column? All cards will be deleted.',
         'confirm.claim_board': 'Claim this board? You will be responsible for its settings.',
+        'confirm.unclaim_board': 'Are you sure you want to relinquish your host role?',
         'confirm.remove_action_item': 'Are you sure you want to remove the Action Item status from this card?',
         'confirm.reopen_action_item': 'Are you sure you want to re-open this item? This will clear the completion details.',
 
@@ -403,6 +404,7 @@ const translations = {
         'confirm.delete_card': 'Tem certeza que deseja excluir este card?',
         'confirm.delete_column': 'Tem certeza que deseja excluir esta coluna? Todos os cards serão excluídos.',
         'confirm.claim_board': 'Assumir esta retro? Você será responsável por suas configurações.',
+        'confirm.unclaim_board': 'Tem certeza que deseja deixar a gestão?',
         'confirm.remove_action_item': 'Tem certeza que deseja remover o status de Action Item deste card?',
         'confirm.reopen_action_item': 'Tem certeza que deseja reabrir este item? Isso limpará os detalhes de conclusão.',
 
