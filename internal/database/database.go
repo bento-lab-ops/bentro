@@ -15,6 +15,11 @@ var DB *gorm.DB
 
 // InitDB initializes the database connection
 func InitDB() error {
+	if os.Getenv("SKIP_DB") == "true" {
+		log.Println("⚠️ SKIP_DB is set. Skipping database connection and migration. (Smoke Test Mode)")
+		return nil
+	}
+
 	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")
 	user := getEnv("DB_USER", "postgres")

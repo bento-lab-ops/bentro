@@ -4,7 +4,7 @@ export const CONFIG = {
     APP_VERSION: 'v0.10.77'
 };
 
-export const APP_VERSION = CONFIG.APP_VERSION;
+export const APP_VERSION = 'v0.12.0-rc5';
 
 // Global Shim
 window.CONFIG = CONFIG;

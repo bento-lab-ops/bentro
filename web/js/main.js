@@ -4,7 +4,7 @@ import { i18n } from './i18n.js';
 import { initWebSocket } from './api.js';
 import { escapeHtml, closeModals } from './utils.js';
 import {
-    loadBoard,
+    // loadBoard, // Moved to BoardController
     // loadBoards, // Moved to DashboardController
     // createBoard, // Moved to BoardService
     createColumn,
@@ -17,6 +17,7 @@ import {
     // filterBoards // Moved to DashboardController
 } from './board.js';
 import { dashboardController } from './controllers/DashboardController.js';
+import { boardController } from './controllers/BoardController.js'; // Phase 4
 import { boardService } from './services/BoardService.js';
 import {
     startTimer,
@@ -151,36 +152,42 @@ async function initApp() {
 }
 
 // Handle URL routing based on hash
-function handleUrlHash() {
+// Handle URL routing based on hash
+async function handleUrlHash() {
+    // Basic User Visibility Check shim
+    if (!window.currentUser && document.getElementById('userModal')) {
+        document.getElementById('userModal').style.display = 'block';
+        return;
+    }
+
     const hash = window.location.hash;
-    if (hash.startsWith('#board/')) {
-        const boardId = hash.replace('#board/', '');
-        if (boardId && (!window.currentBoard || window.currentBoard.id !== boardId)) {
-            if (window.currentUser) {
-                loadBoard(boardId);
-                // Hide modals
-                const returningModal = document.getElementById('returningUserModal');
-                if (returningModal) returningModal.style.display = 'none';
-                document.getElementById('userModal').style.display = 'none';
-            }
+
+    // Hide Modals by default on route change
+    if (document.getElementById('returningUserModal')) document.getElementById('returningUserModal').style.display = 'none';
+    if (document.getElementById('userModal')) document.getElementById('userModal').style.display = 'none';
+
+    if (!hash || hash === '#dashboard') {
+        await dashboardController.showView();
+    } else if (hash.startsWith('#board/')) {
+        const boardId = hash.split('#board/')[1];
+        if (boardId) {
+            // Phase 4: Use BoardController
+            await boardController.init({ id: boardId });
         }
-    } else if (!hash || hash === '#dashboard') {
-        showDashboard();
-    } else if (hash === '#action-items') {
-        loadActionItemsView();
     } else if (hash === '#admin') {
-        loadAdminView();
+        await loadAdminView();
     } else if (hash === '#teams') {
-        loadTeamsView();
+        await loadTeamsView();
+    } else if (hash === '#action-items') {
+        await loadActionItemsView();
     } else if (hash.startsWith('#team/')) {
         const teamId = hash.replace('#team/', '');
-        if (teamId) {
-            // Check if we need to hide other views? openTeamDetails usually handles it?
-            // openTeamDetails is imported.
-            if (openTeamDetails) {
-                openTeamDetails(teamId);
-            }
+        if (teamId && openTeamDetails) {
+            openTeamDetails(teamId);
         }
+    } else {
+        // Fallback
+        await dashboardController.showView();
     }
 }
 
@@ -538,6 +545,7 @@ window.handleUrlHash = handleUrlHash;
 window.toggleTheme = toggleTheme;
 window.filterBoards = (status) => dashboardController.filterBoards(status);
 window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
+window.boardController = boardController; // Expose for board.js referencing
 // leaveBoardPersistent is usually called from within the board view, which is Phase 4.
 // But for now, if dashboard uses it? No, dashboard uses join.
 // The dashboard card has 'Return' or 'Join'.

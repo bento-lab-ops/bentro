@@ -17,23 +17,8 @@ async function loadBoard(boardId) {
         const board = await apiCall(`/boards/${boardId}`);
         window.currentBoard = board;
 
-        // Update URL hash
-        if (window.location.hash !== `#board/${boardId}`) {
-            history.pushState(null, null, `#board/${boardId}`);
-        }
-
-        document.getElementById('dashboardView').style.display = 'none';
-        const actionItemsView = document.getElementById('actionItemsView');
-        if (actionItemsView) actionItemsView.style.display = 'none';
-        const adminView = document.getElementById('adminView');
-        if (adminView) adminView.style.display = 'none';
-
-        document.getElementById('boardContainer').style.display = 'block';
-
-        if (document.getElementById('dashboardBtn')) document.getElementById('dashboardBtn').style.display = 'inline-block';
-        if (document.getElementById('leaveBoardBtn')) document.getElementById('leaveBoardBtn').style.display = 'inline-block';
-        if (document.getElementById('editUserBtn')) document.getElementById('editUserBtn').style.display = 'inline-block';
-        if (document.getElementById('newBoardBtn')) document.getElementById('newBoardBtn').style.display = 'none'; // Fix: Hide New Board button
+        // View switching handled by BoardController
+        // history.pushState handled by Router
 
 
         renderBoardHeader(board);
@@ -190,7 +175,7 @@ function updateBoardStatusUI(status) {
         leaveBoardBtn.disabled = isFinished;
         leaveBoardBtn.style.opacity = isFinished ? '0.5' : '1';
         leaveBoardBtn.style.cursor = isFinished ? 'not-allowed' : 'pointer';
-        leaveBoardBtn.onclick = () => leaveBoardPersistent(window.currentBoard.id);
+        leaveBoardBtn.onclick = () => window.boardController && window.boardController.leave();
         leaveBoardBtn.title = isFinished ? 'Cannot leave a finished board' : 'Leave board and stop participating';
     }
 

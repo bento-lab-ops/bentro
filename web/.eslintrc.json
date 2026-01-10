@@ -1,0 +1,23 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 13,
+        "sourceType": "module"
+    },
+    "rules": {
+        "no-unused-vars": "warn",
+        "no-undef": "warn",
+        "no-redeclare": "error"
+    },
+    "globals": {
+        "i18n": "readonly",
+        "CONFIG": "readonly",
+        "APP_VERSION": "readonly",
+        "Sortable": "readonly",
+        "io": "readonly"
+    }
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"retro-app/internal/database"
 	"retro-app/internal/handlers"
 
@@ -18,12 +19,17 @@ func main() {
 	// Initialize WebSocket hub
 	handlers.InitWebSocketHub()
 
-	// Initialize Auth
-	handlers.InitAuth()
+	// Skip DB-dependent initialization if in Smoke Test mode
+	if os.Getenv("SKIP_DB") != "true" {
+		// Initialize Auth
+		handlers.InitAuth()
 
-	// Ensure admin user exists
-	if err := handlers.EnsureAdminUser(); err != nil {
-		log.Fatalf("Failed to ensure admin user: %v", err)
+		// Ensure admin user exists
+		if err := handlers.EnsureAdminUser(); err != nil {
+			log.Fatalf("Failed to ensure admin user: %v", err)
+		}
+	} else {
+		log.Println("⚠️ Skipping Auth/Admin initialization (Smoke Test Mode)")
 	}
 
 	// Setup Gin router

@@ -44,33 +44,25 @@
 - [x] Team-filtered Dashboard (Backend)
 - [x] Team-filtered Dashboard (Frontend)
 - [x] Fix: Board Participants List (Persistent)
-- [x] Feature: Board Teams Visual Count Many-to-Many Board-Team relations for "Hybrid" filtering.
-- [ ] **Advanced Action Items Filtering**: Filter by Period, Team/Board, or Owner.
-- [ ] **Board Header Redesign**: Consolidate actions (Active/Teams/Settings) for a premium look.
-- [ ] **Hide Vote Buttons**: Hide Like/Dislike controls until Voting Phase to reduce clutter.
-- [ ] **Fix: Phase Switching UI Indicator**: `#currentPhase` element doesn't update text when switching phases (voting functionality works correctly, only visual indicator affected).
+### 🚨 Recovery Phase (Current Focus)
+**Context:** Reverted to `v0.11.0` after failed `v0.12.5` deployment (Reference: `POST_MORTEM_v0.12.5.md`).
+**Goal:** Establish safety nets before re-attempting major refactors.
 
-### v1.0.0 - Semantic Release
-**Goal:** Official release after field testing validation.
-- [ ] **Production Readiness Review**: Stress testing and final security audit.
-- [ ] **User Documentation**: Complete guide for end-users and admins.
+- [ ] **Guardrails Implementation**:
+    - [ ] **Local Smoke Test Script**: Create `scripts/verify_local.sh` to check build, lint, and basic runtime BEFORE push.
+    - [ ] **Pre-commit Hook**: Enforce linting and smoke test on commit.
+    - [ ] **Strict Mode**: Enable strict JSON validation tests for Auth payloads.
+- [ ] **Re-Verify v0.11.0**:
+    - [ ] Ensure current `v0.11.0` deployment is stable.
 
-### v1.0.0 - Integrations & Release Candidate
-**Effort:** XL (1-2 weeks)
-- [ ] **Jira Integration** - Create Jira tickets from action items.
-- [ ] **Slack Notifications** - Send retro summaries to Slack channels.
-- [ ] **Calendar Integration** - Schedule recurring retrospectives.
+### v0.12.0 - Re-attempt (Planned)
+**Focus:** Post-Refactor Stabilization (Iterative Approach).
+- [ ] **Dashboard Reactivity**: Refactor `DashboardController` with properly isolated tests.
+- [ ] **UI/i18n Fixes**: Re-apply fixes for Missing Labels and Modal Buttons (Atomic Commits).
+- [ ] **Team View Functionality**: Fix "View Details" buttons.
+- [ ] **Automated E2E Tests**: Run Playwright suite against local Docker container before K8s deploy.
 
----
-
-## ✅ Completed Features
-
-### v0.10.65 (Robust Initialization)
-- [x] **Refactor**: Split `initUI()` from `initApp()` for immediate rendering.
-- [x] **Stability**: UI skeleton loads before network/auth calls.
-- [x] **Verified**: Browser logs confirm improved execution order.
-
-### v0.10.64 (Stabilization Hotfixes)
+### v0.11.x - Stability & Guardrails (Completed)
 - [x] **UI Restoration**: Restored missing script tags (`main.js`, `teams.js`) and fixed initialization logic.
 - [x] **Global Scope Fix**: Resolved `APP_VERSION` ReferenceError in `config.js`.
 - [x] **Claim/Relinquish Host UI**: Glassmorphic buttons, improved logic, and tests.
