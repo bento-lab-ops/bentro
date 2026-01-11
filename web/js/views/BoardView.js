@@ -11,6 +11,8 @@ export class BoardView {
         if (!container) return;
 
         // Render Header
+        // Check if correct version loaded
+        console.log('BoardView RC32 Loaded');
         this.renderHeader(board, currentUser);
 
         // Render Columns
@@ -21,28 +23,105 @@ export class BoardView {
             .join('');
 
         container.innerHTML = `
-            <div id="board" class="board" data-id="${board.id}">
-                ${columnsHtml}
-                <div class="column add-column">
-                    <button class="btn btn-secondary" style="width:100%; height:100%; min-height:100px;" data-action="addColumn">
-                        <i class="fas fa-plus"></i> ${i18n.t('btn.add_column')}
-                    </button>
-                </div>
+            ${columnsHtml}
+            <div class="column add-column">
+                <button class="btn btn-secondary" style="width:100%; height:100%; min-height:100px;" data-action="addColumn">
+                    <i class="fas fa-plus"></i> ${i18n.t('btn.add_column')}
+                </button>
             </div>
-            <!-- Modals would be injected or handled globally -->
         `;
     }
 
     renderHeader(board, currentUser) {
-        // This usually updates the top nav or a specific header section
-        const titleEl = document.getElementById('boardTitleDisplay');
+        // 1. Update Title and Phase
+        const titleEl = document.getElementById('boardTitle'); // Fixed ID
         if (titleEl) titleEl.textContent = board.name;
 
-        // Update Phase UI if exists
-        const phaseDisplay = document.getElementById('phaseDisplay');
+        const phaseDisplay = document.getElementById('currentPhase'); // Fixed ID from index.html (line 276)
         if (phaseDisplay) {
             phaseDisplay.textContent = i18n.t('phase.' + board.phase) || board.phase;
-            phaseDisplay.className = `phase-badge phase-${board.phase}`;
+            // Update class for styling if needed? 
+            // The HTML has `class="phase-name"`. 
+            // We might want to add a specific class for color?
+            // For now just text update is critical.
+        }
+
+        // 2. Permission Check
+        // 2. Permission Check
+        const isOwner = board.owner === currentUser;
+        const isCoOwner = board.co_owner === currentUser;
+        const canControl = isOwner || isCoOwner;
+        const isFinished = board.status === 'finished';
+
+        // 3. Toggle Control Buttons
+        const timerSection = document.querySelector('.timer-controls');
+        if (timerSection) {
+            // Helper to toggle
+            const toggle = (id, show) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = show ? 'inline-block' : 'none';
+            };
+
+            // Phase Switch (Only if not finished)
+            const switchBtn = document.getElementById('switchPhaseBtn');
+            if (switchBtn) {
+                const isVoting = board.phase === 'voting';
+                switchBtn.innerHTML = isVoting ? `<i class="fas fa-gavel"></i> ${i18n.t('btn.end_voting') || 'End Voting'}` : `<i class="fas fa-vote-yea"></i> ${i18n.t('btn.start_voting') || 'Start Voting'}`;
+                toggle('switchPhaseBtn', canControl && !isFinished);
+            }
+
+            // Timer Controls (Only if not finished)
+            // Note: start/stop logic might need to check if timer is running?
+            // Currently the UI state for timer is handled by `updateTimerDisplay` mostly?
+            // But we need to show at least "Start" if we are manager.
+            // Let's rely on BoardController/Timer state if possible, but initially show Start.
+            // If timer is running, BoardController should flip it to Stop.
+            // For now, just Show Start if authorized.
+            if (canControl && !isFinished) {
+                // If button is hidden, show it. Logic in Controller might toggle Start/Stop.
+                // We ensure the grouping is visible or base buttons are eligible.
+                // We'll default to showing Start if not running, but we don't know "running" state here easily without checking display?
+                // Actually BoardController manages start/stop visibility dynamically.
+                // BUT, they default to NONE in HTML.
+                // So we must enable them.
+                // Let's enable "Start" by default if nothing is showing?
+                const startBtn = document.getElementById('startTimerBtn');
+                const stopBtn = document.getElementById('stopTimerBtn');
+                if (startBtn && stopBtn) {
+                    if (stopBtn.style.display === 'none' && startBtn.style.display === 'none') {
+                        startBtn.style.display = 'inline-block';
+                    }
+                }
+            } else {
+                toggle('startTimerBtn', false);
+                toggle('stopTimerBtn', false);
+            }
+
+            // Host Claiming
+            // If I am owner, I don't need to claim? Or Owner is always manager?
+            // Usually Owner is implicit manager.
+            // If I am NOT manager, show Claim.
+            // If I AM manager (and not owner?), show Unclaim?
+            // Logic:
+            toggle('claimManagerBtn', !canControl && !isFinished);
+            toggle('unclaimManagerBtn', canControl && !isFinished); // Allow both Owner and CoOwner to relinquish
+
+            // Meta Controls
+            toggle('finishRetroBtn', isOwner && !isFinished);
+            toggle('reopenRetroBtn', isOwner && isFinished);
+            toggle('exportBoardBtn', true); // Everyone can export? Or just members? Let's say everyone for now.
+
+            // Settings
+            toggle('adminSettingsBtn', canControl && !isFinished);
+
+            // Add Column (in board container)
+            toggle('addColumnBtn', canControl && !isFinished);
+        }
+
+        // 4. Read Only Banner
+        const banner = document.getElementById('readOnlyBanner');
+        if (banner) {
+            banner.style.display = isFinished ? 'block' : 'none';
         }
     }
 

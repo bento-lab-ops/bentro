@@ -265,8 +265,8 @@
                 <span class="participants-label" data-i18n="label.active_participants">Active:</span>
                 <div id="participantsContainer" class="participants-container"></div>
             </div>
-            <button id="adminSettingsBtn" class="btn btn-icon btn-sm" onclick="openBoardSettings()"
-                title="Admin Settings" style="display: none;">⚙️</button>
+            <button id="adminSettingsBtn" class="btn btn-icon btn-sm" data-action="openSettings" title="Admin Settings"
+                style="display: none;">⚙️</button>
         </div>
 
         <!-- Timer Section -->
@@ -281,25 +281,25 @@
             <div class="timer-controls">
                 <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
                     value="5">
-                <button id="startTimerBtn" class="btn btn-success" style="display: none;"
-                    data-i18n="btn.start_timer">Start Timer</button> <button id="stopTimerBtn" class="btn btn-danger"
-                    style="display: none;" data-i18n="btn.stop_timer">Stop Timer</button>
+                <button id="startTimerBtn" class="btn btn-success" style="display: none;" data-i18n="btn.start_timer"
+                    data-action="startTimer">Start Timer</button> <button id="stopTimerBtn" class="btn btn-danger"
+                    style="display: none;" data-i18n="btn.stop_timer" data-action="stopTimer">Stop Timer</button>
                 <button id="switchPhaseBtn" class="btn btn-secondary" style="display: none;"
-                    data-i18n="btn.switch_voting">Switch to
+                    data-i18n="btn.switch_voting" data-action="switchPhase">Switch to
                     Voting</button>
-                <button id="exportBoardBtn" class="btn btn-secondary" onclick="exportCurrentBoard()"
-                    style="display: none;" data-i18n="btn.export_csv">📊 Export
+                <button id="exportBoardBtn" class="btn btn-secondary" data-action="exportBoard" style="display: none;"
+                    data-i18n="btn.export_csv">📊 Export
                     CSV</button>
 
                 <!-- Host Controls -->
-                <button id="claimManagerBtn" class="btn btn-glass" onclick="claimManagerAction()"
-                    title="Claim Moderation" style="display: none;">👑 Claim Host</button>
-                <button id="unclaimManagerBtn" class="btn btn-glass" onclick="unclaimManagerAction()"
+                <button id="claimManagerBtn" class="btn btn-glass" data-action="claimManager" title="Claim Moderation"
+                    style="display: none;">👑 Claim Host</button>
+                <button id="unclaimManagerBtn" class="btn btn-glass" data-action="unclaimManager"
                     title="Relinquish Control" style="display: none;">❌ Relinquish</button>
 
-                <button id="finishRetroBtn" class="btn btn-glass-danger" onclick="finishRetro()" style="display: none;"
-                    data-i18n="btn.finish_retro">Finish Retro</button>
-                <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" onclick="reopenRetro()"
+                <button id="finishRetroBtn" class="btn btn-glass-danger" data-action="finishRetro"
+                    style="display: none;" data-i18n="btn.finish_retro">Finish Retro</button>
+                <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" data-action="reopenRetro"
                     data-i18n="btn.reopen_retro">Re-open Retro</button>
             </div>
         </div>
@@ -385,8 +385,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-
-    <script type="module" src="/static/js/main.js?v=v0.12.0-rc28"></script>
+    <script type="module" src="/static/js/main.js?v=v0.12.0-rc42"></script>
     </script>
 </body>
 

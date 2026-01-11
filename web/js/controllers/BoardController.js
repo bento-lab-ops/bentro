@@ -12,7 +12,7 @@ export class BoardController extends Controller {
         super();
         this.boardId = null;
         this.board = null;
-        this.view = new BoardView('boardContainer');
+        this.view = new BoardView('columnsContainer');
     }
 
     async init(params) {
@@ -240,6 +240,12 @@ export class BoardController extends Controller {
             case 'mergeCard':
                 this.handleMergeCard(target.dataset.cardId); // Target to merge SOURCE into
                 break;
+            case 'finishRetro':
+                this.handleFinishRetro();
+                break;
+            case 'reopenRetro':
+                this.handleReopenRetro();
+                break;
         }
     }
 
@@ -312,28 +318,24 @@ export class BoardController extends Controller {
 
     async handleSwitchPhase() {
         const newPhase = this.board.phase === 'input' ? 'voting' : 'input';
-        // Optimistic update? No, let's wait for server or just send event
-        // Actually, we use WS to send phase change.
-        // Legacy: sendWebSocketMessage('phase_change', { phase, board_id })
-        // New: BoardService should have this or we use sendWebSocketMessage directly.
-        // Let's use sendWebSocketMessage for now as it's the established pattern for this app's "commands" via WS.
-        // Or better, add updatePhase to BoardService if it's an API call.
-        // The app currently uses WS for phase switching.
 
-        // Import sendWebSocketMessage? It's globally available or in api.js.
-        // We really should move this to an API call if possible, but let's stick to existing protocol.
-        // Protocol: WS 'phase_change'
-
-        const { sendWebSocketMessage } = await import('../api.js');
-        sendWebSocketMessage('phase_change', {
-            phase: newPhase,
-            board_id: this.boardId
-        });
-
-        // Optimistic local update
-        // this.board.phase = newPhase;
-        // this.view.renderHeader(this.board); 
-        // We rely on WS 'phase:change' event to confirm and reload.
+        // Use Hybrid WebSocket send:
+        // 1. Top-level fields for Backend Handler (persists to DB)
+        // 2. 'data' wrapper for Frontend api.js Handler (dispatches event)
+        if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+            window.ws.send(JSON.stringify({
+                type: 'phase_change',
+                phase: newPhase,
+                board_id: this.boardId,
+                data: {
+                    phase: newPhase,
+                    board_id: this.boardId
+                }
+            }));
+        } else {
+            console.warn('WebSocket not connected, cannot switch phase');
+            alert('Connection lost. Please refresh.');
+        }
     }
 
     async handleStartTimer() {
@@ -535,6 +537,67 @@ export class BoardController extends Controller {
         } catch (e) {
             alert(e.message);
         }
+    }
+    async handleFinishRetro() {
+        if (!confirm(i18n.t('confirm.finish_retro'))) return;
+        try {
+            await apiCall(`/boards/${this.boardId}/status`, 'PUT', { status: 'finished' });
+            await this.loadBoardData();
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    async handleReopenRetro() {
+        if (!confirm(i18n.t('confirm.reopen_retro'))) return;
+        try {
+            await apiCall(`/boards/${this.boardId}/status`, 'PUT', { status: 'active' });
+            await this.loadBoardData();
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    async handleClaimManager() {
+        if (!confirm(i18n.t('confirm.claim_host') || "Claim hosting of this board?")) return;
+        try {
+            await apiCall(`/boards/${this.boardId}/claim`, 'POST', { owner: window.currentUser });
+            await this.loadBoardData();
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    async handleUnclaimManager() {
+        if (!confirm(i18n.t('confirm.unclaim_host') || "Relinquish hosting control?")) return;
+        try {
+            await apiCall(`/boards/${this.boardId}/unclaim`, 'POST', { user: window.currentUser });
+            await this.loadBoardData();
+        } catch (e) {
+            alert(e.message);
+        }
+    }
+
+    openSettingsModal() {
+        if (window.openBoardSettings) {
+            window.openBoardSettings(this.boardId);
+        } else {
+            console.error('Settings Modal not found');
+        }
+    }
+
+    handleExportBoard() {
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + this.board.columns.map(col =>
+                (col.cards || []).map(c => `"${col.name}","${c.content.replace(/"/g, '""')}","${c.owner}"`).join('\n')
+            ).join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `board_${this.board.name}_${new Date().toISOString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 

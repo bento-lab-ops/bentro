@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.10.77**
+## Current Version: **v0.12.0-rc43**
 
 ---
 
@@ -55,12 +55,18 @@
 - [ ] **Re-Verify v0.11.0**:
     - [ ] Ensure current `v0.11.0` deployment is stable.
 
-### v0.12.0 - Re-attempt (Planned)
-**Focus:** Post-Refactor Stabilization (Iterative Approach).
-- [ ] **Dashboard Reactivity**: Refactor `DashboardController` with properly isolated tests.
-- [ ] **UI/i18n Fixes**: Re-apply fixes for Missing Labels and Modal Buttons (Atomic Commits).
-- [ ] **Team View Functionality**: Fix "View Details" buttons.
-- [ ] **Automated E2E Tests**: Run Playwright suite against local Docker container before K8s deploy.
+### v0.12.0 - Modular Architecture & Refactor (Completed)
+**Focus:** Decoupling `board.js`, Fix Runtime Errors, and Stability.
+- [x] **Refactor to Component/Module Pattern**: Split `board.js` into `BoardController`, `BoardView`, and `BoardService`.
+- [x] **Runtime Stability**: Fixed `main.js` duplicate declarations and `ReferenceError`s.
+- [x] **F5 Dashboard Bug**: Fixed Router initialization to handle page refreshes correctly.
+- [x] **Deployment**: Verified successful build and rollout (v0.12.0-rc29).
+
+### v0.12.x - Polish & Security (Next Steps)
+**Focus:** User Experience gaps and Backend Security integrity.
+- [ ] **Guest UX**: Improve experience for unauthenticated/guest users accessing boards/teams.
+- [x] **Voting Phase Verification**: Ensure Backend strictly rejects votes outside the 'voting' phase (Security/Integrity).
+- [ ] **Cleanup**: Remove any remaining legacy comments or unused files.
 
 ### v0.11.x - Stability & Guardrails (Completed)
 - [x] **UI Restoration**: Restored missing script tags (`main.js`, `teams.js`) and fixed initialization logic.

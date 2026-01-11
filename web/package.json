@@ -7,10 +7,13 @@
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
-        "lint": "eslint js/**/*.js"
+        "lint": "eslint js/**/*.js",
+        "test": "vitest run"
     },
     "devDependencies": {
         "vite": "^4.5.5",
+        "vitest": "^1.2.0",
+        "jsdom": "^24.0.0",
         "eslint": "^8.56.0",
         "eslint-plugin-import": "^2.29.1"
     },

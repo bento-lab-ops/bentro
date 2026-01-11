@@ -40,16 +40,25 @@ func AddVote(c *gin.Context) {
 		VoteType: input.VoteType,
 	}
 
-	// Check if user already voted on this card
+	// Check if user has ANY vote record (Active or Soft-Deleted)
 	var existingVote models.Vote
-	if err := database.DB.Where("card_id = ? AND user_name = ?", cardID, input.UserName).First(&existingVote).Error; err == nil {
-		// Toggle: If vote exists, remove it
-		if err := database.DB.Delete(&existingVote).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+	if err := database.DB.Unscoped().Where("card_id = ? AND user_name = ?", cardID, input.UserName).First(&existingVote).Error; err == nil {
+		// Found a record
+		if existingVote.DeletedAt.Valid {
+			// It was soft-deleted (Ghost). We want to VOTE again.
+			// Hard delete the ghost so we can create a fresh vote without Unique Constraint violation
+			database.DB.Unscoped().Delete(&existingVote)
+			// Proceed to Create logic below...
+		} else {
+			// It is Active. We want to UNVOTE.
+			// Hard delete to remove it physically
+			if err := database.DB.Unscoped().Delete(&existingVote).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"message": "Vote removed", "toggled": true})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Vote removed", "toggled": true})
-		return
 	}
 
 	// Check Vote Limit AND Phase
