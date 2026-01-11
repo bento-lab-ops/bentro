@@ -1,9 +1,18 @@
 // Auth UI Logic
 import { login, register, apiCall } from './api.js';
-import { loadBoard } from './board.js';
+import { boardController } from './controllers/BoardController.js';
 import { i18n } from './i18n.js';
 
 export function openLoginModal() {
+    // ... unchanged ...
+    // If on board, join it
+    const hash = window.location.hash.substring(1);
+    if (hash.startsWith('board/')) {
+        const boardId = hash.split('/')[1];
+        boardController.init({ id: boardId });
+    } else {
+        if (window.showDashboard) window.showDashboard();
+    }
     closeRegisterModal();
     const modal = document.getElementById('loginModal');
     if (modal) modal.style.display = 'block';

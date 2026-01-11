@@ -1,13 +1,14 @@
 // Action Items Dashboard Management
 import { apiCall, sendWebSocketMessage } from './api.js';
-import { stopParticipantPolling, loadBoard } from './board.js';
+import { boardController } from './controllers/BoardController.js';
 import { i18n } from './i18n.js';
 import { escapeHtml } from './utils.js';
 
 export async function loadActionItemsView() {
     try {
         // Stop any board polling
-        stopParticipantPolling();
+        // Stop any board polling
+        if (boardController) boardController.stopPolling();
         window.currentBoard = null;
 
         // Hide other views
@@ -206,12 +207,9 @@ export async function submitActionItemCompletion(e) {
         // Refresh based on source
         if (window.actionItemSource === 'dashboard') {
             fetchAndRenderActionItems('pending');
-        } else if (window.currentBoard) {
+        } else if (window.currentBoard || (boardController && boardController.boardId)) {
             // Refresh board to update UI
-            loadBoard(window.currentBoard.id);
-            if (typeof sendWebSocketMessage === 'function') {
-                sendWebSocketMessage('board_update', { board_id: window.currentBoard.id });
-            }
+            boardController.loadBoardData();
         }
     } catch (error) {
         alert('Failed to complete item: ' + error.message);

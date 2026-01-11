@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"retro-app/internal/database"
 	"retro-app/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -237,6 +238,7 @@ func HandleWebSocket(c *gin.Context) {
 			var msg map[string]interface{}
 			if err := json.Unmarshal(message, &msg); err == nil {
 				msgType, _ := msg["type"].(string)
+
 				if msgType == "join_board" {
 					boardID, _ := msg["board_id"].(string)
 					username, _ := msg["username"].(string)
@@ -263,10 +265,21 @@ func HandleWebSocket(c *gin.Context) {
 							Conn:     conn,
 						}
 					}
+				} else if msgType == "phase_change" {
+					// Persist phase change to DB
+					if boardID, ok := msg["board_id"].(string); ok {
+						if phase, ok := msg["phase"].(string); ok && boardID != "" {
+							// Update board phase in DB
+							if err := database.DB.Model(&models.Board{}).Where("id = ?", boardID).Update("phase", phase).Error; err != nil {
+								log.Printf("Failed to update board phase: %v", err)
+							} else {
+								// Broadcast update to force full reload if needed, or rely on client-side optimistic + this echo
+								// Actually, let's just let the echo happen below, but we SAVED it.
+							}
+						}
+					}
 				}
 			}
-
-			// Echo message back to all clients (for timer sync, etc.)
 			hub.broadcast <- message
 		}
 	}()

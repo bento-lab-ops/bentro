@@ -1,29 +1,14 @@
 import { CONFIG, APP_VERSION } from './config.js';
-import './i18n.js'; // Import for side effects (global shims)
+import './i18n.js';
 import { i18n } from './i18n.js';
 import { initWebSocket } from './api.js';
 import { escapeHtml, closeModals } from './utils.js';
-import {
-    // loadBoard, // Moved to BoardController
-    // loadBoards, // Moved to DashboardController
-    // createBoard, // Moved to BoardService
-    createColumn,
-    createCard,
-    updateColumn,
-    updateBoardStatus,
-    exportBoardToCSV,
-    // leaveBoardPersistent, // Moved to DashboardController (shimmed below if needed)
-    openNewCardModal,
-    // filterBoards // Moved to DashboardController
-} from './board.js';
+// Removed board.js imports
+// Removed timer.js logic imports (startTimer, etc)
+
 import { dashboardController } from './controllers/DashboardController.js';
-import { boardController } from './controllers/BoardController.js'; // Phase 4
+import { boardController } from './controllers/BoardController.js';
 import { boardService } from './services/BoardService.js';
-import {
-    startTimer,
-    stopTimer,
-    switchPhase
-} from './timer.js';
 import {
     selectAvatar,
     getUserAvatar,
@@ -40,18 +25,23 @@ import {
     openManageTeamsModal
 } from './teams.js';
 import { loadActionItemsView } from './action_items.js';
-
-// Legacy / Auth shims
-// auth.js and admin-users.js etc are imported implicitly by their shims OR we should import them to ensure they run/register?
-// Since they are modules, they need to be imported once to execute their TOP LEVEL code (which sets shims).
-// However, main.js is the entry point. Vite will bundle everything reachable.
-// If we don't import them, they might not be included?
-// YES. We must import them for side-effects (shims) if nothing else.
 import './auth.js';
-import { navController } from './controllers/NavController.js'; // Replaces ./menu.js
+import { navController } from './controllers/NavController.js';
 import './admin-users.js';
 import './admin-boards.js';
 import './admin-actions.js';
+
+// ... (initUI, initApp, handleUrlHash remain same) ...
+// skipping unchanged lines for brevity if possible, but replace_file_content replaces blocks.
+// I will keep the structure but update the listeners section.
+
+
+
+// ... unchanged functions ...
+
+
+
+
 
 // App Initialization
 async function initUI() {
@@ -332,6 +322,20 @@ document.addEventListener('languageChanged', () => {
     }
 });
 
+// Helper for New Card Modal (previously in board.js)
+function openNewCardModal(columnId) {
+    const modal = document.getElementById('newCardModal');
+    if (modal) {
+        document.getElementById('cardColumnId').value = columnId;
+        document.getElementById('cardContent').value = '';
+        modal.style.display = 'block';
+        document.getElementById('cardContent').focus();
+    }
+}
+
+// Global for legacy button access if needed
+window.openNewCardModal = openNewCardModal;
+
 function setupEventListeners() {
     // User Form
     document.getElementById('userForm')?.addEventListener('submit', (e) => {
@@ -350,7 +354,7 @@ function setupEventListeners() {
     });
 
     document.getElementById('dashboardBtn')?.addEventListener('click', () => {
-        showDashboard(); // Directly call shows
+        showDashboard();
     });
     document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
         window.location.hash = 'action-items';
@@ -398,7 +402,28 @@ function setupEventListeners() {
         e.preventDefault();
         const columnId = document.getElementById('cardColumnId').value;
         const content = document.getElementById('cardContent').value;
-        await createCard(columnId, content);
+        // Delegated to BoardController -> handleAddCard logic? 
+        // Or directly call API via Controller? Controller exposes methods?
+        // BoardController doesn't export `createCard` but it handles "submit" if it managed the modal.
+        // Since modal is global, let's call API and refresh Controller.
+        // Actually, BoardService is available.
+        // BUT, we want to trigger Controller refresh.
+        // boardController.createCard?
+
+        // Let's implement `createCard` in main.js using BoardService? 
+        // Or better: boardController.addCard(columnId, content) ?
+
+        if (boardController && boardController.boardId) {
+            const { apiCall } = await import('./api.js');
+            const { sendWebSocketMessage } = await import('./api.js');
+            await apiCall(`/cards`, 'POST', {
+                column_id: columnId,
+                content: content,
+                owner: window.currentUser
+            });
+            sendWebSocketMessage('board_update', { board_id: boardController.boardId });
+            boardController.loadBoardData();
+        }
         closeModals();
     });
 
@@ -406,28 +431,45 @@ function setupEventListeners() {
         e.preventDefault();
         const columnId = document.getElementById('editColumnId').value;
         const name = document.getElementById('columnNameEdit').value;
-        await updateColumn(columnId, name);
+
+        if (boardController && boardController.boardId) {
+            const { apiCall, sendWebSocketMessage } = await import('./api.js');
+            await apiCall(`/columns/${columnId}`, 'PUT', { name });
+            sendWebSocketMessage('board_update', { board_id: boardController.boardId });
+            boardController.loadBoardData();
+        }
         closeModals();
     });
 
     document.getElementById('addColumnBtn')?.addEventListener('click', async () => {
-        const name = prompt('Enter column name:');
-        if (name) {
-            const position = window.currentBoard.columns.length;
-            await createColumn(name, position);
+        // This button might be inside Board View now? 
+        // BoardView renders it inside .board.
+        // If it's the global one in header (unused?), we can ignore.
+        // BoardView has its own button with `data-action="addColumn"`.
+        // BoardController handles it.
+        // BUT, if legacy button exists?
+        // Let's keep a shim calling BoardController.handleAddColumn()
+        if (boardController && boardController.handleAddColumn) {
+            boardController.handleAddColumn();
         }
     });
 
-    document.getElementById('startTimerBtn')?.addEventListener('click', startTimer);
-    document.getElementById('stopTimerBtn')?.addEventListener('click', stopTimer);
-    document.getElementById('switchPhaseBtn')?.addEventListener('click', switchPhase);
+    document.getElementById('startTimerBtn')?.addEventListener('click', () => {
+        if (boardController) boardController.handleStartTimer();
+    });
+    document.getElementById('stopTimerBtn')?.addEventListener('click', () => {
+        if (boardController) boardController.handleStopTimer();
+    });
+    document.getElementById('switchPhaseBtn')?.addEventListener('click', () => {
+        if (boardController) boardController.handleSwitchPhase();
+    });
 
     document.querySelectorAll('.close').forEach(closeBtn => {
         closeBtn.addEventListener('click', closeModals);
     });
 
+    // ... user auth listeners unchanged ...
     document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
-
     document.getElementById('changeUserBtn')?.addEventListener('click', () => {
         document.getElementById('returningUserModal').style.display = 'none';
         window.currentUser = null;
@@ -435,13 +477,10 @@ function setupEventListeners() {
         localStorage.removeItem('adminToken');
         document.getElementById('userModal').style.display = 'block';
     });
-
     document.getElementById('editUserBtn')?.addEventListener('click', openEditUserModal);
-
     document.getElementById('helpBtn')?.addEventListener('click', () => {
         document.getElementById('helpModal').style.display = 'block';
     });
-
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
 
     window.addEventListener('click', (e) => {
@@ -463,7 +502,7 @@ function setupKeyboardShortcuts() {
 
         if (e.key === 'Escape') {
             closeModals();
-            if (typeof cancelSelection === 'function') cancelSelection();
+            if (boardController && boardController.handleCancelSelection) boardController.handleCancelSelection();
             return;
         }
 
@@ -473,28 +512,36 @@ function setupKeyboardShortcuts() {
             return;
         }
 
-        if (window.currentBoard) {
+        if (window.currentBoard || (boardController && boardController.boardId)) {
             if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
                 e.preventDefault();
-                exportBoardToCSV(window.currentBoard.id);
+                if (boardController) boardController.handleExportBoard();
             }
             if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
                 e.preventDefault();
-                // trigger button logic
                 const startBtn = document.getElementById('startTimerBtn');
                 const stopBtn = document.getElementById('stopTimerBtn');
-                if (stopBtn && stopBtn.style.display !== 'none') stopTimer();
-                else if (startBtn && !startBtn.disabled) startTimer();
+                if (boardController) {
+                    // Logic to toggle? Controller needs a toggle or we check UI state?
+                    // Controller knows state?
+                    // Let's blindly call handleStart if visible? or just check button display.
+                    if (stopBtn && stopBtn.style.display !== 'none') boardController.handleStopTimer();
+                    else if (startBtn && !startBtn.disabled) boardController.handleStartTimer();
+                }
             }
             if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
                 e.preventDefault();
                 const switchBtn = document.getElementById('switchPhaseBtn');
-                if (switchBtn && !switchBtn.disabled) switchPhase();
+                if (switchBtn && !switchBtn.disabled && boardController) boardController.handleSwitchPhase();
             }
             if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
                 e.preventDefault();
-                if (window.currentBoard.columns && window.currentBoard.columns.length > 0) {
-                    openNewCardModal(window.currentBoard.columns[0].id);
+                // Check if columns exist
+                // Accessing window.currentBoard might still work if Controller updates it (it does for legacy compat)
+                // Or access boardController.board
+                const board = boardController?.board || window.currentBoard;
+                if (board && board.columns && board.columns.length > 0) {
+                    openNewCardModal(board.columns[0].id);
                 }
             }
         }

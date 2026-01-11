@@ -1,7 +1,6 @@
 import { i18n } from '../i18n.js';
 import { logout } from '../api.js';
-import { loadBoard } from '../board.js'; // Dependency to reload board on admin change
-// We might need to import router here if we want to use router.navigate instead of direct hash manipulation
+import { boardController } from './BoardController.js';
 
 export class NavController {
     constructor() {
@@ -12,6 +11,12 @@ export class NavController {
         this.openMenu = this.openMenu.bind(this);
         this.closeMenu = this.closeMenu.bind(this);
         this.handleUserLogout = this.handleUserLogout.bind(this);
+        this.renderMenuLinks = this.renderMenuLinks.bind(this);
+        this.navigateTo = this.navigateTo.bind(this);
+        this.openSettingsModal = this.openSettingsModal.bind(this);
+        this.handleSettingsAdminLogin = this.handleSettingsAdminLogin.bind(this);
+        this.logoutAdminInSettings = this.logoutAdminInSettings.bind(this);
+        this.toggleThemeFromSettings = this.toggleThemeFromSettings.bind(this);
     }
 
     init() {
@@ -31,15 +36,15 @@ export class NavController {
         window.toggleMenu = this.toggleMenu;
         window.openMenu = this.openMenu;
         window.closeMenu = this.closeMenu;
-        window.renderMenuLinks = this.renderMenuLinks.bind(this);
+        window.renderMenuLinks = this.renderMenuLinks;
         window.handleUserLogout = this.handleUserLogout;
-        window.navigateTo = this.navigateTo.bind(this);
+        window.navigateTo = this.navigateTo;
         window.openHelpModal = this.openHelpModal;
-        window.openSettingsModal = this.openSettingsModal.bind(this);
+        window.openSettingsModal = this.openSettingsModal;
         window.closeSettingsModal = this.closeSettingsModal;
         window.toggleThemeFromSettings = this.toggleThemeFromSettings;
-        window.handleSettingsAdminLogin = this.handleSettingsAdminLogin.bind(this);
-        window.logoutAdminInSettings = this.logoutAdminInSettings.bind(this);
+        window.handleSettingsAdminLogin = this.handleSettingsAdminLogin;
+        window.logoutAdminInSettings = this.logoutAdminInSettings;
     }
 
     toggleMenu() {
@@ -211,7 +216,7 @@ export class NavController {
                 const data = await response.json();
                 localStorage.setItem('adminToken', data.token);
                 this.renderSettingsContent();
-                if (window.currentBoard) loadBoard(window.currentBoard.id);
+                if (boardController && boardController.boardId) boardController.loadBoardData();
             } else {
                 alert(i18n.t('admin.invalid_pass'));
             }
@@ -223,7 +228,7 @@ export class NavController {
     logoutAdminInSettings() {
         localStorage.removeItem('adminToken');
         this.renderSettingsContent();
-        if (window.currentBoard) loadBoard(window.currentBoard.id);
+        if (boardController && boardController.boardId) boardController.loadBoardData();
     }
 }
 

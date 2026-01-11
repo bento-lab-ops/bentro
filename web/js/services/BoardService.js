@@ -29,6 +29,29 @@ export class BoardService {
     async delete(boardId) {
         return await apiCall(`/boards/${boardId}`, 'DELETE');
     }
+
+    async voteCard(cardId, user, type) {
+        return await apiCall(`/cards/${cardId}/votes`, 'POST', {
+            user_name: user,
+            vote_type: type
+        });
+    }
+
+    async addCard(columnId, content, user) {
+        return await apiCall('/cards', 'POST', {
+            column_id: columnId,
+            content: content,
+            owner: user
+        });
+    }
+
+    async updateCard(cardId, content) {
+        return await apiCall(`/cards/${cardId}`, 'PUT', { content });
+    }
+
+    async deleteCard(cardId) {
+        return await apiCall(`/cards/${cardId}`, 'DELETE');
+    }
 }
 
 export const boardService = new BoardService();

@@ -1,58 +1,138 @@
 #1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 753B 0.0s done
+#1 transferring dockerfile: 1.16kB 0.0s done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/golang:1.23
-#2 DONE 0.2s
+#2 [auth] library/alpine:pull token for registry-1.docker.io
+#2 DONE 0.0s
 
-#3 [internal] load metadata for docker.io/library/alpine:latest
-#3 DONE 0.2s
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
 
-#4 [internal] load .dockerignore
+#4 [auth] library/golang:pull token for registry-1.docker.io
 #4 DONE 0.0s
 
-#4 [internal] load .dockerignore
-#4 transferring context: 343B 0.0s done
-#4 DONE 0.0s
+#5 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#5 ...
 
-#5 [stage-1 1/5] FROM docker.io/library/alpine:latest@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62
-#5 resolve docker.io/library/alpine:latest@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 0.0s done
-#5 DONE 0.0s
+#6 [internal] load metadata for docker.io/library/node:18-slim
+#6 DONE 2.5s
 
-#6 [builder 1/6] FROM docker.io/library/golang:1.23@sha256:60deed95d3888cc5e4d9ff8a10c54e5edc008c6ae3fba6187be6fb592e19e8c0
-#6 resolve docker.io/library/golang:1.23@sha256:60deed95d3888cc5e4d9ff8a10c54e5edc008c6ae3fba6187be6fb592e19e8c0 0.0s done
-#6 DONE 0.0s
+#7 [internal] load metadata for docker.io/library/alpine:latest
+#7 DONE 3.0s
 
-#7 [internal] load build context
-#7 transferring context: 100.09kB 4.9s done
-#7 DONE 4.9s
+#5 [internal] load metadata for docker.io/library/golang:1.24-alpine
+#5 DONE 3.4s
 
-#8 [builder 2/6] WORKDIR /app
-#8 CACHED
+#8 [internal] load .dockerignore
+#8 transferring context: 33B
+#8 transferring context: 212B 0.0s done
+#8 DONE 0.0s
 
-#9 [builder 3/6] COPY go.mod go.sum ./
-#9 CACHED
+#9 [go-builder 1/5] FROM docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae
+#9 resolve docker.io/library/golang:1.24-alpine@sha256:ef75fa8822a4c0fb53a390548b3dc1c39639339ec3373c58f5441117e1ff46ae 0.0s done
+#9 DONE 0.0s
 
-#10 [builder 4/6] COPY FORCE_UPDATE .
-#10 CACHED
+#10 [stage-2 1/5] FROM docker.io/library/alpine:latest@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62
+#10 resolve docker.io/library/alpine:latest@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 0.0s done
+#10 DONE 0.0s
 
-#11 [builder 5/6] COPY . .
-#11 DONE 0.4s
+#11 [node-builder 1/7] FROM docker.io/library/node:18-slim@sha256:f9ab18e354e6855ae56ef2b290dd225c1e51a564f87584b9bd21dd651838830e
+#11 resolve docker.io/library/node:18-slim@sha256:f9ab18e354e6855ae56ef2b290dd225c1e51a564f87584b9bd21dd651838830e 0.0s done
+#11 DONE 0.0s
 
-#12 [builder 6/6] RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
-#12 0.086 go: go.mod requires go >= 1.24.0 (running go 1.23.12; GOTOOLCHAIN=local)
-#12 ERROR: process "/bin/sh -c CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server" did not complete successfully: exit code: 1
+#12 [internal] load build context
+#12 transferring context: 8.15kB 0.4s done
+#12 DONE 0.4s
+
+#13 [go-builder 2/5] WORKDIR /app
+#13 CACHED
+
+#14 [node-builder 5/7] COPY web/ .
+#14 CACHED
+
+#15 [node-builder 2/7] WORKDIR /web
+#15 CACHED
+
+#16 [node-builder 4/7] RUN npm install
+#16 CACHED
+
+#17 [node-builder 6/7] RUN mkdir dist && cp -r public/* dist/ && cp -r js dist/ && cp index.html dist/ && cp bentro.css dist/
+#17 CACHED
+
+#18 [node-builder 3/7] COPY web/package.json ./
+#18 CACHED
+
+#19 [node-builder 7/7] RUN echo "Skipped build, serving raw files"
+#19 CACHED
+
+#20 [go-builder 3/5] COPY . .
+#20 DONE 0.6s
+
+#21 [go-builder 4/5] RUN go mod tidy
+#21 0.359 go: downloading github.com/gorilla/websocket v1.5.1
+#21 0.359 go: downloading github.com/gin-contrib/cors v1.5.0
+#21 0.359 go: downloading github.com/gin-gonic/gin v1.9.1
+#21 0.359 go: downloading gorm.io/gorm v1.31.1
+#21 0.359 go: downloading gorm.io/driver/postgres v1.6.0
+#21 0.359 go: downloading github.com/google/uuid v1.5.0
+#21 0.359 go: downloading github.com/golang-jwt/jwt/v5 v5.3.0
+#21 0.367 go: downloading golang.org/x/crypto v0.46.0
+#21 0.912 go: downloading github.com/jackc/pgx/v5 v5.6.0
+#21 1.004 go: downloading golang.org/x/net v0.47.0
+#21 1.079 go: downloading github.com/gin-contrib/sse v0.1.0
+#21 1.079 go: downloading github.com/mattn/go-isatty v0.0.19
+#21 1.100 go: downloading google.golang.org/protobuf v1.31.0
+#21 1.320 go: downloading github.com/jackc/pgpassfile v1.0.0
+#21 1.320 go: downloading golang.org/x/text v0.32.0
+#21 1.321 go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+#21 1.337 go: downloading github.com/go-playground/validator/v10 v10.15.5
+#21 1.339 go: downloading github.com/pelletier/go-toml/v2 v2.1.0
+#21 1.431 go: downloading github.com/ugorji/go/codec v1.2.11
+#21 1.449 go: downloading gopkg.in/yaml.v3 v3.0.1
+#21 1.526 go: downloading github.com/bytedance/sonic v1.10.1
+#21 1.529 go: downloading github.com/goccy/go-json v0.10.2
+#21 1.532 go: downloading github.com/json-iterator/go v1.1.12
+#21 1.533 go: downloading golang.org/x/sys v0.39.0
+#21 1.555 go: downloading github.com/gabriel-vasile/mimetype v1.4.2
+#21 1.561 go: downloading github.com/go-playground/universal-translator v0.18.1
+#21 1.598 go: downloading github.com/leodido/go-urn v1.2.4
+#21 1.670 go: downloading github.com/go-playground/locales v0.14.1
+#21 1.908 go: downloading github.com/jinzhu/now v1.1.5
+#21 1.916 go: downloading github.com/jackc/puddle/v2 v2.2.2
+#21 1.918 go: downloading github.com/jinzhu/inflection v1.0.0
+#21 2.068 go: downloading github.com/modern-go/reflect2 v1.0.2
+#21 2.068 go: downloading github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+#21 2.081 go: downloading github.com/google/go-cmp v0.7.0
+#21 2.117 go: downloading golang.org/x/sync v0.19.0
+#21 2.131 go: downloading github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d
+#21 2.131 go: downloading github.com/go-playground/assert/v2 v2.2.0
+#21 2.131 go: downloading gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+#21 2.132 go: downloading github.com/davecgh/go-spew v1.1.1
+#21 2.132 go: downloading github.com/stretchr/testify v1.8.4
+#21 2.151 go: downloading golang.org/x/arch v0.5.0
+#21 2.161 go: downloading github.com/twitchyliquid64/golang-asm v0.15.1
+#21 2.177 go: downloading github.com/pmezard/go-difflib v1.0.0
+#21 2.181 go: downloading github.com/klauspost/cpuid/v2 v2.2.5
+#21 2.241 go: downloading github.com/kr/pretty v0.3.0
+#21 2.241 go: downloading github.com/chenzhuoyu/iasm v0.9.0
+#21 2.280 go: downloading github.com/rogpeppe/go-internal v1.8.0
+#21 2.280 go: downloading github.com/kr/text v0.2.0
+#21 DONE 4.4s
+
+#22 [go-builder 5/5] RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
+#22 0.148 runc run failed: unable to start container process: can't copy bootstrap data to pipe: write init-p: broken pipe
+#22 ERROR: process "/bin/sh -c CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server" did not complete successfully: exit code: 1
 ------
- > [builder 6/6] RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server:
-0.086 go: go.mod requires go >= 1.24.0 (running go 1.23.12; GOTOOLCHAIN=local)
+ > [go-builder 5/5] RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server:
+0.148 runc run failed: unable to start container process: can't copy bootstrap data to pipe: write init-p: broken pipe
 ------
-Dockerfile:19
+Dockerfile:29
 --------------------
-  17 |     # Build the application
-  18 |     ARG TARGETARCH
-  19 | >>> RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
-  20 |     
-  21 |     # Runtime stage
+  27 |     # Build the application
+  28 |     # Explicitly building for ARM64
+  29 | >>> RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server
+  30 |     
+  31 |     # Runtime stage
 --------------------
-error: failed to solve: process "/bin/sh -c CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server" did not complete successfully: exit code: 1
-time="2026-01-08T22:46:06-03:00" level=fatal msg="no image was built"
+error: failed to solve: process "/bin/sh -c CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o bentro-final-v4 ./cmd/server" did not complete successfully: exit code: 1
+time="2026-01-11T01:54:41-03:00" level=fatal msg="no image was built"

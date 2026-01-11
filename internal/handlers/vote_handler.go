@@ -43,15 +43,26 @@ func AddVote(c *gin.Context) {
 	// Check if user already voted on this card
 	var existingVote models.Vote
 	if err := database.DB.Where("card_id = ? AND user_name = ?", cardID, input.UserName).First(&existingVote).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "User already voted on this card"})
+		// Toggle: If vote exists, remove it
+		if err := database.DB.Delete(&existingVote).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Vote removed", "toggled": true})
 		return
 	}
 
-	// Check Vote Limit
+	// Check Vote Limit AND Phase
 	var column models.Column
 	if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
 		var board models.Board
 		if err := database.DB.First(&board, column.BoardID).Error; err == nil {
+			// Phase Check
+			if board.Phase != "voting" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Voting is closed (Phase: " + board.Phase + ")"})
+				return
+			}
+
 			if board.VoteLimit > 0 {
 				var totalUserVotes int64
 				// Get all cards in this board

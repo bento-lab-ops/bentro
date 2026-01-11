@@ -1,6 +1,6 @@
 // Admin Dashboard Management
 import { apiCall } from './api.js';
-import { loadBoard } from './board.js';
+import { boardController } from './controllers/BoardController.js';
 import { joinBoard } from './api.js';
 import { i18n } from './i18n.js';
 import { openAdminBoardsModal, loadAdminBoards } from './admin-boards.js';
@@ -8,6 +8,14 @@ import { openAdminActionItemsModal, loadAdminActions } from './admin-actions.js'
 import { openAdminUsersModal, loadAllUsers } from './admin-users.js';
 
 export async function loadAdminView() {
+    // ... unchanged ...
+    // Refresh connection if on a board to update status
+    if (boardController && boardController.boardId) {
+        // Determine layout based on current hash to avoid view switching issues
+        // If we are in admin view, we just stay there, but we send the websocket signal
+        joinBoard(boardController.boardId, window.currentUser);
+        boardController.loadBoardData(); // Refresh permissions
+    }
     // Check if user is admin via JWT or has K8s admin token
     const token = localStorage.getItem('adminToken');
     const isJWTAdmin = window.currentUserRole === 'admin';

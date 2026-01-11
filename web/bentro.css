@@ -785,6 +785,41 @@ a:hover {
     border-bottom: 1px solid var(--border);
 }
 
+.vote-controls-blind {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.card-actions-voting {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.vote-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.vote-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.vote-btn.voted {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
 .board-title {
     font-size: 2rem;
     font-weight: 800;

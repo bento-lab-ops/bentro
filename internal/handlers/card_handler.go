@@ -21,6 +21,7 @@ func CreateCard(c *gin.Context) {
 	var input struct {
 		Content  string `json:"content" binding:"required"`
 		Position int    `json:"position"`
+		Owner    string `json:"owner"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -32,6 +33,7 @@ func CreateCard(c *gin.Context) {
 		ColumnID: columnID,
 		Content:  input.Content,
 		Position: input.Position,
+		Owner:    input.Owner,
 	}
 
 	if err := database.DB.Create(&card).Error; err != nil {

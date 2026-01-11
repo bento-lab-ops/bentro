@@ -232,3 +232,30 @@ export class DashboardController {
 }
 
 export const dashboardController = new DashboardController();
+
+// Expose methods for HTML event handlers
+window.filterBoards = (status) => dashboardController.filterBoards(status);
+window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
+// Legacy/Global function alignment
+window.updateBoardStatus = async (id, status) => {
+    // Re-implement or call service directly?
+    // BoardController usually handles this but for dashboard actions...
+    // Let's allow simple API call + reload
+    try {
+        await boardService.updateStatus(id, status);
+        await dashboardController.loadBoards();
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
+    }
+};
+window.deleteBoard = async (id) => {
+    if (!confirm(i18n.t('confirm.delete_board'))) return;
+    try {
+        await boardService.delete(id);
+        await dashboardController.loadBoards();
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
+    }
+};
