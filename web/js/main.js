@@ -262,31 +262,45 @@ let BOARD_TEMPLATES = {};
 let RAW_TEMPLATES = {};
 
 async function loadBoardTemplates() {
-    try {
-        const response = await fetch(`/static/board-templates.json?v=${new Date().getTime()}`);
-        const templates = await response.json();
-        RAW_TEMPLATES = templates;
-        BOARD_TEMPLATES = {};
-        for (const [key, value] of Object.entries(templates)) {
-            BOARD_TEMPLATES[key] = value.columns;
+    const paths = [
+        `/static/board-templates.json?v=${new Date().getTime()}`,
+        `/board-templates.json?v=${new Date().getTime()}`,
+        `/public/board-templates.json?v=${new Date().getTime()}`
+    ];
+
+    for (const path of paths) {
+        try {
+            const response = await fetch(path);
+            if (response.ok) {
+                const templates = await response.json();
+                RAW_TEMPLATES = templates;
+                BOARD_TEMPLATES = {};
+                for (const [key, value] of Object.entries(templates)) {
+                    BOARD_TEMPLATES[key] = value.columns;
+                }
+                populateTemplateDropdown();
+                console.log(`%c✅ Board templates loaded from ${path}`, 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
+                return; // Success, exit
+            }
+        } catch (e) {
+            console.warn(`Failed to load templates from ${path}`, e);
         }
-        populateTemplateDropdown();
-        console.log('%c✅ Board templates loaded', 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
-    } catch (error) {
-        console.error('Failed to load board templates:', error);
-        BOARD_TEMPLATES = {
-            'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
-            'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
-            '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
-            'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
-            'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
-        };
-        RAW_TEMPLATES = {};
-        for (const [key, cols] of Object.entries(BOARD_TEMPLATES)) {
-            RAW_TEMPLATES[key] = { name: key, columns: cols };
-        }
-        populateTemplateDropdown();
     }
+
+    // Fallback if all paths fail
+    console.error('All template paths failed. Using hardcoded defaults.');
+    BOARD_TEMPLATES = {
+        'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
+        'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
+        '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
+        'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
+        'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
+    };
+    RAW_TEMPLATES = {};
+    for (const [key, cols] of Object.entries(BOARD_TEMPLATES)) {
+        RAW_TEMPLATES[key] = { name: key, columns: cols };
+    }
+    populateTemplateDropdown();
 }
 
 function populateTemplateDropdown() {
@@ -380,21 +394,38 @@ function setupEventListeners() {
         }
     });
 
+    // Template Selection Listener
+    const templateSelect = document.getElementById('boardTemplate');
+    const handleTemplateChange = (e) => {
+        const selectedValue = e.target.value;
+        const columnNamesTextarea = document.getElementById('columnNames');
+
+        console.log('Template changed to:', selectedValue);
+
+        if (!columnNamesTextarea) {
+            console.error('Column Names textarea not found');
+            return;
+        }
+
+        if (selectedValue === 'custom') {
+            columnNamesTextarea.value = '';
+            columnNamesTextarea.placeholder = 'Enter custom columns...';
+        } else if (BOARD_TEMPLATES[selectedValue]) {
+            const template = BOARD_TEMPLATES[selectedValue];
+            console.log('Applying template:', template);
+            if (Array.isArray(template)) {
+                columnNamesTextarea.value = template.join('\n');
+            }
+        }
+    };
+
+    if (templateSelect) {
+        templateSelect.addEventListener('change', handleTemplateChange);
+    }
+    // Backup delegation in case of DOM replacement
     document.addEventListener('change', (e) => {
         if (e.target && e.target.id === 'boardTemplate') {
-            const selectedValue = e.target.value;
-            const columnNamesTextarea = document.getElementById('columnNames');
-            if (!columnNamesTextarea) return;
-
-            if (selectedValue === 'custom') {
-                columnNamesTextarea.value = '';
-                columnNamesTextarea.placeholder = 'Enter custom columns...';
-            } else if (BOARD_TEMPLATES[selectedValue]) {
-                const template = BOARD_TEMPLATES[selectedValue];
-                if (Array.isArray(template)) {
-                    columnNamesTextarea.value = template.join('\n');
-                }
-            }
+            handleTemplateChange(e);
         }
     });
 
@@ -416,7 +447,7 @@ function setupEventListeners() {
         if (boardController && boardController.boardId) {
             const { apiCall } = await import('./api.js');
             const { sendWebSocketMessage } = await import('./api.js');
-            await apiCall(`/cards`, 'POST', {
+            await apiCall(`/columns/${columnId}/cards`, 'POST', {
                 column_id: columnId,
                 content: content,
                 owner: window.currentUser
@@ -439,6 +470,28 @@ function setupEventListeners() {
             boardController.loadBoardData();
         }
         closeModals();
+    });
+
+    document.getElementById('newColumnForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('newColumnName').value;
+        const boardId = document.getElementById('newColumnBoardId').value || (boardController ? boardController.boardId : null);
+
+        if (boardId) {
+            try {
+                // Reuse BoardController logic or call service?
+                // BoardController has submitAddColumn
+                if (boardController) {
+                    await boardController.submitAddColumn(name);
+                } else {
+                    const { apiCall } = await import('./api.js');
+                    await apiCall(`/boards/${boardId}/columns`, 'POST', { name });
+                }
+                closeModals();
+            } catch (e) {
+                alert(e.message);
+            }
+        }
     });
 
     document.getElementById('addColumnBtn')?.addEventListener('click', async () => {
@@ -592,6 +645,35 @@ window.handleUrlHash = handleUrlHash;
 window.toggleTheme = toggleTheme;
 window.filterBoards = (status) => dashboardController.filterBoards(status);
 window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
+window.leaveBoardPersistent = async (boardId) => {
+    // If not passed (like from onclick), try to get from global state
+    if (!boardId && window.currentBoard) boardId = window.currentBoard.id;
+    if (!boardId && window.boardId) boardId = window.boardId;
+
+    if (!boardId) {
+        console.error('Board ID undefined during leave');
+        // Try getting from URL hash
+        const hash = window.location.hash;
+        if (hash.startsWith('#board/')) {
+            boardId = hash.replace('#board/', '');
+        } else {
+            alert(i18n.t('alert.error') || 'Error: Board ID missing');
+            return;
+        }
+    }
+
+    if (confirm(i18n.t('confirm.leave_board'))) {
+        const username = window.currentUser;
+        if (username) {
+            try {
+                await boardService.leave(boardId, username);
+                window.location.hash = '#dashboard';
+            } catch (e) {
+                alert('Failed to leave: ' + e.message);
+            }
+        }
+    }
+};
 window.boardController = boardController; // Expose for board.js referencing
 // leaveBoardPersistent is usually called from within the board view, which is Phase 4.
 // But for now, if dashboard uses it? No, dashboard uses join.
@@ -601,6 +683,65 @@ window.boardController = boardController; // Expose for board.js referencing
 
 // Create Board is handled by listener, but let's shim it just in case logic uses it?
 // window.createBoard = undefined; // We don't want global usage if possible.
+
+// Missing Modal Logic
+function openNewColumnModal(boardId) {
+    const modal = document.getElementById('newColumnModal');
+    if (modal) {
+        document.getElementById('newColumnBoardId').value = boardId;
+        document.getElementById('newColumnName').value = '';
+        modal.style.display = 'block';
+        document.getElementById('newColumnName').focus();
+    }
+}
+
+function closeNewColumnModal() {
+    const modal = document.getElementById('newColumnModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openBoardSettings(boardId) {
+    const modal = document.getElementById('boardSettingsModal');
+    if (modal) {
+        // Populate
+        const board = window.currentBoard || (boardController && boardController.board);
+        if (board) {
+            document.getElementById('settingVoteLimit').value = board.vote_limit || 0;
+            document.getElementById('settingBlindVoting').checked = !!board.blind_voting;
+        }
+        modal.style.display = 'block';
+    }
+}
+
+function closeBoardSettingsModal() {
+    const modal = document.getElementById('boardSettingsModal');
+    if (modal) modal.style.display = 'none';
+}
+
+window.saveBoardSettings = async function () {
+    const limit = parseInt(document.getElementById('settingVoteLimit').value) || 0;
+    const blind = document.getElementById('settingBlindVoting').checked;
+
+    if (window.currentBoard) {
+        try {
+            await boardService.update(window.currentBoard.id, {
+                vote_limit: limit,
+                blind_voting: blind
+            });
+            closeBoardSettingsModal();
+            // Reload board
+            if (boardController) boardController.loadBoardData();
+        } catch (e) {
+            alert('Failed to save settings: ' + e.message);
+        }
+    }
+};
+
+// Expose
+window.openNewColumnModal = openNewColumnModal;
+window.closeNewColumnModal = closeNewColumnModal;
+window.openBoardSettings = openBoardSettings;
+window.closeBoardSettingsModal = closeBoardSettingsModal;
 
 // Main Execution
 document.addEventListener('DOMContentLoaded', async () => {

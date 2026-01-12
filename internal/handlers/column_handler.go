@@ -27,6 +27,19 @@ func CreateColumn(c *gin.Context) {
 		return
 	}
 
+	// Calculate position: if not provided (0), append to end
+	if input.Position == 0 {
+		var maxPos int
+		result := database.DB.Model(&models.Column{}).
+			Where("board_id = ?", boardID).
+			Select("COALESCE(MAX(position), -1)"). // Used -1 so that first col becomes 0
+			Scan(&maxPos)
+
+		if result.Error == nil {
+			input.Position = maxPos + 1
+		}
+	}
+
 	column := models.Column{
 		BoardID:  boardID,
 		Name:     input.Name,

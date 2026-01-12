@@ -301,6 +301,22 @@
     </div>
 </div>
 
+<!-- Modal for New Column -->
+<div id="newColumnModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeNewColumnModal()">&times;</span>
+        <h2 data-i18n="heading.add_column">Add New Column</h2>
+        <form id="newColumnForm">
+            <div class="form-group">
+                <label for="newColumnName" data-i18n="label.column_name">Column Name</label>
+                <input type="text" id="newColumnName" class="form-input" placeholder="e.g. Action Items" required>
+            </div>
+            <input type="hidden" id="newColumnBoardId">
+            <button type="submit" class="btn btn-primary" data-i18n="btn.add_column">Add Column</button>
+        </form>
+    </div>
+</div>
+
 <!-- Modal for Edit Column -->
 <div id="editColumnModal" class="modal">
     <div class="modal-content">

@@ -49,22 +49,30 @@ export class BoardController extends Controller {
             },
             onParticipantsUpdate: (e) => {
                 if (e.detail.board_id === this.boardId) {
-                    // Could just update header, but reloading data is safer for now
-                    // Or just pass to View if we want to be granular
-                    // this.view.updateParticipants(e.detail.participants);
-                    // For now, reload
-                    // actually, participants update is frequent, maybe avoid full reload?
-                    // Let's reload for consistency first.
-                    // this.loadBoardData(); 
-                    // Wait, participants update doesn't change board content usually.
-                    // We can optimize this later.
+                    // Optional: Update participants UI without reload
                 }
+            },
+            onTimerStart: (e) => {
+                // Timer is global/board specific?
+                // Message doesn't check board_id?
+                // Let's assume broadast is for current context or check if needed.
+                // Legacy didn't check boardID for timer?
+                // But we should probably check if meaningful.
+                // For now, just run it.
+                console.log('Timer Start Event', e.detail);
+                this.startTimerUI(e.detail.seconds);
+            },
+            onTimerStop: (e) => {
+                console.log('Timer Stop Event');
+                this.stopTimerUI();
             }
         };
 
         window.addEventListener('board:update', this.wsHandlers.onBoardUpdate);
         window.addEventListener('phase:change', this.wsHandlers.onPhaseChange);
         window.addEventListener('participants:update', this.wsHandlers.onParticipantsUpdate);
+        window.addEventListener('timer:start', this.wsHandlers.onTimerStart);
+        window.addEventListener('timer:stop', this.wsHandlers.onTimerStop);
     }
 
     destroy() {
@@ -73,6 +81,8 @@ export class BoardController extends Controller {
             window.removeEventListener('board:update', this.wsHandlers.onBoardUpdate);
             window.removeEventListener('phase:change', this.wsHandlers.onPhaseChange);
             window.removeEventListener('participants:update', this.wsHandlers.onParticipantsUpdate);
+            window.removeEventListener('timer:start', this.wsHandlers.onTimerStart);
+            window.removeEventListener('timer:stop', this.wsHandlers.onTimerStop);
         }
     }
 
@@ -86,7 +96,7 @@ export class BoardController extends Controller {
             if (this.board.phase) window.currentPhase = this.board.phase;
 
             // Render View
-            this.view.render(this.board, window.currentUser);
+            this.view.render(this.board, window.currentUser, this.selectedCardId);
 
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
@@ -143,7 +153,18 @@ export class BoardController extends Controller {
 
         // Context-bound handler
         this.handleClick = this.handleClick.bind(this);
+        this.handleDragStart = this.handleDragStart.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this); // New binding
+        this.handleDragOver = this.handleDragOver.bind(this);
+        this.handleDragLeave = this.handleDragLeave.bind(this);
+        this.handleDrop = this.handleDrop.bind(this);
+
         container.addEventListener('click', this.handleClick);
+        container.addEventListener('dragstart', this.handleDragStart);
+        container.addEventListener('dragend', this.handleDragEnd); // New handler
+        container.addEventListener('dragover', this.handleDragOver);
+        container.addEventListener('dragleave', this.handleDragLeave);
+        container.addEventListener('drop', this.handleDrop);
     }
 
     async handleClick(e) {
@@ -183,6 +204,14 @@ export class BoardController extends Controller {
             case 'deleteBoard':
                 this.handleDeleteBoard();
                 break;
+            case 'manageTeams':
+                if (typeof window.openManageTeamsModal === 'function') {
+                    window.openManageTeamsModal();
+                } else {
+                    console.warn('Manage Teams modal not found');
+                    alert('Feature not available');
+                }
+                break;
             case 'switchPhase':
                 this.handleSwitchPhase();
                 break;
@@ -204,11 +233,9 @@ export class BoardController extends Controller {
                 this.handleReactionPicker(target);
                 break;
             case 'toggleActionItem':
-                // Checkbox change event might not bubble to 'click' properly?
-                // We bound 'click' on the container.
-                // Checkboxes trigger 'click' and 'change'.
-                // Let's assume click works. The target would be the checkbox.
-                this.handleToggleActionItem(target.dataset.cardId, target.checked);
+                // It's a button, so check 'active' class to determine current state
+                const isCurrentlyAction = target.classList.contains('active');
+                this.handleToggleActionItem(target.dataset.cardId, !isCurrentlyAction);
                 break;
             case 'openActionModal':
                 this.handleOpenActionModal(target.dataset.cardId);
@@ -222,14 +249,27 @@ export class BoardController extends Controller {
             case 'unclaimManager':
                 this.handleUnclaimManager();
                 break;
+            case 'finishRetro':
+                this.handleFinishRetro();
+                break;
+            case 'reopenRetro':
+                this.handleReopenRetro();
+                break;
             case 'openSettings':
                 this.openSettingsModal();
                 break;
-            case 'saveSettings':
-                this.handleSaveSettings();
-                break;
             case 'exportBoard':
                 this.handleExportBoard();
+                break;
+            case 'leaveBoard':
+                if (typeof window.leaveBoardPersistent === 'function') {
+                    window.leaveBoardPersistent();
+                } else {
+                    alert("Leave board function not found");
+                }
+                break;
+            case 'saveSettings':
+                this.handleSaveSettings();
                 break;
             case 'selectCard':
                 this.handleSelectCard(target.dataset.cardId);
@@ -238,41 +278,27 @@ export class BoardController extends Controller {
                 this.handleCancelSelection();
                 break;
             case 'mergeCard':
-                this.handleMergeCard(target.dataset.cardId); // Target to merge SOURCE into
-                break;
-            case 'finishRetro':
-                this.handleFinishRetro();
-                break;
-            case 'reopenRetro':
-                this.handleReopenRetro();
+                this.handleMergeCard(target.dataset.cardId);
                 break;
         }
     }
 
     async handleReactionToggle(cardId, type) {
-        // Import toggleReaction from api.js or call directly
         const { toggleReaction } = await import('../api.js');
         try {
             await toggleReaction(cardId, type);
-            // WS update will trigger reload
         } catch (e) {
             console.error(e);
         }
     }
 
     handleReactionPicker(btn) {
-        // Toggle visibility of the picker inside the btn or next to it
-        // The View implementation had inline picker HTML hidden.
-        // Let's assume standard class 'reaction-picker'
         const picker = btn.querySelector('.reaction-picker') || btn.parentElement.querySelector('.reaction-picker');
         if (picker) {
             const isVisible = picker.style.display === 'flex' || picker.style.display === 'block';
-            // Hide all others
             document.querySelectorAll('.reaction-picker').forEach(p => p.style.display = 'none');
-
             if (!isVisible) {
                 picker.style.display = 'flex';
-                // Auto close
                 const close = (e) => {
                     if (!picker.contains(e.target) && !btn.contains(e.target)) {
                         picker.style.display = 'none';
@@ -283,18 +309,29 @@ export class BoardController extends Controller {
             }
         }
     }
-
-    async handleToggleActionItem(cardId, isChecked) {
-        // Logic from board.js toggleActionItemCompletion
-        // PUT /cards/:id { completed: isChecked, ... }
-        const { apiCall } = await import('../api.js');
+    // ...
+    // ...
+    async handleToggleActionItem(cardId, isActionItem) {
+        console.log('Toggling Action Item Status:', cardId, isActionItem);
         try {
+            // We are toggling "Is Action Item", not "Completed"
             await apiCall(`/cards/${cardId}`, 'PUT', {
-                completed: isChecked,
-                completion_date: isChecked ? new Date().toISOString() : null
+                is_action_item: isActionItem
             });
-            // WS update triggers reload
+
+            // If turning ON, show the modal to let user set Owner/Due Date
+            if (isActionItem) {
+                if (window.openActionItemModal) {
+                    window.openActionItemModal(cardId);
+                } else {
+                    console.warn('Action Item Modal function not found on window');
+                }
+            }
+
+            // WS update triggers reload but we reload just in case
+            this.loadBoardData();
         } catch (e) {
+            console.error('Action Item toggle failed', e);
             alert('Failed: ' + e.message);
             this.loadBoardData(); // Revert UI
         }
@@ -309,10 +346,24 @@ export class BoardController extends Controller {
         }
     }
 
-    handleUnmerge(cardId) {
-        // Legacy Bridge
-        if (window.openUnmergeModal) {
-            window.openUnmergeModal(cardId);
+    async handleUnmerge(parentId) {
+        const parent = this.findCard(parentId);
+        if (!parent || !parent.merged_cards || parent.merged_cards.length === 0) {
+            alert("No merged cards to unmerge.");
+            return;
+        }
+
+        // Unmerge the last one (LIFO)
+        const lastChild = parent.merged_cards[parent.merged_cards.length - 1];
+        if (!confirm(`Unmerge card "${lastChild.content}"?`)) return;
+
+        try {
+            console.log(`[Controller] Unmerging child ${lastChild.id} from parent ${parentId}`);
+            await boardService.unmergeCard(lastChild.id);
+            await this.loadBoardData();
+        } catch (e) {
+            console.error('[Controller] Unmerge failed:', e);
+            alert(e.message);
         }
     }
 
@@ -559,6 +610,10 @@ export class BoardController extends Controller {
     }
 
     async handleClaimManager() {
+        if (!window.currentUser) {
+            alert(i18n.t('alert.login_required') || "Please login to claim host.");
+            return;
+        }
         if (!confirm(i18n.t('confirm.claim_host') || "Claim hosting of this board?")) return;
         try {
             await apiCall(`/boards/${this.boardId}/claim`, 'POST', { owner: window.currentUser });
@@ -569,6 +624,10 @@ export class BoardController extends Controller {
     }
 
     async handleUnclaimManager() {
+        if (!window.currentUser) {
+            alert(i18n.t('alert.login_required') || "Please login to unclaim.");
+            return;
+        }
         if (!confirm(i18n.t('confirm.unclaim_host') || "Relinquish hosting control?")) return;
         try {
             await apiCall(`/boards/${this.boardId}/unclaim`, 'POST', { user: window.currentUser });
@@ -598,6 +657,120 @@ export class BoardController extends Controller {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Merge Logic
+    handleSelectCard(cardId) {
+        console.log('Selecting Card:', cardId);
+        if (this.selectedCardId === cardId) {
+            this.handleCancelSelection();
+        } else {
+            this.selectedCardId = cardId;
+            this.view.render(this.board, window.currentUser, this.selectedCardId);
+        }
+    }
+
+    handleCancelSelection() {
+        console.log('Canceling Selection');
+        this.selectedCardId = null;
+        this.view.render(this.board, window.currentUser, null);
+    }
+
+    async handleMergeCard(targetCardId) {
+        if (!this.selectedCardId) return;
+        if (this.selectedCardId === targetCardId) return;
+
+        try {
+            console.log(`[Controller] Attempting merge: ${this.selectedCardId} -> ${targetCardId}`);
+            const result = await boardService.mergeCard(this.selectedCardId, targetCardId);
+            console.log('[Controller] Merge Result:', result);
+            this.selectedCardId = null;
+            await this.loadBoardData();
+        } catch (e) {
+            console.error('[Controller] Merge Failed:', e);
+            alert(e.message);
+        }
+    }
+
+    handleActionItem(cardId) {
+        if (window.openActionItemModal) {
+            const card = this.findCard(cardId);
+            const content = card ? card.content : '';
+            window.openActionItemModal(cardId, content);
+        } else {
+            console.error('Action Item Modal not globally available');
+            alert('Action Item Modal not ported yet.');
+        }
+    }
+
+    findCard(cardId) {
+        if (!this.board || !this.board.columns) return null;
+        for (const col of this.board.columns) {
+            const card = col.cards.find(c => c.id === cardId);
+            if (card) return card;
+        }
+        return null;
+    }
+
+    // Drag and Drop Logic
+    handleDragStart(e) {
+        const card = e.target.closest('.retro-card');
+        if (card) {
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+            e.dataTransfer.effectAllowed = 'move';
+
+            // Visual Feedback
+            document.body.classList.add('dragging');
+            setTimeout(() => card.classList.add('is-dragging'), 0);
+        }
+    }
+
+    handleDragEnd(e) {
+        document.body.classList.remove('dragging');
+        const card = e.target.closest('.retro-card');
+        if (card) card.classList.remove('is-dragging');
+
+        // Clean up column highlights
+        document.querySelectorAll('.column.drag-over').forEach(col => {
+            col.classList.remove('drag-over');
+        });
+    }
+
+    handleDragOver(e) {
+        const column = e.target.closest('.column');
+        if (column) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            column.classList.add('drag-over');
+        }
+    }
+
+    handleDragLeave(e) {
+        const column = e.target.closest('.column');
+        // Only remove if leaving the column (not entering a child)
+        if (column && !column.contains(e.relatedTarget)) {
+            column.classList.remove('drag-over');
+        }
+    }
+
+    async handleDrop(e) {
+        e.preventDefault();
+        const cardId = e.dataTransfer.getData('text/plain');
+        const column = e.target.closest('.column');
+
+        // Cleanup visuals immediately
+        this.handleDragEnd(e);
+
+        if (cardId && column && column.dataset.columnId) {
+            const columnId = column.dataset.columnId;
+            try {
+                await boardService.moveCard(cardId, columnId);
+                this.loadBoardData();
+            } catch (error) {
+                console.error('Move failed:', error);
+                alert('Failed to move card: ' + error.message);
+            }
+        }
     }
 }
 

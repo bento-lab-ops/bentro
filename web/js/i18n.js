@@ -36,6 +36,8 @@ const translations = {
         'btn.finish_retro': 'Finish Retro',
         'btn.reopen_retro': 'Re-open Retro',
         'btn.add_column': '+ Add Column',
+        'btn.start_voting': 'Start Voting',
+        'btn.end_voting': 'End Voting',
         'btn.enter': 'Enter',
         'btn.reopen': 'Re-open',
         'status.active': 'Active',
@@ -129,6 +131,8 @@ const translations = {
         'tooltip.copy_link': 'Copy Link',
         'tooltip.copied': 'Copied!',
         'label.anonymous': 'Anonymous',
+        'confirm.claim_host': 'Claim hosting of this board? You will be responsible for its settings.',
+        'confirm.unclaim_host': 'Are you sure you want to relinquish your host role?',
 
         // Menu
         'menu.dashboard': 'Dashboard',
@@ -136,6 +140,7 @@ const translations = {
         'menu.my_teams': 'My Teams',
         'menu.settings': 'Settings',
         'menu.admin': 'Admin Dashboard',
+        'heading.add_column': 'Add Column',
         'menu.help': 'Help',
         'menu.logout': 'Logout',
         'menu.unlock': 'Unlock',
@@ -321,6 +326,8 @@ const translations = {
         'btn.finish_retro': 'Finalizar Retro',
         'btn.reopen_retro': 'Reabrir Retro',
         'btn.add_column': '+ Add Coluna',
+        'btn.start_voting': 'Iniciar Votação',
+        'btn.end_voting': 'Encerrar Votação',
         'btn.enter': 'Entrar',
         'btn.reopen': 'Reabrir',
         'status.active': 'Ativa',
@@ -397,6 +404,8 @@ const translations = {
 
         // Dynamic / JS
         'alert.enter_board_name': 'Por favor, digite um nome para a retro',
+        'confirm.claim_host': 'Assumir esta retro? Você será responsável por suas configurações.',
+        'confirm.unclaim_host': 'Tem certeza que deseja deixar a gestão?',
         'confirm.leave_board': 'Tem certeza que deseja sair desta retro?',
         'confirm.delete_board': 'Tem certeza que deseja excluir esta retro?',
         'confirm.finish_retro': 'Tem certeza que deseja finalizar esta retrospectiva? Isso impedirá a criação de novos cards e votos.',
@@ -424,6 +433,7 @@ const translations = {
         'menu.my_teams': 'Meus Times',
         'menu.settings': 'Configurações',
         'menu.admin': 'Painel Admin',
+        'heading.add_column': 'Adicionar Coluna',
         'menu.help': 'Ajuda',
         'menu.logout': 'Sair',
         'menu.unlock': 'Desbloquear',

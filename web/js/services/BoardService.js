@@ -6,7 +6,7 @@ export class BoardService {
     }
 
     async getById(id) {
-        return await apiCall(`/boards/${id}`);
+        return await apiCall(`/boards/${id}?t=${Date.now()}`);
     }
 
     async create(data) {
@@ -26,6 +26,10 @@ export class BoardService {
         return await apiCall(`/boards/${boardId}/status`, 'PUT', { status });
     }
 
+    async update(boardId, data) {
+        return await apiCall(`/boards/${boardId}`, 'PUT', data);
+    }
+
     async delete(boardId) {
         return await apiCall(`/boards/${boardId}`, 'DELETE');
     }
@@ -38,7 +42,7 @@ export class BoardService {
     }
 
     async addCard(columnId, content, user) {
-        return await apiCall('/cards', 'POST', {
+        return await apiCall(`/columns/${columnId}/cards`, 'POST', {
             column_id: columnId,
             content: content,
             owner: user
@@ -51,6 +55,18 @@ export class BoardService {
 
     async deleteCard(cardId) {
         return await apiCall(`/cards/${cardId}`, 'DELETE');
+    }
+
+    async mergeCard(sourceCardId, targetCardId) {
+        return await apiCall(`/cards/${sourceCardId}/merge`, 'POST', { target_card_id: targetCardId });
+    }
+
+    async unmergeCard(cardId) {
+        return await apiCall(`/cards/${cardId}/unmerge`, 'POST');
+    }
+
+    async moveCard(cardId, columnId) {
+        return await apiCall(`/cards/${cardId}/move`, 'PUT', { column_id: columnId });
     }
 }
 

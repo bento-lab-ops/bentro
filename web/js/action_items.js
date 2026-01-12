@@ -259,6 +259,92 @@ export async function markActionItemUndone(cardId, currentFilter) {
     }
 }
 
+// Action Item Management (For Board View)
+export function openActionItemModal(cardId) {
+    const modal = document.getElementById('actionItemModal');
+    if (!modal) return;
+
+    // Store card ID
+    document.getElementById('actionItemCardId').value = cardId;
+
+    // Populate Owners from current board participants if available
+    const ownerSelect = document.getElementById('actionItemOwner');
+    if (ownerSelect && boardController && boardController.board && boardController.board.participants) {
+        ownerSelect.innerHTML = '<option value="">Unassigned</option>';
+        boardController.board.participants.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.username; // Or ID? Using username for now as per schema likely
+            option.textContent = p.display_name || p.username;
+            ownerSelect.appendChild(option);
+        });
+    }
+
+    // Try to pre-fill if card exists in board
+    if (boardController && boardController.board) {
+        const card = boardController.findCard(cardId);
+        if (card) {
+            if (ownerSelect) ownerSelect.value = card.owner || '';
+            // If card has due_date, set it
+            if (card.due_date) {
+                document.getElementById('actionItemDueDate').value = new Date(card.due_date).toISOString().split('T')[0];
+            } else {
+                document.getElementById('actionItemDueDate').value = '';
+            }
+        }
+    }
+
+    modal.style.display = 'block';
+}
+
+export function closeActionItemModal() {
+    const modal = document.getElementById('actionItemModal');
+    if (modal) modal.style.display = 'none';
+}
+
+export async function saveActionItem() {
+    const cardId = document.getElementById('actionItemCardId').value;
+    const owner = document.getElementById('actionItemOwner').value;
+    const dueDate = document.getElementById('actionItemDueDate').value;
+
+    try {
+        await apiCall(`/cards/${cardId}`, 'PUT', {
+            is_action_item: true,
+            owner: owner || null, // If explicit owner field for AI overrides card owner? 
+            // NOTE: 'owner' in card update usually refers to card creator. 
+            // Action Item 'owner' might be 'assignee'.
+            // Backend schema: 'owner' is usually creator. 
+            // Do we have 'assignee'? 
+            // Looking at `internal/models/card.go` (inferred):
+            // Usually we assume 'owner' is the assignee for Action Items. 
+            // Let's update 'owner'.
+            owner: owner,
+            due_date: dueDate ? new Date(dueDate).toISOString() : null
+        });
+
+        closeActionItemModal();
+        if (boardController) boardController.loadBoardData();
+    } catch (error) {
+        alert('Failed to save action item: ' + error.message);
+    }
+}
+
+export async function removeActionItem() {
+    const cardId = document.getElementById('actionItemCardId').value;
+    if (!confirm(i18n.t('confirm.remove_action_item') || 'Are you sure you want to remove this action item status?')) return;
+
+    try {
+        await apiCall(`/cards/${cardId}`, 'PUT', {
+            is_action_item: false,
+            due_date: null
+        });
+        closeActionItemModal();
+        if (boardController) boardController.loadBoardData();
+    } catch (error) {
+        alert('Failed to remove action item: ' + error.message);
+    }
+}
+
+
 // Global Shims
 window.loadActionItemsView = loadActionItemsView;
 window.fetchAndRenderActionItems = fetchAndRenderActionItems;
@@ -270,3 +356,9 @@ window.closeCompleteActionItemModal = closeCompleteActionItemModal;
 window.openActionItemDetails = openActionItemDetails;
 window.closeActionItemDetailsModal = closeActionItemDetailsModal;
 window.markActionItemUndone = markActionItemUndone;
+
+// New Modal Global Shims
+window.openActionItemModal = openActionItemModal;
+window.closeActionItemModal = closeActionItemModal;
+window.saveActionItem = saveActionItem;
+window.removeActionItem = removeActionItem;

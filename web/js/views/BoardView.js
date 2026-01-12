@@ -6,129 +6,169 @@ export class BoardView {
         this.containerId = containerId;
     }
 
-    render(board, currentUser) {
+    render(board, currentUser, selectedCardId = null) {
         const container = document.getElementById(this.containerId);
         if (!container) return;
 
         // Render Header
         // Check if correct version loaded
-        console.log('BoardView RC32 Loaded');
+        // console.log('BoardView RC63 Loaded');
         this.renderHeader(board, currentUser);
+        this.renderLinkedTeams(board);
 
         // Render Columns
         const boardEncodedName = escapeHtml(board.name);
         const columnsHtml = board.columns
             .sort((a, b) => a.position - b.position)
-            .map(col => this.createColumnHTML(col, board, currentUser))
+            .map(col => this.createColumnHTML(col, board, currentUser, selectedCardId))
             .join('');
 
         container.innerHTML = `
             ${columnsHtml}
-            <div class="column add-column">
-                <button class="btn btn-secondary" style="width:100%; height:100%; min-height:100px;" data-action="addColumn">
-                    <i class="fas fa-plus"></i> ${i18n.t('btn.add_column')}
-                </button>
-            </div>
         `;
     }
 
     renderHeader(board, currentUser) {
         // 1. Update Title and Phase
-        const titleEl = document.getElementById('boardTitle'); // Fixed ID
+        const titleEl = document.getElementById('boardTitle');
         if (titleEl) titleEl.textContent = board.name;
 
-        const phaseDisplay = document.getElementById('currentPhase'); // Fixed ID from index.html (line 276)
+        const phaseDisplay = document.getElementById('currentPhase');
         if (phaseDisplay) {
             phaseDisplay.textContent = i18n.t('phase.' + board.phase) || board.phase;
-            // Update class for styling if needed? 
-            // The HTML has `class="phase-name"`. 
-            // We might want to add a specific class for color?
-            // For now just text update is critical.
         }
 
-        // 2. Permission Check
         // 2. Permission Check
         const isOwner = board.owner === currentUser;
         const isCoOwner = board.co_owner === currentUser;
-        const canControl = isOwner || isCoOwner;
+        // Check managers array if it exists
+        const isManager = Array.isArray(board.managers) && board.managers.includes(currentUser);
+        // "Control" means Owner, CoOwner, or explicitly in Managers list
+        const canControl = isOwner || isCoOwner || isManager;
         const isFinished = board.status === 'finished';
 
+        console.log('Permissions:', { currentUser, owner: board.owner, isOwner, isManager, canControl, isFinished });
+
         // 3. Toggle Control Buttons
-        const timerSection = document.querySelector('.timer-controls');
-        if (timerSection) {
-            // Helper to toggle
-            const toggle = (id, show) => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = show ? 'inline-block' : 'none';
-            };
-
-            // Phase Switch (Only if not finished)
-            const switchBtn = document.getElementById('switchPhaseBtn');
-            if (switchBtn) {
-                const isVoting = board.phase === 'voting';
-                switchBtn.innerHTML = isVoting ? `<i class="fas fa-gavel"></i> ${i18n.t('btn.end_voting') || 'End Voting'}` : `<i class="fas fa-vote-yea"></i> ${i18n.t('btn.start_voting') || 'Start Voting'}`;
-                toggle('switchPhaseBtn', canControl && !isFinished);
+        // Helper to toggle
+        const toggle = (id, show) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = show ? 'inline-flex' : 'none';
+                if (show) el.classList.remove('hidden');
             }
+        };
 
-            // Timer Controls (Only if not finished)
-            // Note: start/stop logic might need to check if timer is running?
-            // Currently the UI state for timer is handled by `updateTimerDisplay` mostly?
-            // But we need to show at least "Start" if we are manager.
-            // Let's rely on BoardController/Timer state if possible, but initially show Start.
-            // If timer is running, BoardController should flip it to Stop.
-            // For now, just Show Start if authorized.
-            if (canControl && !isFinished) {
-                // If button is hidden, show it. Logic in Controller might toggle Start/Stop.
-                // We ensure the grouping is visible or base buttons are eligible.
-                // We'll default to showing Start if not running, but we don't know "running" state here easily without checking display?
-                // Actually BoardController manages start/stop visibility dynamically.
-                // BUT, they default to NONE in HTML.
-                // So we must enable them.
-                // Let's enable "Start" by default if nothing is showing?
-                const startBtn = document.getElementById('startTimerBtn');
-                const stopBtn = document.getElementById('stopTimerBtn');
-                if (startBtn && stopBtn) {
-                    if (stopBtn.style.display === 'none' && startBtn.style.display === 'none') {
-                        startBtn.style.display = 'inline-block';
-                    }
-                }
-            } else {
-                toggle('startTimerBtn', false);
-                toggle('stopTimerBtn', false);
-            }
-
-            // Host Claiming
-            // If I am owner, I don't need to claim? Or Owner is always manager?
-            // Usually Owner is implicit manager.
-            // If I am NOT manager, show Claim.
-            // If I AM manager (and not owner?), show Unclaim?
-            // Logic:
-            toggle('claimManagerBtn', !canControl && !isFinished);
-            toggle('unclaimManagerBtn', canControl && !isFinished); // Allow both Owner and CoOwner to relinquish
-
-            // Meta Controls
-            toggle('finishRetroBtn', isOwner && !isFinished);
-            toggle('reopenRetroBtn', isOwner && isFinished);
-            toggle('exportBoardBtn', true); // Everyone can export? Or just members? Let's say everyone for now.
-
-            // Settings
-            toggle('adminSettingsBtn', canControl && !isFinished);
-
-            // Add Column (in board container)
-            toggle('addColumnBtn', canControl && !isFinished);
+        // Phase Switch (Only if not finished)
+        const switchBtn = document.getElementById('switchPhaseBtn');
+        if (switchBtn) {
+            const isVoting = board.phase === 'voting';
+            switchBtn.innerHTML = isVoting ? `<i class="fas fa-gavel"></i> ${i18n.t('btn.end_voting') || 'End Voting'}` : `<i class="fas fa-vote-yea"></i> ${i18n.t('btn.start_voting') || 'Start Voting'}`;
+            toggle('switchPhaseBtn', canControl && !isFinished);
         }
+
+        // Timer Controls
+        // Allow Start if authorized and not finished. 
+        // Stop is toggled by Controller usually, but we ensure Start is at least initially visible if idle.
+        if (canControl && !isFinished) {
+            const startBtn = document.getElementById('startTimerBtn');
+            const stopBtn = document.getElementById('stopTimerBtn');
+            // If both hidden, show start as default state
+            if (startBtn && stopBtn && startBtn.style.display === 'none' && stopBtn.style.display === 'none') {
+                startBtn.style.display = 'inline-flex';
+            }
+        } else {
+            toggle('startTimerBtn', false);
+            toggle('stopTimerBtn', false);
+        }
+
+        // Host Claiming
+        // Logic: If NOT controlling, show Claim. If controlling, show Unclaim.
+        toggle('claimManagerBtn', !canControl && !isFinished);
+        toggle('unclaimManagerBtn', canControl && !isFinished);
+
+        // Meta Controls
+        toggle('finishRetroBtn', isOwner && !isFinished);
+        toggle('reopenRetroBtn', isOwner && isFinished);
+        toggle('exportBoardBtn', true); // Everyone
+
+        // Settings
+        toggle('adminSettingsBtn', canControl && !isFinished);
+
+        // Manage Teams
+        toggle('manageTeamsBtn', canControl && !isFinished);
+
+        // Add Column
+        toggle('addColumnBtn', canControl && !isFinished);
+
+        // Leave Board - Everyone
+        toggle('leaveBoardBtn', true);
 
         // 4. Read Only Banner
         const banner = document.getElementById('readOnlyBanner');
         if (banner) {
             banner.style.display = isFinished ? 'block' : 'none';
         }
+
+
+        // Participants (Updated for Compact View)
+        const participants = board.participants || [];
+        const pCountEl = document.getElementById('participantsCount');
+        const pTooltipEl = document.getElementById('participantsTooltip');
+        if (pCountEl) pCountEl.textContent = participants.length;
+        if (pTooltipEl) {
+            pTooltipEl.innerHTML = '';
+            participants.forEach(p => {
+                const avatar = document.createElement('div');
+                avatar.className = 'user-avatar small';
+                avatar.textContent = (p.username || '?').substring(0, 2).toUpperCase();
+                avatar.title = p.username;
+                avatar.style.display = 'inline-flex'; // styling fix for tooltip
+                pTooltipEl.appendChild(avatar);
+            });
+        }
+
+        // Teams (Updated separately in renderLinkedTeams, but header count logic here if needed)
+        // See renderLinkedTeams below
+
+        // ... existing toggle logic ...
+        // Control Buttons Visibility
+        toggle('finishRetroBtn', canControl && !isFinished);
+        toggle('reopenRetroBtn', canControl && isFinished);
+        // ... other buttons
     }
 
-    createColumnHTML(column, board, currentUser) {
-        const cardsHtml = (column.cards || [])
+    renderLinkedTeams(board) {
+        const countEl = document.getElementById('teamsCount');
+        const tooltipEl = document.getElementById('teamsTooltip');
+
+        const teams = board.teams || [];
+        if (countEl) countEl.textContent = teams.length;
+
+        if (tooltipEl) {
+            tooltipEl.innerHTML = '';
+            if (teams.length > 0) {
+                teams.forEach(team => {
+                    const span = document.createElement('span');
+                    span.className = 'badge';
+                    span.style.background = 'rgba(255,255,255,0.1)';
+                    span.style.padding = '4px 8px';
+                    span.style.borderRadius = '4px';
+                    span.style.display = 'block'; // Block for tooltip list
+                    span.innerHTML = `<i class="fas fa-shield-alt"></i> ${escapeHtml(team.name)}`;
+                    tooltipEl.appendChild(span);
+                });
+            } else {
+                tooltipEl.innerHTML = '<span style="opacity:0.5; font-size:0.8rem">No linked teams</span>';
+            }
+        }
+    }
+
+    createColumnHTML(column, board, currentUser, selectedCardId) {
+        const visibleCards = (column.cards || []).filter(c => !c.merged_with_id);
+        const cardsHtml = visibleCards
             .sort((a, b) => a.position - b.position)
-            .map(card => this.createCardHTML(card, board, currentUser))
+            .map(card => this.createCardHTML(card, board, currentUser, selectedCardId))
             .join('');
 
         return `
@@ -151,170 +191,163 @@ export class BoardView {
         `;
     }
 
-    createCardHTML(card, board, currentUser) {
+    createCardHTML(card, board, currentUser, selectedCardId) {
         const isOwner = card.owner === currentUser;
+        const isBoardOwner = board.owner === currentUser;
+        // Managers can edit/delete too
+        const isManager = board.managers && board.managers.includes(currentUser);
+        const canControl = isOwner || isBoardOwner || isManager;
         const isFinished = board.status === 'finished';
+
+        const isSelected = selectedCardId === card.id;
+        const isMergeTarget = selectedCardId && !isSelected;
+
+        // DEBUG LOG
+        if (selectedCardId) {
+            console.log(`[View] Card ${card.id.substring(0, 4)} | SelectedId: ${selectedCardId.substring(0, 4)} | isSelected: ${isSelected} | isMergeTarget: ${isMergeTarget}`);
+        }
 
         // Voting Logic
         const votes = card.votes || [];
         const likes = votes.filter(v => v.vote_type === 'like').length;
         const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
-        const userVoted = votes.some(v => v.user_name === currentUser);
+        const userVotedLike = votes.some(v => v.user_name === currentUser && v.vote_type === 'like');
+        const userVotedDislike = votes.some(v => v.user_name === currentUser && v.vote_type === 'dislike');
+
         const isVotingPhase = board.phase === 'voting';
-        const isBlindVoting = isVotingPhase && board.blind_voting; // Logic from legacy
+        // Fix: backend sends 'blind_voting' at root, not in settings
+        const isBlindVoting = isVotingPhase && board.blind_voting;
 
-        let voteControls = '';
-        if (isVotingPhase) {
-            if (isBlindVoting) {
-                // Blind Voting UI
-                voteControls = `
-                    <div class="vote-controls-blind">
-                        <span class="blind-vote-badge" title="${i18n.t('card.votes_hidden')}">${i18n.t('card.votes_hidden')}</span>
-                        ${!isFinished ? `
-                            <button class="vote-btn ${userVoted ? 'voted' : ''}" data-action="vote" data-vote-type="like" data-card-id="${card.id}">
-                                ${userVoted ? i18n.t('card.remove_vote') : '👍 ' + i18n.t('card.vote')}
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-            } else {
-                // Normal Voting UI
-                voteControls = `
-                    <div class="card-votes">
-                         <span class="vote-count likes">👍 ${likes}</span>
-                         <span class="vote-count dislikes">👎 ${dislikes}</span>
-                    </div>
-                    ${!isFinished ? `
-                        <div class="card-actions-voting">
-                            <button class="vote-btn ${userVoted ? 'voted' : ''}" data-action="vote" data-vote-type="like" data-card-id="${card.id}">👍</button>
-                            <button class="vote-btn" data-action="vote" data-vote-type="dislike" data-card-id="${card.id}">👎</button>
-                        </div>
-                    ` : ''}
-                `;
-            }
-        } else {
-            // Not Voting Phase: Show counts
-            voteControls = `
-                <div class="card-votes">
-                    <span class="vote-count likes">👍 ${likes}</span>
-                    <span class="vote-count dislikes">👎 ${dislikes}</span>
-                </div>
-             `;
+        // --- Toolbar Buttons ---
+        let toolbarHtml = '';
+
+        // 1. Voting (Only in Voting Phase, or if finished)
+        if (isVotingPhase && !isFinished) {
+            toolbarHtml += `
+                <button class="btn-glass-icon ${userVotedLike ? 'active' : ''}" data-action="vote" data-vote-type="like" data-card-id="${card.id}" title="${i18n.t('card.vote')} Like">
+                    <i class="fas fa-thumbs-up"></i>
+                </button>
+                <button class="btn-glass-icon ${userVotedDislike ? 'active' : ''}" data-action="vote" data-vote-type="dislike" data-card-id="${card.id}" title="${i18n.t('card.vote')} Dislike">
+                    <i class="fas fa-thumbs-down"></i>
+                </button>
+            `;
         }
 
-        // Action Item Logic
+        // 2. Edit/Delete (Owner/Manager)
+        if (canControl && !isFinished) {
+            toolbarHtml += `
+                <button class="btn-glass-icon" data-action="itemEdit" data-card-id="${card.id}" data-content="${escapeHtml(card.content)}" title="${i18n.t('btn.edit')}">
+                    <i class="fas fa-pen"></i>
+                </button>
+                <button class="btn-glass-icon danger" data-action="itemDelete" data-card-id="${card.id}" title="${i18n.t('btn.delete')}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+
+        // 3. Action Item Toggle
         const isActionItem = card.is_action_item;
-        let actionItemClasses = isActionItem ? 'action-item' : '';
-        if (card.completed) actionItemClasses += ' completed';
+        toolbarHtml += `
+            <button class="btn-glass-icon ${isActionItem ? 'active' : ''}" data-action="toggleActionItem" data-card-id="${card.id}" title="Convert to Action Item">
+                <i class="fas fa-check-square"></i>
+            </button>
+        `;
 
-        let actionItemBadge = '';
-        let actionItemDetails = '';
-
-        if (isActionItem) {
-            actionItemBadge = `<div class="action-item-indicator">⚡ Action Item</div>`;
-            const dueDate = card.due_date ? new Date(card.due_date).toLocaleDateString() : 'No Date';
-            // Note: event delegation for checkbox change needed 'change' event listener in Controller
-            actionItemDetails = `
-                <div class="action-item-details">
-                    <div class="action-owner">👤 ${escapeHtml(card.owner || '?')}</div>
-                    <div class="action-due-date">📅 ${dueDate}</div>
-                    <div class="action-status">
-                        <label class="action-completed-label">
-                            <input type="checkbox" class="action-completed-checkbox" 
-                                ${card.completed ? 'checked' : ''} 
-                                data-action="toggleActionItem" data-card-id="${card.id}">
-                            ${i18n.t('action.status_done')}
-                        </label>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Reactions Logic
-        const reactions = card.reactions || [];
-        const reactionCounts = {};
-        reactions.forEach(r => reactionCounts[r.reaction_type] = (reactionCounts[r.reaction_type] || 0) + 1);
-
-        const AVAILABLE_REACTIONS = { 'love': '❤️', 'celebrate': '🎉', 'idea': '💡', 'action': '🚀', 'question': '🤔' };
-
-        let reactionsHtml = Object.entries(reactionCounts).map(([type, count]) => {
-            const emoji = AVAILABLE_REACTIONS[type];
-            // isActive logic requires checking if currentUser reacted.
-            const isActive = reactions.some(r => r.reaction_type === type && r.user_name === currentUser) ? 'active' : '';
-            return `
-                <div class="reaction-tag ${isActive}" data-action="reactionToggle" data-card-id="${card.id}" data-reaction-type="${type}" title="${type}">
-                    <span>${emoji}</span>
-                    <span class="reaction-count">${count}</span>
-                </div>
-            `;
-        }).join('');
-
-        let addReactionHtml = !isFinished ? `
-            <div class="add-reaction-btn" data-action="reactionPicker" data-card-id="${card.id}">
-                +🙂
-                <!-- Picker would be injected or handled via a popover/modal since delegation might be tricky for inline popup management without state -->
-            </div>
-        ` : '';
-
-        // Merged Cards Logic
-        let mergedHtml = '';
-        if (card.merged_cards && card.merged_cards.length > 0) {
-            mergedHtml = `
-                <div class="merged-cards-container">
-                    ${card.merged_cards.map(mc => `<div class="merged-card-preview">${escapeHtml(mc.content)}</div>`).join('')}
-                </div>
-                 <div class="merged-indicator">
-                    🔗 ${card.merged_cards.length} merged
-                    ${!isFinished ? `<button class="btn-link" data-action="unmerge" data-card-id="${card.id}">Unmerge</button>` : ''}
-                </div>
-            `;
-        }
-
-        // Selection / Merge Action Logic
-        let mergeActionHtml = '';
+        // 4. Merge / Select Logic
         if (!isFinished) {
-            // We need to know if a card is selected globally or passed in context
-            // For now, let's assume BoardController passes `selectedCardId` in `board` object or as extra arg?
-            // Or we read global `window.selectedCardId` as a temporary bridge until we move selection state to Controller fully.
-            // Controller sets `window.selectedCardId` in `handleSelectCard` for now.
-            const selectedId = window.selectedCardId;
-
-            if (selectedId) {
-                if (selectedId === card.id) {
-                    mergeActionHtml = `<button class="btn btn-outline btn-small" data-action="cancelSelection">${i18n.t('btn.cancel')}</button>`;
-                } else {
-                    mergeActionHtml = `<button class="btn btn-primary btn-small" data-action="mergeCard" data-card-id="${card.id}">${i18n.t('btn.merge_here')}</button>`;
-                }
+            if (isSelected) {
+                // Cancel Selection
+                toolbarHtml += `
+                     <button class="btn-glass-icon active" data-action="cancelSelection" title="Cancel Selection">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                `;
+            } else if (isMergeTarget) {
+                // Merge Here
+                toolbarHtml += `
+                     <button class="btn-glass-icon primary" data-action="mergeCard" data-card-id="${card.id}" title="Merge Here">
+                        <i class="fas fa-file-import"></i>
+                    </button>
+                `;
             } else {
-                mergeActionHtml = `<button class="btn btn-outline btn-small" data-action="selectCard" data-card-id="${card.id}">${i18n.t('btn.select')}</button>`;
+                // Select to Start Merge
+                toolbarHtml += `
+                     <button class="btn-glass-icon" data-action="selectCard" data-card-id="${card.id}" title="Select to Merge">
+                        <i class="fas fa-hand-pointer"></i>
+                    </button>
+                `;
             }
         }
 
-        const isSelectedClass = window.selectedCardId === card.id ? 'selected' : '';
+        // 5. Unmerge (if merged items exist)
+        const mergedCount = (card.merged_cards && card.merged_cards.length) || (card.merged_count || 0);
+
+        if (mergedCount > 0 && !isFinished) {
+            toolbarHtml += `
+                 <button class="btn-glass-icon" data-action="unmerge" data-card-id="${card.id}" title="Unmerge Last">
+                    <i class="fas fa-undo"></i>
+                </button>
+            `;
+        }
+
+
+        // --- Footer Stats ---
+        // Show counts unless Blind Voting is active (and not finished)
+        // If finished, show all.
+        let showStats = true;
+        if (isBlindVoting && !isFinished) showStats = false;
+
+        let footerHtml = '';
+        if (showStats) {
+            footerHtml = `
+                <div class="card-stats">
+                    <span title="Likes"><i class="fas fa-thumbs-up"></i> ${likes}</span>
+                    <span title="Dislikes"><i class="fas fa-thumbs-down"></i> ${dislikes}</span>
+                    ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
+                </div>
+            `;
+        } else {
+            // Blind Voting Active
+            footerHtml = `
+                <div class="card-stats blind">
+                    <span title="Votes Hidden"><i class="fas fa-eye-slash"></i> ???</span>
+                    ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
+                </div>
+            `;
+        }
+
+        const cardClasses = `retro-card ${isSelected ? 'selected-source' : ''} ${isMergeTarget ? 'merge-target' : ''} ${isActionItem ? 'action-item' : ''} ${card.completed ? 'completed' : ''}`;
 
         return `
-            <div class="card ${actionItemClasses} ${isSelectedClass}" draggable="true" data-card-id="${card.id}">
+            <div class="${cardClasses}" data-id="${card.id}">
+                <!-- 1. Content -->
+                <!-- 1. Content -->
                 <div class="card-content">
-                    ${actionItemBadge}
                     ${escapeHtml(card.content)}
-                    <div class="reactions-container">
-                        ${reactionsHtml}
-                        ${addReactionHtml}
-                    </div>
-                    ${actionItemDetails}
+                    ${(card.merged_cards || []).map(mc => `
+                        <div class="merged-content-item" style="border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 0.5rem; padding-top: 0.5rem; opacity: 0.8; font-size: 0.9em;">
+                            <i class="fas fa-level-up-alt fa-rotate-90" style="margin-right: 5px; opacity: 0.5;"></i> 
+                            ${escapeHtml(mc.content)}
+                        </div>
+                    `).join('')}
                 </div>
-                ${mergedHtml}
+
+                <!-- 2. Toolbar Grid -->
+                <div class="card-toolbar-grid">
+                    ${toolbarHtml}
+                </div>
+
+                <!-- 3. Comments Placeholder -->
+                <div class="card-comments-placeholder" style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0; padding-top: 0.2rem; display:none;">
+                    <!-- Future Comments UI -->
+                </div>
+
+                <!-- 4. Footer -->
                 <div class="card-footer">
-                    <small>${escapeHtml(card.owner || '?')}</small>
-                    ${voteControls}
-                    <div class="card-actions">
-                        ${mergeActionHtml}
-                        ${!isFinished ? `<button class="action-btn" data-action="itemEdit" data-card-id="${card.id}">✏️</button>` : ''}
-                        ${!isFinished ? `<button class="action-btn" data-action="itemDelete" data-card-id="${card.id}">🗑️</button>` : ''}
-                         ${!isFinished ? `<button class="action-btn" data-action="openActionModal" data-card-id="${card.id}" title="Make Action Item">⚡</button>` : ''}
-                    </div>
+                    ${footerHtml}
                 </div>
             </div>
         `;
     }
+
 }

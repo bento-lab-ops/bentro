@@ -163,6 +163,53 @@ func UpdateBoardStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, board)
 }
 
+// UpdateBoard updates a board's settings (generic)
+func UpdateBoard(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid board ID"})
+		return
+	}
+
+	var input struct {
+		Name        string `json:"name"`
+		VoteLimit   *int   `json:"vote_limit"`   // Use pointer to distinguish 0 from nil
+		BlindVoting *bool  `json:"blind_voting"` // Use pointer to distinguish false from nil
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var board models.Board
+	if err := database.DB.First(&board, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Board not found"})
+		return
+	}
+
+	// Update fields if present
+	if input.Name != "" {
+		board.Name = input.Name
+	}
+	if input.VoteLimit != nil {
+		board.VoteLimit = *input.VoteLimit
+	}
+	if input.BlindVoting != nil {
+		board.BlindVoting = *input.BlindVoting
+	}
+
+	if err := database.DB.Save(&board).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update board"})
+		return
+	}
+
+	// Broadcast update
+	BroadcastBoardUpdate(board.ID)
+
+	c.JSON(http.StatusOK, board)
+}
+
 // GetBoard retrieves a board with all its columns and cards
 func GetBoard(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))

@@ -65,6 +65,7 @@ func main() {
 		api.GET("/boards", handlers.ListBoards)
 		api.POST("/boards", handlers.CreateBoard)
 		api.GET("/boards/:id", handlers.GetBoard)
+		api.PUT("/boards/:id", handlers.UpdateBoard) // Add generic update
 		api.DELETE("/boards/:id", handlers.DeleteBoard)
 		api.POST("/boards/:id/claim", handlers.ClaimBoard)
 		api.POST("/boards/:id/unclaim", handlers.UnclaimBoard)

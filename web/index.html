@@ -30,9 +30,6 @@
                         style="display: none;">+ New Board</button>
                     <button id="dashboardBtn" class="btn btn-outline btn-small" onclick="showDashboard()"
                         style="display: none;" title="Dashboard">🏠</button>
-
-                    <button id="leaveBoardBtn" class="btn btn-danger btn-small" onclick="leaveBoardPersistent()"
-                        style="display: none;" data-i18n="btn.leave">Leave</button>
                 </div>
                 <div class="lang-selector-container">
                     <button class="icon-btn" onclick="toggleLangMenu()" title="Select Language"
@@ -258,61 +255,121 @@
             ⚠️ This board is finished (Read Only)
         </div>
 
-        <div class="board-header-section">
-            <h2 id="boardTitle"></h2>
-            <div id="voteStatusDisplay" class="vote-status-display" style="display:none;"></div>
-            <div class="participants-wrapper">
-                <span class="participants-label" data-i18n="label.active_participants">Active:</span>
-                <div id="participantsContainer" class="participants-container"></div>
+        <div class="board-header-container">
+            <!-- Row 1: Title -->
+            <div class="header-title-row">
+                <h2 id="boardTitle" class="board-title"></h2>
             </div>
-            <button id="adminSettingsBtn" class="btn btn-icon btn-sm" data-action="openSettings" title="Admin Settings"
-                style="display: none;">⚙️</button>
-        </div>
 
-        <!-- Timer Section -->
-        <div class="timer-section">
-            <div class="phase-info">
-                <span class="phase-label" data-i18n="label.current_phase">Current Phase:</span>
-                <span id="currentPhase" class="phase-name" data-i18n="phase.input">Input Phase</span>
-            </div>
-            <div class="timer-display">
-                <span id="timerDisplay" class="timer-text">00:00</span>
-            </div>
-            <div class="timer-controls">
-                <input type="number" id="timerMinutes" class="timer-input" placeholder="Minutes" min="1" max="60"
-                    value="5">
-                <button id="startTimerBtn" class="btn btn-success" style="display: none;" data-i18n="btn.start_timer"
-                    data-action="startTimer">Start Timer</button> <button id="stopTimerBtn" class="btn btn-danger"
-                    style="display: none;" data-i18n="btn.stop_timer" data-action="stopTimer">Stop Timer</button>
-                <button id="switchPhaseBtn" class="btn btn-secondary" style="display: none;"
-                    data-i18n="btn.switch_voting" data-action="switchPhase">Switch to
-                    Voting</button>
-                <button id="exportBoardBtn" class="btn btn-secondary" data-action="exportBoard" style="display: none;"
-                    data-i18n="btn.export_csv">📊 Export
-                    CSV</button>
+            <!-- Row 2: Grid Content -->
+            <div class="header-content-grid">
 
-                <!-- Host Controls -->
-                <button id="claimManagerBtn" class="btn btn-glass" data-action="claimManager" title="Claim Moderation"
-                    style="display: none;">👑 Claim Host</button>
-                <button id="unclaimManagerBtn" class="btn btn-glass" data-action="unclaimManager"
-                    title="Relinquish Control" style="display: none;">❌ Relinquish</button>
+                <!-- Col 1: Phase, Users, Teams (Minimalist) -->
+                <div class="header-section info-section"
+                    style="flex-direction: row; gap: 1rem; align-items: center; padding-left: 1rem;">
 
-                <button id="finishRetroBtn" class="btn btn-glass-danger" data-action="finishRetro"
-                    style="display: none;" data-i18n="btn.finish_retro">Finish Retro</button>
-                <button id="reopenRetroBtn" class="btn btn-warning" style="display: none;" data-action="reopenRetro"
-                    data-i18n="btn.reopen_retro">Re-open Retro</button>
+                    <!-- Phase (Icon only if active, or minimal text) -->
+                    <div class="info-card minimal" title="Current Status">
+                        <div class="phase-info-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-hourglass-half" style="color: var(--primary); font-size: 1.2rem;"></i>
+                            <span id="currentPhase" style="font-weight: bold; font-size: 1.1rem;"></span>
+                        </div>
+                    </div>
+
+                    <div style="display: none;">
+                        <div style="width: 1px; height: 30px; background: var(--glass-border);"></div>
+
+                        <!-- Participants Icon + Count -->
+                        <div class="info-card minimal" id="participantsCard">
+                            <div class="info-summary">
+                                <i class="fas fa-user-friends"
+                                    style="font-size: 1.2rem; color: var(--text-secondary);"></i>
+                                <span id="participantsCount" style="font-size: 1.1rem; font-weight: bold;">0</span>
+                            </div>
+                            <div class="info-tooltip" id="participantsTooltip"></div>
+                        </div>
+
+                        <!-- Teams Icon + Count -->
+                        <div class="info-card minimal" id="teamsCard">
+                            <div class="info-summary">
+                                <i class="fas fa-shield-alt"
+                                    style="font-size: 1.2rem; color: var(--text-secondary);"></i>
+                                <span id="teamsCount" style="font-size: 1.1rem; font-weight: bold;">0</span>
+                            </div>
+                            <div class="info-tooltip" id="teamsTooltip"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Timer & Control -->
+                <div class="header-section timer-section-grid">
+
+                    <div class="timer-row">
+                        <span id="timerDisplay" class="timer-text">00:00</span>
+
+                        <div class="timer-controls-group">
+                            <input type="number" id="timerMinutes" class="timer-input" placeholder="Min" min="1"
+                                max="60" value="5">
+                            <span style="opacity:0.5; font-size:0.8rem">min</span>
+                            <div style="width: 1px; height: 20px; background: var(--glass-border); margin: 0 5px;">
+                            </div>
+                            <button id="startTimerBtn" class="btn btn-success icon-btn"
+                                style="display: none; width:32px; height:32px; padding:0;" data-action="startTimer"
+                                title="Start"><i class="fas fa-play" style="font-size:0.9rem"></i></button>
+                            <button id="stopTimerBtn" class="btn btn-danger icon-btn"
+                                style="display: none; width:32px; height:32px; padding:0;" data-action="stopTimer"
+                                title="Stop"><i class="fas fa-stop" style="font-size:0.9rem"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Phase Switch -->
+                    <button id="switchPhaseBtn" class="btn btn-secondary"
+                        style="width: 100%; margin-top: auto; font-size: 0.9rem;" data-action="switchPhase"><i
+                            class="fas fa-exchange-alt"></i> Phase</button>
+
+                    <div id="voteStatusDisplay" class="vote-status-display"
+                        style="display:none; text-align: center; margin-top: 5px;"></div>
+                </div>
+
+                <!-- Col 3: Actions Grid -->
+                <div class="header-section actions-section">
+                    <h5 style="margin:0; opacity:0.7; font-size:0.8rem; margin-bottom:0.5rem; letter-spacing: 1px;">
+                        ACTIONS</h5>
+                    <div class="actions-grid"
+                        style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                        <!-- Host Claims -->
+                        <button id="claimManagerBtn" class="btn btn-primary" data-action="claimManager"
+                            style="display: none;" title="Claim Host"><i class="fas fa-crown"></i></button>
+                        <button id="unclaimManagerBtn" class="btn btn-outline" data-action="unclaimManager"
+                            style="display: none;" title="Unclaim"><i class="fas fa-user-slash"></i></button>
+
+                        <!-- Tools -->
+                        <button id="addColumnBtn" class="btn btn-primary" style="display: none;" data-action="addColumn"
+                            title="Add Column"><i class="fas fa-plus"></i></button>
+                        <button id="manageTeamsBtn" class="btn btn-secondary" style="display: none;"
+                            data-action="manageTeams" title="Manage Teams"><i class="fas fa-users-cog"></i></button>
+                        <button id="adminSettingsBtn" class="btn btn-secondary" style="display: none;"
+                            data-action="openSettings" title="Board Settings"><i class="fas fa-cog"></i></button>
+                        <button id="exportBoardBtn" class="btn btn-secondary" data-action="exportBoard"
+                            style="display: none;" title="Export CSV"><i class="fas fa-file-csv"></i></button>
+
+                        <!-- Meta -->
+                        <button id="finishRetroBtn" class="btn btn-danger" style="display: none;"
+                            data-action="finishRetro" title="Finish Retro"><i
+                                class="fas fa-flag-checkered"></i></button>
+                        <button id="reopenRetroBtn" class="btn btn-primary" style="display: none;"
+                            data-action="reopenRetro" title="Reopen Retro"><i class="fas fa-door-open"></i></button>
+                        <button id="leaveBoardBtn" class="btn btn-danger" style="display: none;"
+                            data-action="leaveBoard" title="Leave Board"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
             </div>
+
         </div>
 
         <!-- Columns Section -->
         <div id="columnsContainer" class="columns-container">
             <!-- Columns will be dynamically added here -->
-        </div>
-
-        <!-- Add Column Button -->
-        <div class="add-column-section">
-            <button id="addColumnBtn" class="btn btn-outline" style="display: none;" data-i18n="btn.add_column">+
-                Add Column</button>
         </div>
     </div>
     </div> <!-- End .container -->
@@ -348,7 +405,7 @@
                 </div>
                 <div class="modal-footer"
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
-                    <a href="#" onclick="switchAuthModal('register')" style="font-size: 0.9rem;">Need an account?
+                    <a href="#" onclick="switchToRegister()" style="font-size: 0.9rem;">Need an account?
                         Register</a>
                     <button type="submit" class="btn btn-primary" data-i18n="btn.login">Login</button>
                 </div>
@@ -375,7 +432,7 @@
                 </div>
                 <div class="modal-footer"
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
-                    <a href="#" onclick="switchAuthModal('login')" style="font-size: 0.9rem;">Have
+                    <a href="#" onclick="switchToLogin()" style="font-size: 0.9rem;">Have
                         an account? Login</a>
                     <button type="submit" class="btn btn-primary">Register</button>
                 </div>
