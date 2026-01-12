@@ -189,6 +189,7 @@ const translations = {
         // Buttons
         'btn.close': 'Close',
         'btn.join': 'Join',
+        'btn.view': 'View',
 
         // Admin
         'admin.title': 'Admin Access',
@@ -481,6 +482,7 @@ const translations = {
         'label.votes_remaining': 'Votos Restantes',
         'label.votes_remaining': 'Votos Restantes',
         'btn.join': 'Entrar',
+        'btn.view': 'Ver',
         'btn.login': 'Entrar',
         'btn.signin_google': 'Entrar com Google',
         'btn.claim_host': 'Tornar-se Moderador',

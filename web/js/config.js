@@ -1,10 +1,10 @@
 // Application Configuration
 export const CONFIG = {
     API_BASE: '/api',
-    APP_VERSION: 'v0.12.0'
+    APP_VERSION: 'v0.13.0-rc9'
 };
 
-export const APP_VERSION = 'v0.12.0';
+export const APP_VERSION = 'v0.13.0-rc9';
 
 // Global Shim
 window.CONFIG = CONFIG;

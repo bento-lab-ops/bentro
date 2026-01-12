@@ -1,59 +1,37 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.12.0-rc43**
+## Current Version: **v0.13.0-rc9**
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### v0.11.x - Stability & Guardrails (Current Focus)
-**Focus:** Reliability, Automated Testing, and DevEx.
-- [x] **UI Polish: Claim/Relinquish Host Button** (Completed v0.10.64)
-    - [x] **Style**: Apply Glassmorphic design (`.btn-glass`).
-    - [x] **Layout**: Relocate to Control Bar (alongside other actions).
-    - [x] **Testing**: Add E2E tests for Claim/Relinquish flow & button visibility.
-    - [x] **Fix**: Verify/Add `confirm.unclaim_board` translation key.
-- [ ] **Code Architecture Improvements** (from Critical Analysis v0.10.64):
-    - [x] **Refactor to Component/Module Pattern**: Break `main.js` into feature modules (`DashboardController`, `NavController`, `Router`, `BoardService`) to reduce coupling
-    - [ ] **Visual Regression Testing**: Add assertions for key element visibility (`#newBoardBtn`, `#dashboardGrid`) in E2E tests
-- [ ] **CI/CD Guardrails**:
-    - [ ] **Docker Lint**: Implement `docker build --check` or `hadolint` to catch Dockerfile errors.
-    - [ ] **Frontend Lint/Test**: Add `eslint` and smoke tests to build process.
-    - [ ] **Backend Lint**: Add `golangci-lint` to catch Go errors before compile.
-    - [ ] **Pre-commit Hooks**: Implement hooks for syntax validation, linting, and preventing bad commits
-    - [ ] **E2E Test Selector Validation**: Add CSS selector validation to CI/CD pipeline
-- [ ] **Documentation**:
-    - [ ] **ES Module Migration Guide**: Document learnings from v0.10.65-v0.10.77 migration
-    - [ ] **E2E Test Maintenance**: Document CSS selectors in test comments for maintainability
-- [ ] **Dockerfile Security Hardening** (Production):
-    - [ ] Add non-root user for runtime security
-    - [ ] Implement build cache mounts (`--mount=type=cache`) for faster builds
-    - [ ] Add security scanning (e.g., `trivy` or `grype`)
-    - [ ] Minimize final image size (multi-stage optimization)
-- [ ] **Feature Flags**: Decouple "Hide Vote" and other experimental features.
-- [ ] **Automated Audit**: Browser-based regression testing checklist.
-    - [x] Initial Playwright Setup (`tests/e2e`).
-    - [x] Run Playwright Audit Locally (via `run_tests.ps1` in Docker).
-    - [x] **Finish Retro Validation**: Automated check for board completion flow.
-- [ ] **Automated E2E Tests**: Run Playwright tests in CI.
+### v0.14.0 - Visual Overhaul (Design System)
+**Focus:** Aesthetics, Glassmorphism everywhere, and Premium feel.
+- [ ] **Header Redesign**:
+    - [ ] Make Main Header Glassmorphic.
+    - [ ] Update Header Buttons (New Board, Dashboard, Menu) to Glassmorphic style.
+    - [ ] Update User Avatar and Language Selector to match.
+- [ ] **Navigation Redesign**:
+    - [ ] Hamburger Menu Transparency & Blur.
+    - [ ] Menu Items hover effects.
+- [ ] **Dashboard Polish**:
+    - [ ] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
+    - [ ] Verify Board Status Badges (Fixed in v0.13.0).
 
-### v0.10.x - Field Testing & Refinement
-**Focus:** Stability, UX Polish, and Real-world usage.
-- [ ] **Peek Mode**: Allow users to view a board as read-only before joining ("Peek" button).
-- [ ] **Data Export**: Export board data to CSV/PDF (Backend implementation).
-- [x] Team-filtered Dashboard (Backend)
-- [x] Team-filtered Dashboard (Frontend)
-- [x] Fix: Board Participants List (Persistent)
-### 🚨 Recovery Phase (Current Focus)
-**Context:** Reverted to `v0.11.0` after failed `v0.12.5` deployment (Reference: `POST_MORTEM_v0.12.5.md`).
-**Goal:** Establish safety nets before re-attempting major refactors.
-
-- [ ] **Guardrails Implementation**:
-    - [ ] **Local Smoke Test Script**: Create `scripts/verify_local.sh` to check build, lint, and basic runtime BEFORE push.
-    - [ ] **Pre-commit Hook**: Enforce linting and smoke test on commit.
-    - [ ] **Strict Mode**: Enable strict JSON validation tests for Auth payloads.
-- [ ] **Re-Verify v0.11.0**:
-    - [ ] Ensure current `v0.11.0` deployment is stable.
+### v0.13.0 - Stabilization & Light Theme (Current Release)
+**Focus:** Fixing Regressions, recovering from crashes, and basic Light Theme readability.
+- [x] **Light Theme Fixes**:
+    - [x] "My Retrospectives" Title Visibility (Gradient fixed).
+    - [x] Dashboard Badges Contrast (Solid Colors).
+- [x] **Critical Crash Fix**:
+    - [x] Restored corrupted `index.html` (v0.13.0-rc9).
+    - [x] Fixed `BoardController` event binding memory leak/loop (v0.13.0-rc5).
+- [x] **Functional Regressions**:
+    - [x] Restored missing `init`, `bindWebSocketEvents` methods.
+    - [x] Fixed Drag and Drop selectors (`.retro-card`).
+- [x] **Deployment**:
+    - [x] Version Bump to `v0.13.0`.
 
 ### v0.12.0 - Modular Architecture & Refactor (Completed)
 **Focus:** Decoupling `board.js`, Fix Runtime Errors, and Stability.

@@ -13,6 +13,15 @@ export class BoardController extends Controller {
         this.boardId = null;
         this.board = null;
         this.view = new BoardView('columnsContainer');
+        this.eventsBound = false;
+
+        // Bind handlers once in constructor
+        this.handleClick = this.handleClick.bind(this);
+        this.handleDragStart = this.handleDragStart.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this);
+        this.handleDragOver = this.handleDragOver.bind(this);
+        this.handleDragLeave = this.handleDragLeave.bind(this);
+        this.handleDrop = this.handleDrop.bind(this);
     }
 
     async init(params) {
@@ -43,28 +52,21 @@ export class BoardController extends Controller {
             onPhaseChange: (e) => {
                 if (e.detail.board_id === this.boardId) {
                     console.log('BoardController: Phase Changed', e.detail.phase);
-                    // Reload to ensure full UI sync (e.g. vote buttons visibility)
                     this.loadBoardData();
                 }
             },
             onParticipantsUpdate: (e) => {
                 if (e.detail.board_id === this.boardId) {
-                    // Optional: Update participants UI without reload
+                    // Update participants UI
                 }
             },
             onTimerStart: (e) => {
-                // Timer is global/board specific?
-                // Message doesn't check board_id?
-                // Let's assume broadast is for current context or check if needed.
-                // Legacy didn't check boardID for timer?
-                // But we should probably check if meaningful.
-                // For now, just run it.
                 console.log('Timer Start Event', e.detail);
-                this.startTimerUI(e.detail.seconds);
+                if (this.startTimerUI) this.startTimerUI(e.detail.seconds);
             },
             onTimerStop: (e) => {
                 console.log('Timer Stop Event');
-                this.stopTimerUI();
+                if (this.stopTimerUI) this.stopTimerUI();
             }
         };
 
@@ -77,6 +79,8 @@ export class BoardController extends Controller {
 
     destroy() {
         super.destroy();
+        console.log('BoardController destroyed');
+
         if (this.wsHandlers) {
             window.removeEventListener('board:update', this.wsHandlers.onBoardUpdate);
             window.removeEventListener('phase:change', this.wsHandlers.onPhaseChange);
@@ -84,6 +88,8 @@ export class BoardController extends Controller {
             window.removeEventListener('timer:start', this.wsHandlers.onTimerStart);
             window.removeEventListener('timer:stop', this.wsHandlers.onTimerStop);
         }
+
+        if (this.cleanup) this.cleanup();
     }
 
     async loadBoardData() {
@@ -91,7 +97,7 @@ export class BoardController extends Controller {
             this.board = await boardService.getById(this.boardId);
             console.log('BoardController: State Updated', this.board);
 
-            // Sync with global legacy state (Temporary for API/other actions)
+            // Sync with global legacy state
             window.currentBoard = this.board;
             if (this.board.phase) window.currentPhase = this.board.phase;
 
@@ -114,9 +120,7 @@ export class BoardController extends Controller {
 
         document.getElementById('boardContainer').style.display = 'block';
 
-        // Visibility Logic handled by View rendering mostly, but header buttons still needed?
-        // BoardView.renderHeader handled the specific board header.
-        // Global Nav buttons (Dashboard, Leave) still need explicit toggle here or in View.
+        // Visibility Logic handled by View rendering mostly
         if (document.getElementById('dashboardBtn')) document.getElementById('dashboardBtn').style.display = 'inline-block';
         if (document.getElementById('leaveBoardBtn')) document.getElementById('leaveBoardBtn').style.display = 'inline-block';
         if (document.getElementById('editUserBtn')) document.getElementById('editUserBtn').style.display = 'inline-block';
@@ -129,42 +133,44 @@ export class BoardController extends Controller {
 
         try {
             await boardService.leave(this.boardId, window.currentUser);
-            // Router will handle view switching
             window.router.navigate('dashboard');
         } catch (error) {
             console.error('Failed to leave board:', error);
-            // Fallback for demo
             window.router.navigate('dashboard');
         }
-    }
-
-    async destroy() {
-        console.log('BoardController destroyed');
-        if (this.cleanup) this.cleanup();
     }
 
     bindEvents() {
         const container = document.getElementById('boardContainer');
         if (!container) return;
 
-        this.cleanup = () => {
-            container.removeEventListener('click', this.handleClick);
-        };
+        // Prevent duplicate binding if same instance reused
+        if (this.eventsBound) {
+            console.log('BoardController: Events already bound, skipping.');
+            return;
+        }
 
-        // Context-bound handler
-        this.handleClick = this.handleClick.bind(this);
-        this.handleDragStart = this.handleDragStart.bind(this);
-        this.handleDragEnd = this.handleDragEnd.bind(this); // New binding
-        this.handleDragOver = this.handleDragOver.bind(this);
-        this.handleDragLeave = this.handleDragLeave.bind(this);
-        this.handleDrop = this.handleDrop.bind(this);
+        this.cleanup = () => {
+            if (!this.eventsBound) return;
+            container.removeEventListener('click', this.handleClick);
+            container.removeEventListener('dragstart', this.handleDragStart);
+            container.removeEventListener('dragend', this.handleDragEnd);
+            container.removeEventListener('dragover', this.handleDragOver);
+            container.removeEventListener('dragleave', this.handleDragLeave);
+            container.removeEventListener('drop', this.handleDrop);
+            this.eventsBound = false;
+            console.log('BoardController: Events cleaned up');
+        };
 
         container.addEventListener('click', this.handleClick);
         container.addEventListener('dragstart', this.handleDragStart);
-        container.addEventListener('dragend', this.handleDragEnd); // New handler
+        container.addEventListener('dragend', this.handleDragEnd);
         container.addEventListener('dragover', this.handleDragOver);
         container.addEventListener('dragleave', this.handleDragLeave);
         container.addEventListener('drop', this.handleDrop);
+
+        this.eventsBound = true;
+        console.log('BoardController: Events bound');
     }
 
     async handleClick(e) {
