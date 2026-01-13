@@ -17,8 +17,9 @@ export class DashboardController {
         this.showView();
     }
 
-    showView() {
+    async showView() {
         document.getElementById('dashboardView').style.display = 'block';
+        await this.loadBoards(); // Refresh data on view show
 
         // Hide all other views
         const views = ['boardContainer', 'actionItemsView', 'adminView', 'teamsView'];

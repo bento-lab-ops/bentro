@@ -587,6 +587,27 @@ func LeaveBoard(c *gin.Context) {
 		return
 	}
 
+	// Logic to handle Owner/CoOwner leaving
+	hasChanged := false
+	if board.Owner == input.Username {
+		if board.CoOwner != "" {
+			board.Owner = board.CoOwner
+			board.CoOwner = ""
+		} else {
+			board.Owner = ""
+		}
+		hasChanged = true
+	} else if board.CoOwner == input.Username {
+		board.CoOwner = ""
+		hasChanged = true
+	}
+
+	if hasChanged {
+		if err := database.DB.Save(&board).Error; err != nil {
+			fmt.Printf("Warning: Failed to update board owner after leave: %v\n", err)
+		}
+	}
+
 	// Fetch updated board
 	var updatedBoard models.Board
 	if err := database.DB.Preload("Members").First(&updatedBoard, id).Error; err != nil {

@@ -1,6 +1,6 @@
 <!-- Modal for Manage Teams -->
 <div id="manageTeamsModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="position: relative;">
         <span class="close-modal" onclick="closeManageTeamsModal()">&times;</span>
         <h2 data-i18n="modal.manage_teams_title">Manage Participating Teams</h2>
         <p data-i18n="text.manage_teams_desc">Add or remove teams from this board.</p>
@@ -598,5 +598,17 @@
                 <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save Changes</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Generic Confirmation Modal -->
+<div id='confirmationModal' class='modal' style='z-index: 10000;'>
+    <div class='modal-content confirmation-modal-content' style='max-width: 400px; text-align: center;'>
+        <h2 id='confirmationTitle' style='margin-bottom: 1rem;'>Confirm</h2>
+        <p id='confirmationMessage' style='color: var(--text-secondary); margin-bottom: 2rem;'></p>
+        <div class='modal-actions' style='justify-content: center; gap: 1rem;'>
+            <button id='btnConfirmCancel' class='btn btn-outline' style='min-width: 100px;'>Cancel</button>
+            <button id='btnConfirmOk' class='btn btn-primary' style='min-width: 100px;'>Confirm</button>
+        </div>
     </div>
 </div>

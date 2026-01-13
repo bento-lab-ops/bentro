@@ -686,19 +686,26 @@ window.leaveBoardPersistent = async (boardId) => {
         if (hash.startsWith('#board/')) {
             boardId = hash.replace('#board/', '');
         } else {
-            alert(i18n.t('alert.error') || 'Error: Board ID missing');
+            await window.showAlert('Error', i18n.t('alert.error') || 'Error: Board ID missing');
             return;
         }
     }
 
-    if (confirm(i18n.t('confirm.leave_board'))) {
+    if (await window.showConfirm(i18n.t('confirm.leave_board'), "Are you sure you want to leave this board?", { isDanger: false, confirmText: 'Leave' })) {
         const username = window.currentUser;
         if (username) {
             try {
+                console.log('Leaving board:', boardId, 'User:', username);
                 await boardService.leave(boardId, username);
+                console.log('Left board successfully');
+                window.currentBoard = null;
                 window.location.hash = '#dashboard';
             } catch (e) {
-                alert('Failed to leave: ' + e.message);
+                console.error('Leave failed:', e);
+                await window.showAlert('Error', 'Failed to leave: ' + e.message);
+                // Even if API fails, user wants to leave UI?
+                // For now, let's allow them to stay if error, or prompt?
+                // Standard behavior is usually block on error.
             }
         }
     }
@@ -761,7 +768,7 @@ window.saveBoardSettings = async function () {
             // Reload board
             if (boardController) boardController.loadBoardData();
         } catch (e) {
-            alert('Failed to save settings: ' + e.message);
+            await window.showAlert('Error', 'Failed to save settings: ' + e.message);
         }
     }
 };

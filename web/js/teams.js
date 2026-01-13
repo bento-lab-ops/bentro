@@ -620,7 +620,8 @@ export async function addTeamToBoard() {
 
             const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
             window.currentBoard = updatedBoard;
-            alert(i18n.t('msg.team_added') || 'Team added successfully');
+            // Removed popup for success, just toast/refresh
+            // alert(i18n.t('msg.team_added') || 'Team added successfully');
             populateManageTeamsModal();
             // Assuming renderBoardHeader is in main.js or globally available?
             // Actually main.js had it inline, checking if function exists.
@@ -628,12 +629,12 @@ export async function addTeamToBoard() {
         }
     } catch (error) {
         console.error('Failed to add team:', error);
-        alert(error.message || 'Failed to add team');
+        await window.showAlert('Error', error.message || 'Failed to add team');
     }
 };
 
 export async function removeTeamFromBoard(teamId) {
-    if (!window.currentBoard || !confirm(i18n.t('confirm.remove_team') || 'Are you sure you want to remove this team?')) return;
+    if (!window.currentBoard || !await window.showConfirm(i18n.t('confirm.remove_team'), 'Are you sure you want to remove this team?', { isDanger: true })) return;
 
     try {
         const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
@@ -641,12 +642,12 @@ export async function removeTeamFromBoard(teamId) {
 
         const updatedBoard = await apiCall(`/boards/${window.currentBoard.id}/teams`, 'PUT', { team_ids: newTeamIds });
         window.currentBoard = updatedBoard;
-        alert(i18n.t('msg.team_removed') || 'Team removed successfully');
+        // alert(i18n.t('msg.team_removed') || 'Team removed successfully');
         populateManageTeamsModal();
         if (window.renderBoardHeader) window.renderBoardHeader();
     } catch (error) {
         console.error('Failed to remove team:', error);
-        alert(error.message || 'Failed to remove team');
+        await window.showAlert('Error', error.message || 'Failed to remove team');
     }
 };
 

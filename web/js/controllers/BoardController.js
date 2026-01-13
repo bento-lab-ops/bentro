@@ -132,7 +132,7 @@ export class BoardController extends Controller {
 
     async leave() {
         if (!this.boardId) return;
-        if (!confirm(i18n.t('confirm.leave_board'))) return;
+        if (!await window.showConfirm(i18n.t('confirm.leave_board'), "Are you sure you want to leave this board?")) return;
 
         try {
             await boardService.leave(this.boardId, window.currentUser);
@@ -350,13 +350,13 @@ export class BoardController extends Controller {
     async handleUnmerge(parentId) {
         const parent = this.findCard(parentId);
         if (!parent || !parent.merged_cards || parent.merged_cards.length === 0) {
-            alert("No merged cards to unmerge.");
+            await window.showAlert('Notice', "No merged cards to unmerge.");
             return;
         }
 
         // Unmerge the last one (LIFO)
         const lastChild = parent.merged_cards[parent.merged_cards.length - 1];
-        if (!confirm(`Unmerge card "${lastChild.content}"?`)) return;
+        if (!await window.showConfirm("Unmerge?", `Unmerge card "${lastChild.content}"?`)) return;
 
         try {
             console.log(`[Controller] Unmerging child ${lastChild.id} from parent ${parentId}`);
@@ -364,7 +364,7 @@ export class BoardController extends Controller {
             await this.loadBoardData();
         } catch (e) {
             console.error('[Controller] Unmerge failed:', e);
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 
@@ -386,7 +386,7 @@ export class BoardController extends Controller {
             }));
         } else {
             console.warn('WebSocket not connected, cannot switch phase');
-            alert('Connection lost. Please refresh.');
+            await window.showAlert('Error', 'Connection lost. Please refresh.');
         }
     }
 
@@ -504,12 +504,12 @@ export class BoardController extends Controller {
     }
 
     async handleDeleteColumn(columnId) {
-        if (!confirm(i18n.t('confirm.delete_column'))) return;
+        if (!await window.showConfirm(i18n.t('confirm.delete_column'), "Deleting a column also deletes all cards in it. This cannot be undone.", { isDanger: true, confirmText: 'Delete' })) return;
         try {
             await apiCall(`/columns/${columnId}`, 'DELETE');
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 
@@ -522,7 +522,7 @@ export class BoardController extends Controller {
 
         if (currentPhase !== 'voting') {
             console.warn('Voting attempted outside voting phase (Controller Check)');
-            alert(i18n.t('alert.voting_closed') || "Voting is only allowed during the Voting phase.");
+            await window.showAlert('Notice', i18n.t('alert.voting_closed') || "Voting is only allowed during the Voting phase.");
             return;
         }
 
@@ -539,7 +539,7 @@ export class BoardController extends Controller {
             await this.loadBoardData();
         } catch (error) {
             console.error('Vote failed:', error);
-            alert(error.message);
+            await window.showAlert('Notice', error.message);
         }
     }
 
@@ -554,13 +554,13 @@ export class BoardController extends Controller {
 
     async handleDeleteItem(cardId) {
         if (!cardId) return;
-        if (!confirm(i18n.t('confirm.delete_card') || 'Delete this card?')) return;
+        if (!await window.showConfirm(i18n.t('confirm.delete_card'), "Are you sure you want to delete this card?", { isDanger: true, confirmText: 'Delete' })) return;
 
         try {
             await boardService.deleteCard(cardId);
             await this.loadBoardData();
         } catch (error) {
-            alert('Failed to delete card: ' + error.message);
+            await window.showAlert('Error', 'Failed to delete card: ' + error.message);
         }
     }
 
@@ -591,50 +591,50 @@ export class BoardController extends Controller {
         }
     }
     async handleFinishRetro() {
-        if (!confirm(i18n.t('confirm.finish_retro'))) return;
+        if (!await window.showConfirm(i18n.t('confirm.finish_retro'), null, { confirmText: 'Finish', isDanger: true })) return;
         try {
             await apiCall(`/boards/${this.boardId}/status`, 'PUT', { status: 'finished' });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 
     async handleReopenRetro() {
-        if (!confirm(i18n.t('confirm.reopen_retro'))) return;
+        if (!await window.showConfirm(i18n.t('confirm.reopen_retro'), null, { confirmText: 'Reopen', isDanger: false })) return;
         try {
             await apiCall(`/boards/${this.boardId}/status`, 'PUT', { status: 'active' });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 
     async handleClaimManager() {
         if (!window.currentUser) {
-            alert(i18n.t('alert.login_required') || "Please login to claim host.");
+            await window.showAlert('Notice', i18n.t('alert.login_required') || "Please login to claim host.");
             return;
         }
-        if (!confirm(i18n.t('confirm.claim_host') || "Claim hosting of this board?")) return;
+        if (!await window.showConfirm(i18n.t('confirm.claim_host') || "Claim Board Hosting?", "Do you want to claim hosting management for this board?")) return;
         try {
             await apiCall(`/boards/${this.boardId}/claim`, 'POST', { owner: window.currentUser });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 
     async handleUnclaimManager() {
         if (!window.currentUser) {
-            alert(i18n.t('alert.login_required') || "Please login to unclaim.");
+            await window.showAlert('Notice', i18n.t('alert.login_required') || "Please login to unclaim.");
             return;
         }
-        if (!confirm(i18n.t('confirm.unclaim_host') || "Relinquish hosting control?")) return;
+        if (!await window.showConfirm(i18n.t('confirm.unclaim_host') || "Relinquish Control?", "Are you sure you want to relinquish hosting control?")) return;
         try {
             await apiCall(`/boards/${this.boardId}/unclaim`, 'POST', { user: window.currentUser });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            await window.showAlert('Error', e.message);
         }
     }
 

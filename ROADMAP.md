@@ -34,17 +34,27 @@
 - [x] **Deployment**:
     - [x] Version Bump to `v0.13.0`.
 
-### v0.13.2 - UX Improvements & Modal Standardization (Next)
+### v0.13.3 - Teams UX & Polish (Next)
+**Focus:** Fix regressions in Teams view and standardize modals.
+- [ ] **My Teams Tab**:
+    - [ ] Fix `ReferenceError: confirmLeaveTeam is not defined`.
+    - [ ] Replace native `confirm()` in "Leave Team" (View Details) with glassmorphic modal.
+- [ ] **Explore Teams Tab**:
+    - [ ] Fix missing Team Card outline/style.
+    - [ ] Replace native `confirm()` in "Join Team" with glassmorphic modal.
+    - [ ] Fix Team Participant Counter not working.
+
+### v0.13.2 - UX Improvements & Modal Standardization (Completed)
 **Focus:** Replace native alerts with glassmorphic modals and fix UI bugs.
-- [ ] **Modal Standardization**:
-    - [ ] Implementation of Generic Confirmation Modal.
-    - [ ] Replace `confirm()` in "Finish Retro".
-    - [ ] Replace `confirm()` in "Leave Board".
-    - [ ] Replace `alert()` in "Vote Limit".
-    - [ ] Replace `confirm()` in "Delete Column".
-    - [ ] Replace `confirm()` in "Delete Card".
-- [ ] **Bug Fixes**:
-    - [ ] Fix "Manage Teams" modal close button visibility.
+- [x] **Modal Standardization**:
+    - [x] Implementation of Generic Confirmation Modal.
+    - [x] Replace `confirm()` in "Finish Retro".
+    - [x] Replace `confirm()` in "Leave Board" (Backend + UI Fixed).
+    - [x] Replace `alert()` in "Vote Limit".
+    - [x] Replace `confirm()` in "Delete Column".
+    - [x] Replace `confirm()` in "Delete Card".
+- [x] **Bug Fixes**:
+    - [x] Fix "Manage Teams" modal close button visibility.
 
 ### v0.13.1 - User Experience Improvements (Completed)
 **Focus:** Card Drag & Drop responsiveness and fluidity.
