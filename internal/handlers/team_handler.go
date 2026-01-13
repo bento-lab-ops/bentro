@@ -180,10 +180,18 @@ func AddTeamMember(c *gin.Context) {
 		return
 	}
 
-	// Verify permission: Only System Admin can add members (edit members)
-	// User said: "only users admin can delete or edit members of a team"
-	if !checkSystemAdmin(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Only administrators can add members to a team"})
+	// Verify permission: System Admin OR Team Owner
+	userID := c.MustGet("user_id").(uuid.UUID)
+	isOwner := false
+	var membership models.TeamMember
+	if err := database.DB.Where("team_id = ? AND user_id = ?", teamID, userID).First(&membership).Error; err == nil {
+		if membership.Role == "owner" {
+			isOwner = true
+		}
+	}
+
+	if !checkSystemAdmin(c) && !isOwner {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only team owners or administrators can add members"})
 		return
 	}
 

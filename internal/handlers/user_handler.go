@@ -20,7 +20,8 @@ func SearchUsers(c *gin.Context) {
 	// Using ILIKE for case-insensitive search in Postgres.
 	// If using SQLite during dev, ILIKE might fail if not supported, but usually LIKE is case-insensitive in SQLite by default or with config.
 	// Assuming Postgres as per context imply (GORM driver).
-	if err := database.DB.Where("name ILIKE ? OR email ILIKE ?", "%"+query+"%", "%"+query+"%").Limit(10).Find(&users).Error; err != nil {
+	// Compatible search for both SQLite and Postgres
+	if err := database.DB.Where("LOWER(name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)", "%"+query+"%", "%"+query+"%").Limit(10).Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
 		return
 	}

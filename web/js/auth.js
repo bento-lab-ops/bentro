@@ -45,6 +45,13 @@ export function openRegisterModal() {
         userModal.style.display = 'none';
         window.returnToUserModal = true;
     }
+
+    // Reset avatar
+    window.selectedRegisterAvatar = '👤';
+    const display = document.getElementById('registerAvatarDisplay');
+    if (display) display.textContent = '👤';
+    const selector = document.getElementById('registerAvatarSelector');
+    if (selector) selector.style.display = 'none';
 }
 
 export function closeRegisterModal() {
@@ -146,14 +153,12 @@ export async function handleLoginSubmit(event) {
 
 export async function handleRegisterSubmit(event) {
     event.preventDefault();
-    const fullName = document.getElementById('regName').value;
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const lastName = document.getElementById('regLastName').value.trim();
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
 
-    // Split name for legacy backend support
-    const nameParts = fullName.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(' ') || '';
+    const fullName = `${firstName} ${lastName}`.trim();
 
     try {
         await register({
@@ -162,7 +167,7 @@ export async function handleRegisterSubmit(event) {
             display_name: fullName,
             email,
             password,
-            avatar: '👤'
+            avatar: window.selectedRegisterAvatar || '👤'
         });
         // Auto login after register?
         // For now, ask to login
@@ -338,7 +343,59 @@ export async function handleChangePasswordSubmit(event) {
     }
 }
 
-// Attach to window for HTML access
+// Register Avatar Selection
+export function populateRegisterAvatarSelector() {
+    const selector = document.getElementById('registerAvatarSelector');
+    if (!selector) return;
+
+    const avatars = [
+        '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+        '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+        '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
+        '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏',
+        '👤', '👥', '👶', '👦', '👧', '👨', '👩', '👴',
+        '👵', '👱', '💂', '🕵️', '👷', '👮', '👳', '👲'
+    ];
+
+    selector.innerHTML = avatars.map(avatar =>
+        `<span class="avatar-option ${avatar === window.selectedRegisterAvatar ? 'selected' : ''}" 
+               onclick="selectRegisterAvatar('${avatar}')">${avatar}</span>`
+    ).join('');
+}
+
+export function toggleRegisterAvatarSelector() {
+    const selector = document.getElementById('registerAvatarSelector');
+    if (selector) {
+        selector.style.display = selector.style.display === 'none' ? 'grid' : 'none';
+        if (selector.style.display === 'grid') {
+            populateRegisterAvatarSelector();
+        }
+    }
+}
+
+export function selectRegisterAvatar(avatar) {
+    window.selectedRegisterAvatar = avatar;
+    const display = document.getElementById('registerAvatarDisplay');
+    if (display) {
+        display.textContent = avatar;
+    }
+
+    // Update selected state in UI
+    document.querySelectorAll('#registerAvatarSelector .avatar-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    if (window.event && window.event.target) {
+        window.event.target.classList.add('selected');
+    }
+    // Auto close
+    toggleRegisterAvatarSelector();
+}
+
+// Attach to window
+window.toggleRegisterAvatarSelector = toggleRegisterAvatarSelector;
+window.selectRegisterAvatar = selectRegisterAvatar;
+window.populateRegisterAvatarSelector = populateRegisterAvatarSelector;
+
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.openRegisterModal = openRegisterModal;

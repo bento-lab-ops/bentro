@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.13.4">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.14.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -422,17 +422,34 @@
             <span class="close" onclick="closeRegisterModal()">&times;</span>
             <h2>Register</h2>
             <form onsubmit="handleRegisterSubmit(event)">
-                <div class="form-group">
-                    <label data-i18n="label.name">Name</label>
-                    <input type="text" id="regName" class="form-input" required>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label data-i18n="label.first_name">First Name</label> <span style="color:red">*</span>
+                        <input type="text" id="regFirstName" class="form-input" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label data-i18n="label.last_name">Last Name</label> <span style="color:red">*</span>
+                        <input type="text" id="regLastName" class="form-input" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="label.email">Email</label>
+                    <label data-i18n="label.email">Email</label> <span style="color:red">*</span>
                     <input type="email" id="regEmail" class="form-input" required autocomplete="email">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="label.password">Password</label>
-                    <input type="password" id="regPassword" class="form-input" required autocomplete="new-password">
+                    <label data-i18n="label.password">Password</label> <span style="color:red">*</span>
+                    <input type="password" id="regPassword" class="form-input" required autocomplete="new-password"
+                        minlength="6" placeholder="Min. 6 characters">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="label.choose_avatar">Choose Your Avatar</label>
+                    <div class="avatar-selector-container">
+                        <div id="registerAvatarDisplay" class="current-avatar-large">👤</div>
+                        <div id="registerAvatarSelector" class="avatar-grid" style="display: none;"></div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleRegisterAvatarSelector()"
+                            data-i18n="btn.change_avatar">Change Avatar</button>
+                    </div>
                 </div>
                 <div class="modal-footer"
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
@@ -446,7 +463,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-    <script type="module" src="/static/js/main.js?v=v0.13.4"></script>
+    <script type="module" src="/static/js/main.js?v=v0.14.0"></script>
 </body>
 
 </html>

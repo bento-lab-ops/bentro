@@ -22,6 +22,10 @@ export class BoardController extends Controller {
 
     async init(params) {
         console.log('BoardController initialized with params:', params);
+
+        // Cleanup previous instance listeners if any
+        this.destroy();
+
         if (!params.id) {
             console.error('BoardController: No board ID provided');
             return;
@@ -707,6 +711,7 @@ export class BoardController extends Controller {
     findCard(cardId) {
         if (!this.board || !this.board.columns) return null;
         for (const col of this.board.columns) {
+            if (!col.cards) continue;
             const card = col.cards.find(c => c.id === cardId);
             if (card) return card;
         }
@@ -734,6 +739,9 @@ export class BoardController extends Controller {
                 dragClass: 'sortable-drag',
                 delay: 100, // Slight delay to prevent accidental drags on touch
                 delayOnTouchOnly: true,
+                scroll: true,
+                scrollSensitivity: 100, // Smoother scrolling near edges
+                bubbleScroll: true,
                 onEnd: async (evt) => {
                     const itemEl = evt.item;
                     const cardId = itemEl.dataset.id;

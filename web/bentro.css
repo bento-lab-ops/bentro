@@ -3477,3 +3477,58 @@ input[type="date"]:hover ::-webkit-calendar-picker-indicator {
     border-color: var(--primary) !important;
     color: white !important;
 }
+
+/* Fix Modal Double Scrollbars & Centering */
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* Prevent background scrolling */
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+
+    /* Flex Centering */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure modal becomes flex when shown (JS sets display: block usually) */
+.modal[style*="display: block"] {
+    display: flex !important;
+}
+
+.modal-content {
+    background-color: var(--bg-medium);
+    margin: 0 !important;
+    /* Remove old auto margins */
+    padding: 2rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+
+    /* Internal Scroll logic */
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

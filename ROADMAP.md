@@ -25,21 +25,18 @@
 - **Micro-interactions**: Improved various button alignments and hover states.
 - **Cleanup**: Removed deprecated admin password input from settings.
 
-### v0.14.0 - Performance & Optimization (Planned)
-& Light Theme (Completed)
-**Focus:** Fixing Regressions, recovering from crashes, and basic Light Theme readability.
-- [x] **Light Theme Fixes**:
-    - [x] "My Retrospectives" Title Visibility (Gradient fixed).
-    - [x] Dashboard Badges Contrast (Solid Colors).
-- [x] **Critical Crash Fix**:
-    - [x] Restored corrupted `index.html` (v0.13.0-rc9).
-    - [x] Fixed `BoardController` event binding memory leak/loop (v0.13.0-rc5).
-- [x] **Functional Regressions**:
-    - [x] Restored missing `init`, `bindWebSocketEvents` methods.
-    - [x] Fixed Drag and Drop selectors (`.retro-card`).
-    - [x] **Hamburger Menu & Overlay**: Fixed unresponsive menu, auto-close, and overlay click (v0.13.0-rc21).
-- [x] **Deployment**:
-    - [x] Version Bump to `v0.13.0`.
+### v0.14.0 - Performance & Optimization (Completed)
+**Focus:** Code cleanup, performance tuning, and removing technical debt.
+- [x] **Code Cleanup**:
+    - [x] Remove legacy commented-out code in `main.js` and controllers.
+    - [x] Delete unused backup files (e.g., `main.js.new`, `main.js.clean`).
+- [x] **Performance**:
+    - [x] Audit and fix potential event listener leaks in `BoardController`.
+    - [x] Optimize Drag & Drop re-renders (SortableJS).
+- [x] **UI Fixes**:
+    - [x] Fixed Help Modal Double Scrollbar.
+- [ ] **Architecture**:
+    - [ ] Ensure `Nav`, `Dashboard`, and `Board` controllers have clear separation of concerns (Refactored in v0.12, continuously improving).
 
 ### v0.13.3 - Teams UX & Polish (Completed)
 **Focus:** Fix regressions in Teams view and standardize modals.

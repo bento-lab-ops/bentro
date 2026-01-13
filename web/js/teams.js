@@ -477,9 +477,14 @@ function renderSearchResults(users) {
         const item = document.createElement('div');
         item.className = 'search-result-item';
         item.innerHTML = `
-            <div style="font-weight: bold;">${escapeHtml(user.name || user.display_name)}</div>
-            <div style="font-size: 0.8rem; color: #666;">${escapeHtml(user.email)}</div>
+            <div style="font-size: 1.5rem; margin-right: 10px;">${user.avatar_url || '👤'}</div>
+            <div>
+                <div style="font-weight: bold;">${escapeHtml(user.name || user.display_name)}</div>
+                <div style="font-size: 0.8rem; color: #666;">${escapeHtml(user.email)}</div>
+            </div>
         `;
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
         item.onclick = () => selectUserForTeam(user);
         container.appendChild(item);
     });
@@ -681,7 +686,7 @@ export async function addTeamToBoard() {
 };
 
 export async function removeTeamFromBoard(teamId) {
-    if (!window.currentBoard || !await window.showConfirmModal(i18n.t('confirm.remove_team'), 'Are you sure you want to remove this team?', { isDanger: true })) return;
+    if (!window.currentBoard || !await window.showConfirm(i18n.t('confirm.remove_team'), 'Are you sure you want to remove this team from the board?', { isDanger: true })) return;
 
     try {
         const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];

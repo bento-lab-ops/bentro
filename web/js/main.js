@@ -3,8 +3,8 @@ import './i18n.js';
 import { i18n } from './i18n.js';
 import { initWebSocket } from './api.js';
 import { escapeHtml, closeModals } from './utils.js';
-// Removed board.js imports
-// Removed timer.js logic imports (startTimer, etc)
+// Imports
+
 
 import { dashboardController } from './controllers/DashboardController.js';
 import { boardController } from './controllers/BoardController.js';
@@ -31,9 +31,7 @@ import './admin-users.js';
 import './admin-boards.js';
 import './admin-actions.js';
 
-// ... (initUI, initApp, handleUrlHash remain same) ...
-// skipping unchanged lines for brevity if possible, but replace_file_content replaces blocks.
-// I will keep the structure but update the listeners section.
+
 
 
 
