@@ -37,6 +37,10 @@ async function loadTeamsView() {
     await fetchAndRenderTeams();
     await fetchAndRenderAvailableTeams();
 
+    // Restore last tab
+    const lastTab = localStorage.getItem('lastTeamsTab') || 'myTeams';
+    switchTeamTab(lastTab);
+
     // Start Auto-Refresh
     if (window.teamsRefreshInterval) clearInterval(window.teamsRefreshInterval);
     window.teamsRefreshInterval = setInterval(() => {
@@ -67,6 +71,9 @@ async function fetchAndRenderTeams() {
 }
 
 function switchTeamTab(tabName) {
+    // Save state
+    localStorage.setItem('lastTeamsTab', tabName);
+
     // Update Tab UI
     document.querySelectorAll('.team-nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabName === 'myTeams' ? 'tabMyTeams' : 'tabExploreTeams').classList.add('active');
@@ -123,15 +130,38 @@ function renderTeams(teams) {
     });
 }
 
+// Leave Team Logic
+async function confirmLeaveTeam(teamId, teamName) {
+    if (!await window.showConfirm(
+        i18n.t('modal.confirm_leave_team') || 'Leave Team?',
+        `Are you sure you want to leave the team <strong>${escapeHtml(teamName)}</strong>?`,
+        { isDanger: true, confirmText: 'Leave Team' }
+    )) return;
+
+    try {
+        const currentUserId = window.currentUserId || (window.currentUserState ? window.currentUserState.id : null);
+        // We use the remove member endpoint for ourselves
+        await apiCall(`/teams/${teamId}/members/${currentUserId}`, 'DELETE');
+
+        await window.showAlert(i18n.t('msg.success'), i18n.t('msg.left_team') || 'You have left the team.');
+        loadTeamsView(); // Refresh list
+    } catch (error) {
+        console.error('Failed to leave team:', error);
+        await window.showAlert(i18n.t('msg.error'), 'Failed to leave team: ' + error.message);
+    }
+}
+
+// ... existing code ...
+
 async function fetchAndRenderAvailableTeams() {
     const container = document.getElementById('availableTeamsList');
-    if (!container) return; // Must be added to HTML
+    if (!container) return;
 
     container.innerHTML = '<div class="loading-spinner"></div> Loading available teams...';
 
     try {
         const allTeams = await apiCall('/teams/all');
-        const myTeams = await apiCall('/teams'); // Cache this? reused from prev call
+        const myTeams = await apiCall('/teams');
 
         const myTeamIds = new Set(myTeams.map(t => t.id));
         const availableTeams = allTeams.filter(t => !myTeamIds.has(t.id));
@@ -157,22 +187,35 @@ function renderAvailableTeams(teams) {
 
     teams.forEach(team => {
         const card = document.createElement('div');
-        card.className = 'team-card card';
-        card.style.borderColor = 'var(--border)';
+        // Use team-card-premium styling for consistency in Explore tab too, or stick to 'card' but fix border
+        card.className = 'team-card-premium';
+        // Force relative positioning if needed, but team-card-premium should handle it.
+        // If team-card-premium is too big, let's use a modified version or just ensure border works.
+        // The user said "contorno nao aparece". 'team-card-premium' has borders defined in CSS (implied).
+        // Let's stick to the previous structure but add specific border style to be safe.
+        card.style.border = '1px solid var(--glass-border)';
 
         const joinButton = team.is_invite_only
             ? `<button class="btn btn-secondary btn-sm" disabled title="Invite Only"><i class="fas fa-lock"></i> Locked</button>`
-            : `<button class="btn btn-primary btn-sm" onclick="joinTeam('${team.id}')">Join Team</button>`;
+            : `<button class="btn btn-primary btn-sm" onclick="joinTeam('${team.id}', '${escapeHtml(team.name)}')">Join Team</button>`;
+
+        // Fix member count: Use member_count if available, fallback to length
+        const memberCount = (team.member_count !== undefined) ? team.member_count : (team.members ? team.members.length : 0);
 
         card.innerHTML = `
-            <h3>${escapeHtml(team.name)} ${team.is_invite_only ? '<i class="fas fa-lock" title="Invite Only" style="font-size: 0.8rem; color: var(--text-secondary);"></i>' : ''}</h3>
-            <p>${escapeHtml(team.description || 'No description')}</p>
-            <div class="team-meta">
-                <span><i class="fas fa-calendar-alt"></i> ${new Date(team.created_at).toLocaleDateString()}</span>
-                <span><i class="fas fa-user-friends"></i> ${team.members ? team.members.length : 0} members</span>
+            <div class="team-card-header">
+                <h3 class="team-card-title">${escapeHtml(team.name)} ${team.is_invite_only ? '<i class="fas fa-lock" title="Invite Only" style="font-size: 0.8rem; color: var(--text-secondary);"></i>' : ''}</h3>
             </div>
-            <div style="margin-top: 1rem; text-align: right;">
-                ${joinButton}
+            <div class="team-card-desc">
+                ${escapeHtml(team.description || 'No description provided')}
+            </div>
+            <div class="team-card-footer">
+                <div class="team-meta">
+                    <span><i class="fas fa-user-friends"></i> ${memberCount} members</span>
+                </div>
+                <div>
+                    ${joinButton}
+                </div>
             </div>
         `;
         grid.appendChild(card);
@@ -181,11 +224,15 @@ function renderAvailableTeams(teams) {
     listContainer.appendChild(grid);
 }
 
-async function joinTeam(teamId) {
-    if (!confirm('Join this team?')) return;
+async function joinTeam(teamId, teamName) {
+    if (!await window.showConfirm(
+        i18n.t('btn.join') + ' Team?',
+        `Join the team <strong>${teamName}</strong>?`
+    )) return;
 
-    // Optimistic UI: Find button and set loading state
-    const btn = document.querySelector(`button[onclick="joinTeam('${teamId}')"]`);
+    // Optimistic UI
+    const btn = document.querySelector(`button[onclick="joinTeam('${teamId}', '${teamName}')"]`); // Selector needs to match
+    // ... logic ...
     const originalText = btn ? btn.innerText : '';
     if (btn) {
         btn.disabled = true;
@@ -194,27 +241,18 @@ async function joinTeam(teamId) {
 
     try {
         await apiCall(`/teams/${teamId}/join`, 'POST');
-        showToast('Joined team successfully!');
+        await window.showAlert(i18n.t('msg.success'), 'Joined team successfully!');
 
-        // Optimistic UI: Remove the card immediately
-        const card = document.querySelector(`.team-card button[onclick="joinTeam('${teamId}')"]`)?.closest('.team-card');
-        if (card) {
-            card.remove();
-        }
+        // Redirect to Team Details
+        openTeamDetails(teamId);
 
-        // Reload views to ensure state consistency (in background or next navigation)
-        // We do NOT reload the whole view immediately if we just removed the card, 
-        // unless the list is empty, to prevent jarring refresh.
-        // But for safety, we trigger a data refresh.
-        // loadTeamsView(); 
     } catch (error) {
-        alert('Failed to join team: ' + error.message);
-        // Revert button state on error
+        await window.showAlert(i18n.t('msg.error'), 'Failed to join team: ' + error.message);
         if (btn) {
             btn.disabled = false;
             btn.innerText = originalText;
         }
-        loadTeamsView(); // Refresh to ensure correct state (maybe already joined?)
+        loadTeamsView(); // Refresh if failed
     }
 }
 
@@ -242,14 +280,13 @@ async function handleCreateTeam(e) {
         await apiCall('/teams', 'POST', { name, description: desc, is_invite_only: isInviteOnly });
 
         closeCreateTeamModal();
-        showToast('Team created successfully!');
+        await window.showAlert(i18n.t('msg.success'), 'Team created successfully!');
 
-        // Wait a bit to ensure backend consistency, then refresh
         setTimeout(() => {
             fetchAndRenderTeams();
         }, 500);
     } catch (error) {
-        alert(error.message);
+        await window.showAlert(i18n.t('msg.error'), error.message);
     }
 }
 
@@ -323,7 +360,7 @@ function renderTeamDetails(team) {
                 <div class="team-members-card card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <h3>Team Members <span class="badge">${team.members.length}</span></h3>
-                        <button class="btn btn-primary btn-sm" onclick="openAddMemberModal()">+ Add Member</button>
+                        ${isOwner ? `<button class="btn btn-primary btn-sm" onclick="openAddMemberModal()">+ Add Member</button>` : ''}
                     </div>
                     
                     <div class="members-list-table">
@@ -355,7 +392,7 @@ function renderTeamDetails(team) {
                                             ${isOwner && m.role !== 'owner' ?
             `<button class="btn btn-outline btn-sm" onclick="promoteMember('${team.id}', '${m.user_id}', '${escapeHtml(m.user.name || 'User')}')" title="Promote to Owner" style="margin-right: 0.5rem;"><i class="fas fa-crown"></i></button>`
             : ''}
-                                            ${(isOwner && m.role !== 'owner') || (m.user_id === currentUserId) ?
+                                            ${(isOwner && m.role !== 'owner') ?
             `<button class="btn btn-danger btn-sm" onclick="removeTeamMember('${m.user_id}')" title="Remove Member">&times;</button>`
             : ''}
                                         </td>
@@ -368,15 +405,20 @@ function renderTeamDetails(team) {
 
                 <div class="team-settings-card card">
                     <h3>Team Settings</h3>
-                    <p class="text-secondary" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Manage team properties and danger zone.</p>
+                    <p class="text-secondary" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Manage team properties.</p>
                     
+                    ${isOwner ? `
                     <div class="danger-zone" style="border: 1px solid var(--danger); border-radius: 8px; padding: 1rem; background: rgba(255, 0, 0, 0.05);">
                         <h4 style="color: var(--danger); margin-top: 0;">Danger Zone</h4>
                         <p style="font-size: 0.9rem;">Once you delete a team, there is no going back. Please be certain.</p>
-                        ${isOwner ? `
                             <button class="btn btn-danger" style="width: 100%;" onclick="deleteTeam('${team.id}')">Delete Team</button>
-                        ` : '<button class="btn btn-disabled" style="width: 100%;" disabled>Delete Locked (Owner Only)</button>'}
                     </div>
+                    ` : `
+                    <div class="info-zone" style="border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+                        <p style="font-size: 0.9rem;">You are a member of this team.</p>
+                        <button class="btn btn-outline btn-danger" style="width: 100%;" onclick="confirmLeaveTeam('${team.id}', '${escapeHtml(team.name)}')">Leave Team</button>
+                    </div>
+                    `}
                 </div>
             </div>
         </div>
@@ -460,7 +502,7 @@ async function handleAddMember(e) {
     const finalEmail = email || (searchValue.includes('@') ? searchValue : null);
 
     if (!finalEmail) {
-        alert('Please select a user or enter a valid email.');
+        await window.showAlert(i18n.t('msg.warning'), 'Please select a user or enter a valid email.');
         return;
     }
 
@@ -471,7 +513,7 @@ async function handleAddMember(e) {
         showToast('Member added successfully!');
         loadTeamDetails(currentTeamId);
     } catch (error) {
-        alert(error.message);
+        await window.showAlert(i18n.t('msg.error'), error.message);
     }
 }
 
@@ -499,13 +541,13 @@ async function handleEditTeam(e) {
         showToast('Team updated successfully!');
         loadTeamDetails(currentTeamId);
     } catch (error) {
-        alert(error.message);
+        await window.showAlert(i18n.t('msg.error'), error.message);
     }
 }
 
 // Remove Member
 async function removeTeamMember(userId) {
-    if (!confirm('Are you sure you want to remove this member?')) return;
+    if (!await window.showConfirm(i18n.t('modal.confirm'), 'Are you sure you want to remove this member?', { isDanger: true })) return;
 
     try {
         await apiCall(`/teams/${currentTeamId}/members/${userId}`, 'DELETE');
@@ -513,13 +555,16 @@ async function removeTeamMember(userId) {
         showToast('Member removed.');
         loadTeamDetails(currentTeamId);
     } catch (error) {
-        alert(error.message);
+        await window.showAlert(i18n.t('msg.error'), error.message);
     }
 }
 
 // Delete Team
 async function deleteTeam(teamId) {
-    if (!confirm('Are you sure you want to delete this team? This action cannot be undone.')) return;
+    if (!await window.showConfirm('Delete Team',
+        'Are you sure you want to delete this team? This action cannot be undone.',
+        { isDanger: true, confirmText: 'Delete Forever' }
+    )) return;
 
     try {
         await apiCall(`/teams/${teamId}`, 'DELETE');
@@ -527,13 +572,15 @@ async function deleteTeam(teamId) {
         showToast('Team deleted.');
         loadTeamsView();
     } catch (error) {
-        alert(error.message);
+        await window.showAlert(i18n.t('msg.error'), error.message);
     }
 }
 
 // ... (functions)
 export async function promoteMember(teamId, userId, userName) {
-    if (confirm(`Are you sure you want to promote ${userName} to Owner? They will have full control over this team.`)) {
+    if (await window.showConfirm('Promote Member',
+        `Are you sure you want to promote ${userName} to Owner? They will have full control over this team.`
+    )) {
         try {
             await apiCall(`/teams/${teamId}/members/${userId}/role`, 'PUT', { role: 'owner' });
             showToast(`${userName} promoted to Owner`);
@@ -634,7 +681,7 @@ export async function addTeamToBoard() {
 };
 
 export async function removeTeamFromBoard(teamId) {
-    if (!window.currentBoard || !await window.showConfirm(i18n.t('confirm.remove_team'), 'Are you sure you want to remove this team?', { isDanger: true })) return;
+    if (!window.currentBoard || !await window.showConfirmModal(i18n.t('confirm.remove_team'), 'Are you sure you want to remove this team?', { isDanger: true })) return;
 
     try {
         const currentTeamIds = window.currentBoard.teams ? window.currentBoard.teams.map(t => t.id) : [];
@@ -657,6 +704,8 @@ export async function removeTeamFromBoard(teamId) {
 window.loadTeamsView = loadTeamsView;
 
 window.joinTeam = joinTeam;
+window.confirmLeaveTeam = confirmLeaveTeam; // Added
+
 window.openCreateTeamModal = openCreateTeamModal;
 window.closeCreateTeamModal = closeCreateTeamModal;
 window.handleCreateTeam = handleCreateTeam;

@@ -312,9 +312,14 @@ func RemoveTeamMember(c *gin.Context) {
 		return
 	}
 
-	// Verify permission: Only System Admin can remove other members
-	if !checkSystemAdmin(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Only administrators can remove members from a team"})
+	// Verify permission: System Admin OR Team Owner OR Self
+	requesterID := c.MustGet("user_id").(uuid.UUID)
+	isSelf := requesterID == targetUserID
+	isOwner := checkTeamPermission(c, teamID, []string{"owner"})
+	isAdmin := checkSystemAdmin(c)
+
+	if !isSelf && !isOwner && !isAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only team owners or administrators can remove other members"})
 		return
 	}
 

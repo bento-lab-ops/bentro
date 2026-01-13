@@ -34,16 +34,16 @@
 - [x] **Deployment**:
     - [x] Version Bump to `v0.13.0`.
 
-### v0.13.3 - Teams UX & Polish (Next)
+### v0.13.3 - Teams UX & Polish (Completed)
 **Focus:** Fix regressions in Teams view and standardize modals.
-- [ ] **My Teams Tab**:
-    - [ ] Fix `ReferenceError: confirmLeaveTeam is not defined` (Local/Env mismatch?).
-    - [ ] Replace native `confirm()` in "Leave Team" (View Details) with glassmorphic modal.
-    - [ ] Fix "Leave Team" button triggering error.
-- [ ] **Explore Teams Tab**:
-    - [ ] Fix missing Team Card outline/style (CSS/Class issue).
-    - [ ] Replace native `confirm()` in "Join Team" with glassmorphic modal.
-    - [ ] Fix Team Participant Counter not working.
+- [x] **My Teams Tab**:
+    - [x] Fix `ReferenceError: confirmLeaveTeam is not defined` (Local/Env mismatch?).
+    - [x] Replace native `confirm()` in "Leave Team" (View Details) with glassmorphic modal.
+    - [x] Fix "Leave Team" button triggering error.
+- [x] **Explore Teams Tab**:
+    - [x] Fix missing Team Card outline/style (CSS/Class issue).
+    - [x] Replace native `confirm()` in "Join Team" with glassmorphic modal.
+    - [x] Fix Team Participant Counter not working.
 
 ### v0.13.2 - UX Improvements & Modal Standardization (In Progress)
 **Focus:** Replace native alerts with glassmorphic modals and fix UI bugs.

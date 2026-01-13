@@ -34,7 +34,7 @@ export function showConfirm(title, message, options = {}) {
 
         // Content
         titleEl.textContent = title || 'Confirm';
-        msgEl.textContent = message || 'Are you sure?';
+        msgEl.innerHTML = message || 'Are you sure?';
 
         // Options
         const confirmText = options.confirmText || 'Confirm';

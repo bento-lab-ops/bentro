@@ -53,8 +53,8 @@ func main() {
 		router.StaticFile("/static/modals.html", "./web/public/modals.html")
 		router.StaticFile("/static/board-templates.json", "./web/public/board-templates.json") // Fix template 404
 		router.StaticFile("/static/bentro.css", "./web/bentro.css")
-		// User requested using favicon.png as the main logo locally
-		router.StaticFile("/static/bentrologo.png", "./web/static/favicon.png")
+		// User requested using actual logo
+		router.StaticFile("/static/bentrologo.png", "./web/public/bentrologo.png")
 		router.StaticFile("/static/favicon.png", "./web/static/favicon.png")
 
 		router.StaticFile("/", "./web/index.html")

@@ -87,6 +87,7 @@ const translations = {
         'msg.profile_updated': 'Profile updated successfully!',
         'msg.reg_success': 'Registration successful! Please login.',
         'msg.password_changed': 'Password changed successfully!',
+        'msg.left_team': 'You have left the team.',
         'msg.email_readonly': 'Email cannot be changed',
         'msg.must_change_password': 'You must change your password before continuing',
         'msg.guest_option': 'Or continue as guest (Data not saved)',
