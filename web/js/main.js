@@ -570,64 +570,184 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Initialize Dashboard Filters
+    setupDashboardFilters();
 }
 
-function setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            if (e.key === 'Escape') {
-                e.target.blur();
-                closeModals();
-            }
-            return;
-        }
+// Dashboard Filtering Logic
+const activeFilters = new Set();
 
-        if (e.key === 'Escape') {
-            closeModals();
-            if (boardController && boardController.handleCancelSelection) boardController.handleCancelSelection();
-            return;
-        }
+function setupDashboardFilters() {
+    const searchInput = document.getElementById('boardSearchInput');
+    const filterToggles = document.querySelectorAll('.filter-toggle');
+    const clearBtn = document.getElementById('clearFiltersBtn');
 
-        if (e.key === '?' && e.shiftKey) {
-            const helpModal = document.getElementById('helpModal');
-            if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
-            return;
-        }
+    if (searchInput) {
+        searchInput.addEventListener('input', applyDashboardFilters);
+    }
 
-        if (window.currentBoard || (boardController && boardController.boardId)) {
-            if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
-                e.preventDefault();
-                if (boardController) boardController.handleExportBoard();
+    filterToggles.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filterType = btn.dataset.filter;
+            if (activeFilters.has(filterType)) {
+                activeFilters.delete(filterType);
+                btn.classList.remove('active');
+            } else {
+                activeFilters.add(filterType);
+                btn.classList.add('active');
             }
-            if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
-                e.preventDefault();
-                const startBtn = document.getElementById('startTimerBtn');
-                const stopBtn = document.getElementById('stopTimerBtn');
-                if (boardController) {
-                    // Logic to toggle? Controller needs a toggle or we check UI state?
-                    // Controller knows state?
-                    // Let's blindly call handleStart if visible? or just check button display.
-                    if (stopBtn && stopBtn.style.display !== 'none') boardController.handleStopTimer();
-                    else if (startBtn && !startBtn.disabled) boardController.handleStartTimer();
-                }
-            }
-            if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
-                e.preventDefault();
-                const switchBtn = document.getElementById('switchPhaseBtn');
-                if (switchBtn && !switchBtn.disabled && boardController) boardController.handleSwitchPhase();
-            }
-            if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
-                e.preventDefault();
-                // Check if columns exist
-                // Accessing window.currentBoard might still work if Controller updates it (it does for legacy compat)
-                // Or access boardController.board
-                const board = boardController?.board || window.currentBoard;
-                if (board && board.columns && board.columns.length > 0) {
-                    openNewCardModal(board.columns[0].id);
-                }
-            }
-        }
+            applyDashboardFilters();
+        });
     });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            activeFilters.clear();
+            document.querySelectorAll('.filter-toggle').forEach(b => b.classList.remove('active'));
+            if (searchInput) searchInput.value = '';
+            applyDashboardFilters();
+        });
+    }
+}
+
+window.applyDashboardFilters = function () {
+    const searchInput = document.getElementById('boardSearchInput');
+    const searchText = searchInput ? searchInput.value.toLowerCase() : '';
+    const cards = document.querySelectorAll('#dashboardGrid .board-card');
+    let visibleCount = 0;
+
+    const myUser = (window.currentUser || '').toLowerCase();
+
+    cards.forEach(card => {
+        let isVisible = true;
+
+        // Text Search
+        const titleEl = card.querySelector('h3');
+        const title = titleEl ? titleEl.innerText.toLowerCase() : '';
+        if (searchText && !title.includes(searchText)) {
+            isVisible = false;
+        }
+
+        // Filters
+        if (isVisible && activeFilters.size > 0) {
+            // Need to reverse-engineer card properties from DOM or data attributes
+            // Ideally cards should have data attributes, but we can parse text
+            // "Owner: name", "Team: name"
+
+            const metaRows = card.querySelectorAll('.meta-row');
+            let owner = '';
+            let team = '';
+            let participants = '0';
+
+            metaRows.forEach(row => {
+                const label = row.querySelector('span:first-child')?.innerText || '';
+                const value = row.querySelector('span:last-child')?.innerText || '';
+
+                if (label.includes('Owner')) owner = value.toLowerCase();
+                if (label.includes('Team')) team = value.toLowerCase();
+            });
+
+            // Participants logic is hard without raw data, but let's assume if I'm not owner I might be participant
+            // Actually, we passed isMember to render actions. 
+            // We can check if "Join" button exists -> Not Member. If "Return" -> Member.
+            const hasJoinBtn = card.querySelector('.btn-success');
+            const hasReturnBtn = card.querySelector('.btn-primary[title*="Return"], .btn-primary[title*="View"]');
+
+            const isOwner = (owner === myUser);
+            // I am participant if I have Return button AND I am not owner (loosely)
+            // Or simple: Is Member = !hasJoinBtn (if active)
+
+            const isParticipating = hasReturnBtn !== null;
+
+            if (activeFilters.has('myBoards')) {
+                if (!isOwner) isVisible = false;
+            }
+            if (activeFilters.has('participant')) {
+                if (!isParticipating) isVisible = false;
+            }
+            if (activeFilters.has('teamBoards')) {
+                if (!team) isVisible = false;
+            }
+        }
+
+        card.style.display = isVisible ? 'flex' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    // Update Badge
+    const badge = document.getElementById('activeFiltersBadge');
+    const countSpan = document.getElementById('activeFiltersCount');
+    const clearBtn = document.getElementById('clearFiltersBtn');
+
+    if (badge && countSpan) {
+        if (activeFilters.size > 0) {
+            badge.style.display = 'inline-flex';
+            countSpan.innerText = activeFilters.size;
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none'; // Only show clear if filters active
+            // Actually check if search is active too
+            if (searchText && clearBtn) clearBtn.style.display = 'inline-block';
+        }
+    }
+};
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (e.key === 'Escape') {
+            e.target.blur();
+            closeModals();
+        }
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        closeModals();
+        if (boardController && boardController.handleCancelSelection) boardController.handleCancelSelection();
+        return;
+    }
+
+    if (e.key === '?' && e.shiftKey) {
+        const helpModal = document.getElementById('helpModal');
+        if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
+        return;
+    }
+
+    if (window.currentBoard || (boardController && boardController.boardId)) {
+        if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
+            e.preventDefault();
+            if (boardController) boardController.handleExportBoard();
+        }
+        if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
+            e.preventDefault();
+            const startBtn = document.getElementById('startTimerBtn');
+            const stopBtn = document.getElementById('stopTimerBtn');
+            if (boardController) {
+                // Logic to toggle? Controller needs a toggle or we check UI state?
+                // Controller knows state?
+                // Let's blindly call handleStart if visible? or just check button display.
+                if (stopBtn && stopBtn.style.display !== 'none') boardController.handleStopTimer();
+                else if (startBtn && !startBtn.disabled) boardController.handleStartTimer();
+            }
+        }
+        if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
+            e.preventDefault();
+            const switchBtn = document.getElementById('switchPhaseBtn');
+            if (switchBtn && !switchBtn.disabled && boardController) boardController.handleSwitchPhase();
+        }
+        if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
+            e.preventDefault();
+            // Check if columns exist
+            // Accessing window.currentBoard might still work if Controller updates it (it does for legacy compat)
+            // Or access boardController.board
+            const board = boardController?.board || window.currentBoard;
+            if (board && board.columns && board.columns.length > 0) {
+                openNewCardModal(board.columns[0].id);
+            }
+        }
+    }
+});
 }
 
 // Avatar Logic (Local implementation for userModal)
