@@ -22,7 +22,7 @@ export class DashboardController {
         await this.loadBoards(); // Refresh data on view show
 
         // Hide all other views
-        const views = ['boardContainer', 'actionItemsView', 'adminView', 'teamsView'];
+        const views = ['boardContainer', 'actionItemsView', 'adminView', 'teamsView', 'teamDetailsView'];
         views.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';

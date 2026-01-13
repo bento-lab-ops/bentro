@@ -376,7 +376,7 @@ function renderTeamDetails(team) {
                                 ${team.members.map(m => `
                                     <tr style="border-bottom: 1px solid var(--border-light);">
                                         <td style="padding: 0.8rem; display: flex; align-items: center; gap: 0.8rem;">
-                                            <div class="member-avatar-small" style="font-size: 1.2rem;">${m.user.avatar || '👤'}</div>
+                                            <div class="member-avatar-small" style="font-size: 1.2rem;">${m.user.avatar_url || '👤'}</div>
                                             <div>
                                                 <div style="font-weight: 500;">${escapeHtml(m.user.name || 'Unknown')}</div>
                                                 <div style="font-size: 0.8rem; color: var(--text-secondary);">${escapeHtml(m.user.email || '')}</div>
