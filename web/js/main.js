@@ -903,6 +903,19 @@ window.closeBoardSettingsModal = closeBoardSettingsModal;
 // Main Execution
 document.addEventListener('DOMContentLoaded', async () => {
     await loadModals();
+
+    // Initialize Flatpickr for date inputs
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr("input[type=date]", {
+            altInput: true,
+            altFormat: "F j, Y",
+            dateFormat: "Y-m-d",
+            theme: "dark",
+            disableMobile: "true",
+            // static: true removed to let it float above modal
+        });
+    }
+
     setupEventListeners();
     setupKeyboardShortcuts();
     initApp();

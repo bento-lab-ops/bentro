@@ -6,10 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.13.0-rc9">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.13.4">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
 <body>
@@ -33,7 +35,7 @@
                 </div>
                 <div class="lang-selector-container">
                     <button class="btn btn-glass btn-small" onclick="toggleLangMenu()" title="Select Language"
-                        style="font-size: 1.2rem; min-width: 40px; justify-content: center;">🌐</button>
+                        style="min-width: 42px; justify-content: center;">🌐</button>
                     <div id="langMenu" class="lang-dropdown">
                         <button onclick="i18n.setLanguage('en')">English (US) 🇺🇸</button>
                         <button onclick="i18n.setLanguage('pt-BR')">Português (BR) 🇧🇷</button>
@@ -314,18 +316,20 @@
                             <div style="width: 1px; height: 20px; background: var(--glass-border); margin: 0 5px;">
                             </div>
                             <button id="startTimerBtn" class="btn btn-success icon-btn"
-                                style="display: none; width:32px; height:32px; padding:0;" data-action="startTimer"
-                                title="Start"><i class="fas fa-play" style="font-size:0.9rem"></i></button>
+                                style="display: none; width:32px; height:32px; padding:0; justify-content:center; align-items:center;"
+                                data-action="startTimer" title="Start"><i class="fas fa-play"
+                                    style="font-size:0.9rem"></i></button>
                             <button id="stopTimerBtn" class="btn btn-danger icon-btn"
-                                style="display: none; width:32px; height:32px; padding:0;" data-action="stopTimer"
-                                title="Stop"><i class="fas fa-stop" style="font-size:0.9rem"></i></button>
+                                style="display: none; width:32px; height:32px; padding:0; justify-content:center; align-items:center;"
+                                data-action="stopTimer" title="Stop"><i class="fas fa-stop"
+                                    style="font-size:0.9rem"></i></button>
                         </div>
                     </div>
 
                     <!-- Phase Switch -->
                     <button id="switchPhaseBtn" class="btn btn-secondary"
-                        style="width: 100%; margin-top: auto; font-size: 0.9rem;" data-action="switchPhase"><i
-                            class="fas fa-exchange-alt"></i> Phase</button>
+                        style="width: 100%; margin-top: auto; font-size: 0.9rem; display:flex; justify-content:center; align-items:center; gap:0.5rem;"
+                        data-action="switchPhase"><i class="fas fa-exchange-alt"></i> Phase</button>
 
                     <div id="voteStatusDisplay" class="vote-status-display"
                         style="display:none; text-align: center; margin-top: 5px;"></div>
@@ -442,7 +446,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-    <script type="module" src="/static/js/main.js?v=v0.13.0-rc9"></script>
+    <script type="module" src="/static/js/main.js?v=v0.13.4"></script>
 </body>
 
 </html>

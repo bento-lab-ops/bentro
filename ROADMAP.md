@@ -19,7 +19,14 @@
     - [ ] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
     - [ ] Verify Board Status Badges (Fixed in v0.13.0).
 
-### v0.13.0 - Stabilization & Light Theme (Completed)
+### v0.13.4 - UI Polish & UX Enhancements (Current)
+- **Glassmorphism**: Standardized header buttons, language dropdown, and sidebar menu.
+- **Date Picker**: Integrated Flatpickr for a modern, themed date selection experience.
+- **Micro-interactions**: Improved various button alignments and hover states.
+- **Cleanup**: Removed deprecated admin password input from settings.
+
+### v0.14.0 - Performance & Optimization (Planned)
+& Light Theme (Completed)
 **Focus:** Fixing Regressions, recovering from crashes, and basic Light Theme readability.
 - [x] **Light Theme Fixes**:
     - [x] "My Retrospectives" Title Visibility (Gradient fixed).

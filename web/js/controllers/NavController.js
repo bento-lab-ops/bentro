@@ -161,41 +161,37 @@ export class NavController {
                     </label>
                 </div>
             </div>
+        `;
+
+        // Only show Administration if already authenticated
+        if (window.currentUserRole === 'admin' || adminToken) {
+            html += `
             <div class="settings-section">
                 <h4>🛡️ ${i18n.t('settings.administration')}</h4>
                 <div class="admin-panel-link">
-        `;
+            `;
 
-        if (window.currentUserRole === 'admin') {
-            html += `
-                <div class="alert alert-success">✅ Authenticated as Admin (JWT)</div>
-                <p>You have full administrative access.</p>
-                <div class="settings-actions">
-                    <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
-                </div>
-            `;
-        } else if (adminToken) {
-            html += `
-                <div class="alert alert-success">✅ ${i18n.t('menu.verified')}</div>
-                <p>${i18n.t('admin.board_management_desc')}</p>
-                <div class="settings-actions">
-                    <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
-                    <button class="btn btn-outline btn-sm" onclick="logoutAdminInSettings()">${i18n.t('menu.logout')}</button>
-                </div>
-            `;
-        } else {
-            html += `
-                <p class="text-secondary">${i18n.t('menu.enter_password')}</p>
-                <form id="settingsAdminLogin" onsubmit="handleSettingsAdminLogin(event)">
-                    <div class="input-group">
-                        <input type="password" id="settingsAdminPass" placeholder="${i18n.t('label.password') || 'Password'}" class="form-input">
-                        <button type="submit" class="btn btn-primary">${i18n.t('menu.unlock')}</button>
+            if (window.currentUserRole === 'admin') {
+                html += `
+                    <div class="alert alert-success">✅ Authenticated as Admin (JWT)</div>
+                    <p>You have full administrative access.</p>
+                    <div class="settings-actions">
+                        <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
                     </div>
-                </form>
-            `;
+                `;
+            } else if (adminToken) {
+                html += `
+                    <div class="alert alert-success">✅ ${i18n.t('menu.verified')}</div>
+                    <p>${i18n.t('admin.board_management_desc')}</p>
+                    <div class="settings-actions">
+                        <button class="btn btn-primary btn-sm" onclick="navigateTo('admin'); closeSettingsModal()">${i18n.t('menu.admin')}</button>
+                        <button class="btn btn-outline btn-sm" onclick="logoutAdminInSettings()">${i18n.t('menu.logout')}</button>
+                    </div>
+                `;
+            }
+            html += `</div></div>`;
         }
 
-        html += `</div></div>`;
         container.innerHTML = html;
     }
 

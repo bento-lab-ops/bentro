@@ -185,9 +185,10 @@ a:hover {
 
 /* Glassmorphic Buttons */
 .btn-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    /* Increased opacity */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     color: var(--text-primary);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
@@ -3256,12 +3257,13 @@ input:checked+.slider:before {
     /* Space below button */
     right: 0;
     min-width: 180px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
+    background: var(--bg-medium);
+    /* Opaque background */
+    backdrop-filter: none;
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 0.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     z-index: 1000;
     flex-direction: column;
     gap: 0.5rem;
@@ -3291,9 +3293,11 @@ input:checked+.slider:before {
 }
 
 .lang-dropdown button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--glass-border);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateX(2px);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    /* Keep text white/bright */
 }
 
 @keyframes fadeIn {
@@ -3306,4 +3310,170 @@ input:checked+.slider:before {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Sidebar Menu Glassmorphism Polish */
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+}
+
+.menu-list li {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    /* Centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    gap: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.menu-list li:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: var(--glass-border);
+    /* Or primary if preferred */
+    color: var(--primary);
+    /* Highlight text */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+    /* Ensure icon doesn't shift layout too much */
+}
+
+/* Admin Item Special Style (Optional) */
+.menu-list li.admin-item {
+    border-color: rgba(124, 58, 237, 0.3);
+    background: rgba(124, 58, 237, 0.1);
+}
+
+
+/* Date Picker Polish */
+input[type="date"] {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input[type="date"]:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--glass-border);
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3);
+}
+
+/* Fix calendar icon color in dark mode */
+::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+input[type="date"]:hover ::-webkit-calendar-picker-indicator {
+    opacity: 1;
+}
+
+
+/* Custom Flatpickr Glassmorphic Theme */
+.flatpickr-calendar {
+    background: var(--bg-medium) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    font-family: 'Inter', sans-serif !important;
+    z-index: 99999 !important;
+    /* Ensure it floats above modals */
+}
+
+.flatpickr-calendar.arrowTop:before,
+.flatpickr-calendar.arrowTop:after {
+    border-bottom-color: var(--bg-medium) !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    fill: var(--text-primary) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+    background: var(--bg-dark) !important;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: var(--text-primary) !important;
+    fill: var(--text-primary) !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover svg,
+.flatpickr-months .flatpickr-next-month:hover svg {
+    fill: var(--primary) !important;
+}
+
+.flatpickr-weekdays {
+    background: transparent !important;
+}
+
+.flatpickr-weekday {
+    color: var(--text-secondary) !important;
+}
+
+.flatpickr-day {
+    color: var(--text-primary) !important;
+}
+
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: var(--text-muted) !important;
+}
+
+.flatpickr-day.today {
+    border-color: var(--text-secondary) !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day:focus,
+.flatpickr-day:hover {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
 }
