@@ -146,24 +146,28 @@ export async function handleLoginSubmit(event) {
 
 export async function handleRegisterSubmit(event) {
     event.preventDefault();
-    const firstName = document.getElementById('registerFirstName').value;
-    const lastName = document.getElementById('registerLastName').value;
-    const displayName = document.getElementById('registerDisplayName').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
+    const fullName = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+
+    // Split name for legacy backend support
+    const nameParts = fullName.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
 
     try {
         await register({
             first_name: firstName,
             last_name: lastName,
-            display_name: displayName,
+            display_name: fullName,
             email,
             password,
             avatar: '👤'
         });
         // Auto login after register?
         // For now, ask to login
-        alert('Registration successful! Please login.');
+        // alert('Registration successful! Please login.'); // REMOVED
+        await window.showAlert(i18n.t('msg.success'), i18n.t('msg.reg_success'));
         switchToLogin();
         // Pre-fill email
         document.getElementById('loginEmail').value = email;
@@ -264,10 +268,10 @@ export async function saveProfileChanges() {
         // Update UI
         if (window.updateUserDisplay) window.updateUserDisplay();
 
-        alert('Profile updated successfully!');
+        await window.showAlert(i18n.t('msg.success'), i18n.t('msg.profile_updated') || 'Profile updated successfully!');
         closeUserProfileModal();
     } catch (error) {
-        alert('Failed to update profile: ' + error.message);
+        await window.showAlert(i18n.t('msg.error'), 'Failed to update profile: ' + error.message);
     }
 }
 
@@ -287,7 +291,7 @@ export function openChangePasswordModal(forced = false) {
     } else {
         warningDiv.style.display = 'none';
         const closeBtn = modal.querySelector('.close-modal');
-        if (closeBtn) closeBtn.style.display = 'inline';
+        if (closeBtn) closeBtn.style.display = ''; // Let CSS handle it (was 'inline')
     }
 
     modal.style.display = 'block';
@@ -295,7 +299,7 @@ export function openChangePasswordModal(forced = false) {
 
 export function closeChangePasswordModal() {
     if (isPasswordChangeForced) {
-        alert('You must change your password before continuing.');
+        window.showAlert(i18n.t('msg.warning'), i18n.t('msg.must_change_password'));
         return;
     }
     const modal = document.getElementById('changePasswordModal');
@@ -321,7 +325,7 @@ export async function handleChangePasswordSubmit(event) {
             new_password: newPassword
         });
 
-        alert('Password changed successfully!');
+        await window.showAlert(i18n.t('msg.success'), i18n.t('msg.password_changed') || 'Password changed successfully!');
         isPasswordChangeForced = false;
         closeChangePasswordModal();
 

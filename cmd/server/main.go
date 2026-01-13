@@ -44,15 +44,31 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Serve static files from Vite build (dist)
-	// /assets is for hashed JS/CSS from Vite
-	router.Static("/assets", "./web/dist/assets")
-	// /static is used for legacy compat and public files (images, json, html partials)
-	// Vite copies public/* to dist root. So we serve dist root as /static.
-	router.Static("/static", "./web/dist")
+	// Serve static files
+	if os.Getenv("LOCAL_DEV") == "true" {
+		log.Println("📂 Serving raw files from ./web (Local Dev Mode)")
 
-	// Serve index.html for root
-	router.StaticFile("/", "./web/dist/index.html")
+		// Granular mapping to avoid wildcard conflicts and match Build structure:
+		router.Static("/static/js", "./web/js")
+		router.StaticFile("/static/modals.html", "./web/public/modals.html")
+		router.StaticFile("/static/board-templates.json", "./web/public/board-templates.json") // Fix template 404
+		router.StaticFile("/static/bentro.css", "./web/bentro.css")
+		// User requested using favicon.png as the main logo locally
+		router.StaticFile("/static/bentrologo.png", "./web/static/favicon.png")
+		router.StaticFile("/static/favicon.png", "./web/static/favicon.png")
+
+		router.StaticFile("/", "./web/index.html")
+	} else {
+		// Serve static files from Vite build (dist)
+		// /assets is for hashed JS/CSS from Vite
+		router.Static("/assets", "./web/dist/assets")
+		// /static is used for legacy compat and public files (images, json, html partials)
+		// Vite copies public/* to dist root. So we serve dist root as /static.
+		router.Static("/static", "./web/dist")
+
+		// Serve index.html for root
+		router.StaticFile("/", "./web/dist/index.html")
+	}
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})

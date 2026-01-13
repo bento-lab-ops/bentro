@@ -6,6 +6,7 @@ import (
 	"os"
 	"retro-app/internal/models"
 
+	"github.com/glebarez/sqlite"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -20,17 +21,25 @@ func InitDB() error {
 		return nil
 	}
 
-	host := getEnv("DB_HOST", "localhost")
-	port := getEnv("DB_PORT", "5432")
-	user := getEnv("DB_USER", "postgres")
-	password := getEnv("DB_PASSWORD", "postgres")
-	dbname := getEnv("DB_NAME", "retrodb")
+	var dialector gorm.Dialector
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	if os.Getenv("DB_DRIVER") == "sqlite" {
+		log.Println("🛠️ Using SQLite Driver (Local Mode)")
+		dialector = sqlite.Open("retro.db")
+	} else {
+		host := getEnv("DB_HOST", "localhost")
+		port := getEnv("DB_PORT", "5432")
+		user := getEnv("DB_USER", "postgres")
+		password := getEnv("DB_PASSWORD", "postgres")
+		dbname := getEnv("DB_NAME", "retrodb")
+
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			host, port, user, password, dbname)
+		dialector = postgres.Open(dsn)
+	}
 
 	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+	DB, err = gorm.Open(dialector, &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
