@@ -47,20 +47,24 @@ export class NavController {
         window.logoutAdminInSettings = this.logoutAdminInSettings;
     }
 
-    toggleMenu() {
-        const isOpen = this.sidebar.classList.contains('open');
+    toggleMenu(forceClose = false) {
+        if (forceClose) {
+            this.closeMenu();
+            return;
+        }
+        const isOpen = this.sidebar.classList.contains('active');
         isOpen ? this.closeMenu() : this.openMenu();
     }
 
     openMenu() {
-        this.sidebar.classList.add('open');
-        this.overlay.classList.add('visible');
+        this.sidebar.classList.add('active');
+        this.overlay.classList.add('active');
         this.renderMenuLinks();
     }
 
     closeMenu() {
-        this.sidebar.classList.remove('open');
-        this.overlay.classList.remove('visible');
+        this.sidebar.classList.remove('active');
+        this.overlay.classList.remove('active');
     }
 
     renderMenuLinks() {

@@ -200,7 +200,7 @@ export function openUserProfileModal() {
 
     // Refresh i18n for modal content
     if (window.i18n) {
-        window.i18n.translatePage();
+        window.i18n.updatePage();
     }
 }
 

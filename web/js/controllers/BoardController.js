@@ -77,6 +77,10 @@ export class BoardController extends Controller {
         window.addEventListener('timer:stop', this.wsHandlers.onTimerStop);
     }
 
+    stopPolling() {
+        this.destroy();
+    }
+
     destroy() {
         super.destroy();
         console.log('BoardController destroyed');

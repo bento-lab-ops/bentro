@@ -1,7 +1,7 @@
 // API and WebSocket Handling
 import { CONFIG } from './config.js'; // Import dependency
 
-const API_BASE = CONFIG.API_BASE; // Local constant for module use
+const API_BASE = CONFIG.API_URL; // Local constant for module use
 
 // Initialize WebSocket
 export function initWebSocket() {

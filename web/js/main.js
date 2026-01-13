@@ -541,6 +541,35 @@ function setupEventListeners() {
             closeModals();
         }
     });
+
+    // Explicitly attach hamburger menu listener
+    const hamburgerBtn = document.getElementById('hamburgerBtn') || document.querySelector('.hamburger-btn');
+    if (hamburgerBtn) {
+        console.log('Hamburger button found, attaching listener');
+        hamburgerBtn.addEventListener('click', (e) => {
+            console.log('Hamburger Clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            if (navController) {
+                navController.toggleMenu();
+            } else {
+                console.error('navController not initialized');
+            }
+        });
+    } else {
+        console.error('Hamburger button NOT found!');
+    }
+
+    // Explicitly attach overlay listener for safety
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            console.log('Overlay clicked');
+            if (navController) {
+                navController.closeMenu();
+            }
+        });
+    }
 }
 
 function setupKeyboardShortcuts() {
@@ -749,4 +778,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     setupKeyboardShortcuts();
     initApp();
+
+    // Auto-close menu on link clicks
+    const menuList = document.getElementById('menuList');
+    if (menuList) {
+        menuList.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+                if (navController) navController.toggleMenu(true);
+            }
+        });
+    }
 });

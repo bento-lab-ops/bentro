@@ -183,11 +183,11 @@ a:hover {
     font-size: 0.85rem;
 }
 
-/* Glassmorphism Buttons */
-.btn {
-    background: rgba(255, 255, 255, 0.05);
+/* Glassmorphic Buttons */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--text-primary);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
@@ -198,7 +198,25 @@ a:hover {
     justify-content: center;
 }
 
-.btn:hover {
+[data-theme="light"] .btn-glass {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+[data-theme="light"] .btn-glass:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-glass:hover {
     background: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
@@ -230,8 +248,17 @@ a:hover {
     border-color: rgba(14, 165, 233, 0.5);
 }
 
-.btn-glass {
-    /* Base glass style already in .btn, just explicit alias */
+/* Detailed Help Modal fix for double scrollbars */
+.help-modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 1.5rem;
+}
+
+/* Ensure images in help don't break layout */
+.help-modal-content img {
+    max-width: 100%;
+    height: auto;
 }
 
 .btn i {
@@ -433,14 +460,13 @@ a:hover {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
 
-    /* Tooltip & Compact Info Styles */
-    .info-card {
+    /* Flattened .column styles */
+    .column .info-card {
         position: relative;
-        /* Context for tooltip */
         cursor: pointer;
     }
 
-    .info-summary {
+    .column .info-summary {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -449,7 +475,7 @@ a:hover {
         font-size: 1.2rem;
     }
 
-    .info-tooltip {
+    .column .info-tooltip {
         visibility: hidden;
         opacity: 0;
         position: absolute;
@@ -466,13 +492,12 @@ a:hover {
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         transition: all 0.2s ease;
         pointer-events: none;
-        /* simple hover */
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
     }
 
-    .info-card:hover .info-tooltip {
+    .column .info-card:hover .info-tooltip {
         visibility: visible;
         opacity: 1;
         transform: translateX(-50%) translateY(5px);
@@ -1638,80 +1663,140 @@ kbd {
     gap: 1rem;
 }
 
+/* Hamburger Menu */
 .hamburger-btn {
+    display: block;
+    /* Visible by default on all screens */
     background: none;
     border: none;
-    font-size: 1.5rem;
     color: var(--text-primary);
+    font-size: 1.5rem;
     cursor: pointer;
+    z-index: 9999;
+    /* Ensure above overlay */
     padding: 0.5rem;
-    z-index: 2000;
 }
 
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: block;
+    }
+
+    .header-controls {
+        gap: 0.5rem;
+    }
+
+    .app-sidebar {
+        width: 250px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 2001;
+        /* Above header content */
+    }
+
+    .app-sidebar.active {
+        transform: translateX(0);
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* Glass Sidebar */
 .app-sidebar {
     position: fixed;
     top: 0;
-    /* top: 0; removed duplicate */
-    right: 0;
-    width: 250px;
-    height: 100vh;
-    background: var(--bg-medium);
-    border-right: none;
-    border-left: 1px solid var(--border);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    z-index: 1500;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.95));
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2005;
+    /* Higher than before to ensure it's above everything */
+    display: flex;
+    flex-direction: column;
     padding-top: 60px;
-    /* Space for close button if inside, or header */
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    border-left: 1px solid var(--glass-border);
 }
 
-.app-sidebar.open {
-    transform: translateX(0);
+body.dark-mode .app-sidebar {
+    background: var(--glass-bg-dark, rgba(17, 24, 39, 0.95));
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.app-sidebar.active {
+    right: 0;
 }
 
 .sidebar-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1400;
+    backdrop-filter: blur(2px);
+    z-index: 2003;
+    /* Below sidebar (2005) but above header (1000) */
+    display: none;
     opacity: 0;
-    pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
-.sidebar-overlay.visible {
+.sidebar-overlay.active {
+    display: block;
     opacity: 1;
     pointer-events: auto;
+    cursor: pointer;
 }
 
 .menu-list {
     list-style: none;
-    padding: 1rem 0;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
 }
 
-.menu-list li {
-    padding: 1rem 1.5rem;
-    cursor: pointer;
-    font-size: 1.1rem;
-    color: var(--text-primary);
+.menu-list li a {
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: background 0.2s;
+    padding: 1rem 2rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
 }
 
-.menu-list li:hover {
-    background: var(--bg-light);
+body.dark-mode .menu-list li a {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.menu-icon {
-    font-size: 1.2rem;
-    width: 25px;
+.menu-list li a:hover {
+    background: rgba(var(--primary-rgb), 0.08);
+    /* Minimal tint */
+    padding-left: 2.2rem;
+    /* Slight slide effect */
+    color: var(--primary);
+}
+
+.menu-list li a i {
+    margin-right: 1rem;
+    width: 24px;
     text-align: center;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.menu-list li a:hover i {
+    color: var(--primary);
 }
 
 .admin-item {
@@ -1859,12 +1944,6 @@ input:checked+.slider:before {
     align-items: center;
     justify-content: center;
     background: var(--bg-medium);
-}
-
-.app-sidebar {
-    display: flex;
-    flex-direction: column;
-    /* Ensure footer pushes to bottom */
 }
 
 /* Close Modal Button */
@@ -3107,15 +3186,8 @@ input:checked+.slider:before {
     transform: translateY(-1px);
 }
 
-/* Glassmorphic Primary Button */
+/* Glass Button (Premium) */
 .btn-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     display: inline-flex;

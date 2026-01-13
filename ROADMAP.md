@@ -19,7 +19,7 @@
     - [ ] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
     - [ ] Verify Board Status Badges (Fixed in v0.13.0).
 
-### v0.13.0 - Stabilization & Light Theme (Current Release)
+### v0.13.0 - Stabilization & Light Theme (Completed)
 **Focus:** Fixing Regressions, recovering from crashes, and basic Light Theme readability.
 - [x] **Light Theme Fixes**:
     - [x] "My Retrospectives" Title Visibility (Gradient fixed).
@@ -30,8 +30,15 @@
 - [x] **Functional Regressions**:
     - [x] Restored missing `init`, `bindWebSocketEvents` methods.
     - [x] Fixed Drag and Drop selectors (`.retro-card`).
+    - [x] **Hamburger Menu & Overlay**: Fixed unresponsive menu, auto-close, and overlay click (v0.13.0-rc21).
 - [x] **Deployment**:
     - [x] Version Bump to `v0.13.0`.
+
+### v0.13.1 - User Experience Improvements (Next)
+**Focus:** Card Drag & Drop responsiveness and fluidity.
+- [ ] **Card Movement**:
+    - [ ] Improve Drag & Drop responsiveness (Mobile/Desktop).
+    - [ ] Refactor SortableJS implementation.
 
 ### v0.12.0 - Modular Architecture & Refactor (Completed)
 **Focus:** Decoupling `board.js`, Fix Runtime Errors, and Stability.
