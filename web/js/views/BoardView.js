@@ -14,6 +14,7 @@ export class BoardView {
         // Check if correct version loaded
         // console.log('BoardView RC63 Loaded');
         this.renderHeader(board, currentUser);
+        this.renderParticipants(board.participants); // Render participants
         this.renderLinkedTeams(board);
 
         // Render Columns
@@ -26,6 +27,52 @@ export class BoardView {
         container.innerHTML = `
             ${columnsHtml}
         `;
+    }
+
+    renderParticipants(participants) {
+        const container = document.getElementById('boardParticipantsDisplay');
+        if (!container) return;
+
+        if (!participants || participants.length === 0) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'flex';
+
+        const maxDisplay = 10; // Max avatars to show
+        const displayList = participants.slice(0, maxDisplay);
+        const remaining = participants.length - maxDisplay;
+
+        const avatarsHtml = displayList.map(p => {
+            const initial = (p.username || p.name || '?').charAt(0).toUpperCase();
+
+            let avatarContent;
+            // Check if avatar is a generic URL (starts with http) or a relative path (starts with /)
+            const isUrl = p.avatar && (p.avatar.startsWith('http') || p.avatar.startsWith('/'));
+
+            if (isUrl) {
+                avatarContent = `<img src="${p.avatar}" alt="${escapeHtml(p.username)}" class="participant-avatar-img">`;
+            } else if (p.avatar && p.avatar !== '👤') {
+                // It's likely an emoji
+                avatarContent = `<span class="participant-avatar-text" style="font-size: 1.2rem;">${p.avatar}</span>`;
+            } else {
+                avatarContent = `<span class="participant-avatar-text">${initial}</span>`;
+            }
+
+            return `
+                <div class="participant-avatar" title="${escapeHtml(p.display_name || p.username)}">
+                    ${avatarContent}
+                </div>
+            `;
+        }).join('');
+
+        const remainingHtml = remaining > 0
+            ? `<div class="participant-avatar remaining" title="${remaining} more">+${remaining}</div>`
+            : '';
+
+        container.innerHTML = avatarsHtml + remainingHtml;
     }
 
     renderHeader(board, currentUser) {

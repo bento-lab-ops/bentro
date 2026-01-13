@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.14.0">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.14.2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -261,6 +261,9 @@
             <!-- Row 1: Title -->
             <div class="header-title-row">
                 <h2 id="boardTitle" class="board-title"></h2>
+
+                <!-- Participants Display -->
+                <div id="boardParticipantsDisplay" class="board-participants-row"></div>
             </div>
 
             <!-- Row 2: Grid Content -->
@@ -391,12 +394,6 @@
         <div class="modal-content">
             <span class="close" onclick="closeLoginModal()">&times;</span>
             <h2 data-i18n="btn.login">Login</h2>
-            <div class="auth-buttons">
-                <a href="/api/auth/google/login" class="btn btn-google">
-                    Sign in with Google
-                </a>
-            </div>
-            <div class="divider">OR</div>
             <form onsubmit="handleLoginSubmit(event)">
                 <div class="form-group">
                     <label data-i18n="label.email">Email</label>
@@ -463,7 +460,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-    <script type="module" src="/static/js/main.js?v=v0.14.0"></script>
+    <script type="module" src="/static/js/main.js?v=v0.14.2"></script>
 </body>
 
 </html>

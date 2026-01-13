@@ -6,12 +6,15 @@
 
 ## 🎯 Immediate Priorities
 
-### v0.14.0 - Visual Overhaul (Design System)
-**Focus:** Aesthetics, Glassmorphism everywhere, and Premium feel.
-- [ ] **Header Redesign**:
-    - [ ] Make Main Header Glassmorphic.
-    - [ ] Update Header Buttons (New Board, Dashboard, Menu) to Glassmorphic style.
-    - [ ] Update User Avatar and Language Selector to match.
+### v0.14.2 - Visual & Feature Polish (Completed)
+**Focus:** Aesthetics, Board Members Display, and Code Cleanup.
+- [x] **Header Redesign**:
+    - [x] Make Main Header Glassmorphic.
+    - [x] Update Header Buttons (New Board, Dashboard, Menu) to Glassmorphic style.
+- [x] **Features**:
+    - [x] Display Board Members (Avatars) in Retro View.
+    - [x] Remove legacy Google Login button.
+    - [ ] **Verification Pending**: Docker Build & Kubernetes Test (Network Blocked).
 - [ ] **Navigation Redesign**:
     - [ ] Hamburger Menu Transparency & Blur.
     - [ ] Menu Items hover effects.
