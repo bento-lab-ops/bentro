@@ -3215,13 +3215,14 @@ input:checked+.slider:before {
     cursor: grabbing;
     opacity: 1;
     background: var(--glass-bg);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     transform: scale(1.02);
 }
 
 /* Fix for Modal Close Button Positioning */
 .modal-content {
-    position: relative; /* Anchor for absolute children */
+    position: relative;
+    /* Anchor for absolute children */
 }
 
 .close-modal {
@@ -3241,3 +3242,68 @@ input:checked+.slider:before {
     color: var(--danger);
 }
 
+
+/* Language Selector & Dropdown Polish */
+.lang-selector-container {
+    position: relative;
+    display: inline-block;
+}
+
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 120%;
+    /* Space below button */
+    right: 0;
+    min-width: 180px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Show class toggled by JS */
+.lang-dropdown.show {
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.lang-dropdown button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.lang-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--glass-border);
+    transform: translateX(2px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
