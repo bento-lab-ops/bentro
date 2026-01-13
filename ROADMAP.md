@@ -34,6 +34,18 @@
 - [x] **Deployment**:
     - [x] Version Bump to `v0.13.0`.
 
+### v0.13.2 - UX Improvements & Modal Standardization (Next)
+**Focus:** Replace native alerts with glassmorphic modals and fix UI bugs.
+- [ ] **Modal Standardization**:
+    - [ ] Implementation of Generic Confirmation Modal.
+    - [ ] Replace `confirm()` in "Finish Retro".
+    - [ ] Replace `confirm()` in "Leave Board".
+    - [ ] Replace `alert()` in "Vote Limit".
+    - [ ] Replace `confirm()` in "Delete Column".
+    - [ ] Replace `confirm()` in "Delete Card".
+- [ ] **Bug Fixes**:
+    - [ ] Fix "Manage Teams" modal close button visibility.
+
 ### v0.13.1 - User Experience Improvements (Completed)
 **Focus:** Card Drag & Drop responsiveness and fluidity.
 - [x] **Card Movement**:
