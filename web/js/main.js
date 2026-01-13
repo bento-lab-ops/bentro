@@ -693,61 +693,62 @@ window.applyDashboardFilters = function () {
         }
     }
 };
-document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if (e.key === 'Escape') {
+                e.target.blur();
+                closeModals();
+            }
+            return;
+        }
+
         if (e.key === 'Escape') {
-            e.target.blur();
             closeModals();
+            if (boardController && boardController.handleCancelSelection) boardController.handleCancelSelection();
+            return;
         }
-        return;
-    }
 
-    if (e.key === 'Escape') {
-        closeModals();
-        if (boardController && boardController.handleCancelSelection) boardController.handleCancelSelection();
-        return;
-    }
-
-    if (e.key === '?' && e.shiftKey) {
-        const helpModal = document.getElementById('helpModal');
-        if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
-        return;
-    }
-
-    if (window.currentBoard || (boardController && boardController.boardId)) {
-        if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
-            e.preventDefault();
-            if (boardController) boardController.handleExportBoard();
+        if (e.key === '?' && e.shiftKey) {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.style.display = helpModal.style.display === 'block' ? 'none' : 'block';
+            return;
         }
-        if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
-            e.preventDefault();
-            const startBtn = document.getElementById('startTimerBtn');
-            const stopBtn = document.getElementById('stopTimerBtn');
-            if (boardController) {
-                // Logic to toggle? Controller needs a toggle or we check UI state?
-                // Controller knows state?
-                // Let's blindly call handleStart if visible? or just check button display.
-                if (stopBtn && stopBtn.style.display !== 'none') boardController.handleStopTimer();
-                else if (startBtn && !startBtn.disabled) boardController.handleStartTimer();
+
+        if (window.currentBoard || (boardController && boardController.boardId)) {
+            if ((e.key === 'E' || e.key === 'e') && e.shiftKey) {
+                e.preventDefault();
+                if (boardController) boardController.handleExportBoard();
+            }
+            if ((e.key === 'T' || e.key === 't') && e.shiftKey) {
+                e.preventDefault();
+                const startBtn = document.getElementById('startTimerBtn');
+                const stopBtn = document.getElementById('stopTimerBtn');
+                if (boardController) {
+                    // Logic to toggle? Controller needs a toggle or we check UI state?
+                    // Controller knows state?
+                    // Let's blindly call handleStart if visible? or just check button display.
+                    if (stopBtn && stopBtn.style.display !== 'none') boardController.handleStopTimer();
+                    else if (startBtn && !startBtn.disabled) boardController.handleStartTimer();
+                }
+            }
+            if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
+                e.preventDefault();
+                const switchBtn = document.getElementById('switchPhaseBtn');
+                if (switchBtn && !switchBtn.disabled && boardController) boardController.handleSwitchPhase();
+            }
+            if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
+                e.preventDefault();
+                // Check if columns exist
+                // Accessing window.currentBoard might still work if Controller updates it (it does for legacy compat)
+                // Or access boardController.board
+                const board = boardController?.board || window.currentBoard;
+                if (board && board.columns && board.columns.length > 0) {
+                    openNewCardModal(board.columns[0].id);
+                }
             }
         }
-        if ((e.key === 'V' || e.key === 'v') && e.shiftKey) {
-            e.preventDefault();
-            const switchBtn = document.getElementById('switchPhaseBtn');
-            if (switchBtn && !switchBtn.disabled && boardController) boardController.handleSwitchPhase();
-        }
-        if ((e.key === 'N' || e.key === 'n') && e.shiftKey) {
-            e.preventDefault();
-            // Check if columns exist
-            // Accessing window.currentBoard might still work if Controller updates it (it does for legacy compat)
-            // Or access boardController.board
-            const board = boardController?.board || window.currentBoard;
-            if (board && board.columns && board.columns.length > 0) {
-                openNewCardModal(board.columns[0].id);
-            }
-        }
-    }
-});
+    });
 }
 
 // Avatar Logic (Local implementation for userModal)
