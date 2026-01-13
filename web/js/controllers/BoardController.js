@@ -17,11 +17,7 @@ export class BoardController extends Controller {
 
         // Bind handlers once in constructor
         this.handleClick = this.handleClick.bind(this);
-        this.handleDragStart = this.handleDragStart.bind(this);
-        this.handleDragEnd = this.handleDragEnd.bind(this);
-        this.handleDragOver = this.handleDragOver.bind(this);
-        this.handleDragLeave = this.handleDragLeave.bind(this);
-        this.handleDrop = this.handleDrop.bind(this);
+        // drag handlers removed
     }
 
     async init(params) {
@@ -108,6 +104,9 @@ export class BoardController extends Controller {
             // Render View
             this.view.render(this.board, window.currentUser, this.selectedCardId);
 
+            // Initialize Sortable
+            this.initSortable();
+
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
         }
@@ -157,21 +156,13 @@ export class BoardController extends Controller {
         this.cleanup = () => {
             if (!this.eventsBound) return;
             container.removeEventListener('click', this.handleClick);
-            container.removeEventListener('dragstart', this.handleDragStart);
-            container.removeEventListener('dragend', this.handleDragEnd);
-            container.removeEventListener('dragover', this.handleDragOver);
-            container.removeEventListener('dragleave', this.handleDragLeave);
-            container.removeEventListener('drop', this.handleDrop);
+            // Native DnD listeners removed
             this.eventsBound = false;
             console.log('BoardController: Events cleaned up');
         };
 
         container.addEventListener('click', this.handleClick);
-        container.addEventListener('dragstart', this.handleDragStart);
-        container.addEventListener('dragend', this.handleDragEnd);
-        container.addEventListener('dragover', this.handleDragOver);
-        container.addEventListener('dragleave', this.handleDragLeave);
-        container.addEventListener('drop', this.handleDrop);
+        // Native DnD listeners removed
 
         this.eventsBound = true;
         console.log('BoardController: Events bound');
@@ -722,65 +713,61 @@ export class BoardController extends Controller {
         return null;
     }
 
-    // Drag and Drop Logic
-    handleDragStart(e) {
-        const card = e.target.closest('.retro-card');
-        if (card) {
-            e.dataTransfer.setData('text/plain', card.dataset.id);
-            e.dataTransfer.effectAllowed = 'move';
-
-            // Visual Feedback
-            document.body.classList.add('dragging');
-            setTimeout(() => card.classList.add('is-dragging'), 0);
+    // SortableJS Logic
+    initSortable() {
+        if (typeof Sortable === 'undefined') {
+            console.error('SortableJS not loaded');
+            return;
         }
-    }
 
-    handleDragEnd(e) {
-        document.body.classList.remove('dragging');
-        const card = e.target.closest('.retro-card');
-        if (card) card.classList.remove('is-dragging');
+        const containers = document.querySelectorAll('.cards-container');
+        containers.forEach(container => {
+            // Check if already initialized to avoid duplicates? 
+            // Better to destroy previous instance or rely on fresh render.
+            // Since we re-render full board on update, new DOM elements are created.
+            // So we just init on the new elements.
 
-        // Clean up column highlights
-        document.querySelectorAll('.column.drag-over').forEach(col => {
-            col.classList.remove('drag-over');
+            new Sortable(container, {
+                group: 'shared', // Allow dragging between lists
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                delay: 100, // Slight delay to prevent accidental drags on touch
+                delayOnTouchOnly: true,
+                onEnd: async (evt) => {
+                    const itemEl = evt.item;
+                    const cardId = itemEl.dataset.id;
+                    const toColumnEl = evt.to.closest('.column');
+                    const fromColumnEl = evt.from.closest('.column');
+
+                    // If dropped in same list and same position, do nothing (or reorder if we supported it)
+                    if (evt.to === evt.from && evt.newIndex === evt.oldIndex) {
+                        return;
+                    }
+
+                    if (cardId && toColumnEl && toColumnEl.dataset.columnId) {
+                        const columnId = toColumnEl.dataset.columnId;
+                        console.log(`[Sortable] Moved ${cardId} to Column ${columnId}`);
+                        try {
+                            await boardService.moveCard(cardId, columnId);
+                            // No need to reload, the WS update will trigger reload
+                            // But for snappiness we might leave it. 
+                            // Actually, if we rely on WS, we might get a flicker revert if WS is slow.
+                            // But usually loadBoardData is called after moveCard returns anyway
+                            // in previous logic. Let's see.
+                            // For now, let's call loadBoardData to confirm state match.
+                            this.loadBoardData();
+                        } catch (error) {
+                            console.error('Move failed:', error);
+                            alert('Failed to move card: ' + error.message);
+                            // Revert changes on UI if possible? 
+                            // Sortable doesn't easily revert unless we reload.
+                            this.loadBoardData();
+                        }
+                    }
+                }
+            });
         });
-    }
-
-    handleDragOver(e) {
-        const column = e.target.closest('.column');
-        if (column) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            column.classList.add('drag-over');
-        }
-    }
-
-    handleDragLeave(e) {
-        const column = e.target.closest('.column');
-        // Only remove if leaving the column (not entering a child)
-        if (column && !column.contains(e.relatedTarget)) {
-            column.classList.remove('drag-over');
-        }
-    }
-
-    async handleDrop(e) {
-        e.preventDefault();
-        const cardId = e.dataTransfer.getData('text/plain');
-        const column = e.target.closest('.column');
-
-        // Cleanup visuals immediately
-        this.handleDragEnd(e);
-
-        if (cardId && column && column.dataset.columnId) {
-            const columnId = column.dataset.columnId;
-            try {
-                await boardService.moveCard(cardId, columnId);
-                this.loadBoardData();
-            } catch (error) {
-                console.error('Move failed:', error);
-                alert('Failed to move card: ' + error.message);
-            }
-        }
     }
 }
 

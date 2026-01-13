@@ -34,11 +34,11 @@
 - [x] **Deployment**:
     - [x] Version Bump to `v0.13.0`.
 
-### v0.13.1 - User Experience Improvements (Next)
+### v0.13.1 - User Experience Improvements (Completed)
 **Focus:** Card Drag & Drop responsiveness and fluidity.
-- [ ] **Card Movement**:
-    - [ ] Improve Drag & Drop responsiveness (Mobile/Desktop).
-    - [ ] Refactor SortableJS implementation.
+- [x] **Card Movement**:
+    - [x] Improve Drag & Drop responsiveness (Mobile/Desktop).
+    - [x] Refactor SortableJS implementation.
 
 ### v0.12.0 - Modular Architecture & Refactor (Completed)
 **Focus:** Decoupling `board.js`, Fix Runtime Errors, and Stability.

@@ -3202,3 +3202,19 @@ input:checked+.slider:before {
     box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
     transform: translateY(-1px);
 }
+
+/* Sortable JS Ghost (Where item will be dropped) */
+.sortable-ghost {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    opacity: 0.5;
+}
+
+/* Sortable JS Drag (Item being dragged) */
+.sortable-drag {
+    cursor: grabbing;
+    opacity: 1;
+    background: var(--glass-bg);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    transform: scale(1.02);
+}
