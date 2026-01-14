@@ -1,6 +1,6 @@
 # BenTro 🍱
 
-![BenTro Logo](web/bentrologo.png)
+![BenTro Logo](web/static/favicon.png)
 
 **BenTro** (Bento + Retro) is a lightweight, real-time retrospective tool designed for agile teams. It combines the simplicity of a bento box with powerful collaboration features.
 
