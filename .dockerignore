@@ -1,12 +1,56 @@
-web/node_modules
-web/dist
+# Git
 .git
 .gitignore
+
+# Docker
+.dockerignore
+Dockerfile*
+
+# Documentation & Plans
 README.md
 ROADMAP.md
+docs/
+plans/
 task.md
 implimentation_plan.md
 walkthrough.md
 critical_analysis_*.md
-.gemini
+BRANDING_SUMMARY.md
+TESTING_PLAN.md
+
+# Build Artifacts & Binaries
+dist/
+web/dist/
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+server
+
+# Dependencies
+vendor/
+web/node_modules/
+
+# IDE & Tooling
+.idea/
+.vscode/
+.gemini/
+.agent/
+sonar-project.properties
+
+# Logs & Temporary Files
+*.log
+*.tmp
 audit_output*.txt
+coverage/
+e2e_*.txt
+tests/
+
+# Kubernetes Manifests (Not needed in image)
+k8s/
+
+# Local DBs
+*.db
