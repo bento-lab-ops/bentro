@@ -1,9 +1,0 @@
-FROM node:23-alpine
-WORKDIR /web
-COPY web/package.json ./
-# Install dependencies including vitest
-RUN npm install
-# Copy source code
-COPY web/ ./
-# Run tests
-RUN npm test
