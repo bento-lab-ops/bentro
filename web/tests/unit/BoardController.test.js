@@ -29,23 +29,20 @@ vi.mock('../../js/lib/Controller.js', () => ({
         destroy() { }
     }
 }));
-// Helper to mock global window properties if needed
-global.window = {
+// Helper to update window properties safer
+Object.assign(window, {
     currentUser: 'TestUser',
     location: { hash: '' }
-};
-global.document = {
-    getElementById: vi.fn(),
-    querySelector: vi.fn()
-};
-global.alert = vi.fn();
-global.confirm = vi.fn(() => true);
+});
 
 describe('BoardController', () => {
     let controller;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset window state if needed
+        window.currentUser = 'TestUser';
+
         // BoardView constructor mock
         BoardView.mockImplementation(() => ({
             render: vi.fn(),
@@ -66,7 +63,8 @@ describe('BoardController', () => {
 
             // Assert
             expect(boardService.voteCard).not.toHaveBeenCalled();
-            expect(global.alert).toHaveBeenCalledWith('alert.voting_closed');
+            // Code uses window.showAlert, not alert
+            expect(window.showAlert).toHaveBeenCalledWith(expect.any(String), 'alert.voting_closed');
         });
 
         it('should call boardService.voteCard if phase IS "voting"', async () => {

@@ -1,30 +1,30 @@
 /**
- * @jest-environment jsdom
+ * @vi-environment jsdom
  */
 
 import { DashboardController } from '../../js/controllers/DashboardController.js';
 import { boardService } from '../../js/services/BoardService.js';
 
 // Mocks
-jest.mock('../../js/services/BoardService.js', () => ({
+vi.mock('../../js/services/BoardService.js', () => ({
     boardService: {
-        getAll: jest.fn(),
-        join: jest.fn(),
-        create: jest.fn()
+        getAll: vi.fn(),
+        join: vi.fn(),
+        create: vi.fn()
     }
 }));
 
-jest.mock('../../js/i18n.js', () => ({
+vi.mock('../../js/i18n.js', () => ({
     i18n: { t: k => k }
 }));
 
-jest.mock('../../js/utils.js', () => ({
+vi.mock('../../js/utils.js', () => ({
     escapeHtml: s => s
 }));
 
 // Mock Router globally
 window.router = {
-    navigate: jest.fn()
+    navigate: vi.fn()
 };
 
 describe('DashboardController', () => {
@@ -32,12 +32,13 @@ describe('DashboardController', () => {
     let mockGrid;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         // Setup DOM
         document.body.innerHTML = `
             <div id="dashboardView">
                 <div id="dashboardGrid"></div>
+                <div id="emptyDashboard" style="display: none;">msg.no_boards</div>
                 <button id="filterActiveBtn" class="team-nav-tab active"></button>
                 <button id="filterFinishedBtn" class="team-nav-tab"></button>
                 <div id="boardContainer"></div>
@@ -49,12 +50,12 @@ describe('DashboardController', () => {
         dashboardController = new DashboardController();
 
         // Mock window functions called by rendered HTML
-        window.joinBoardPersistent = jest.fn();
-        window.deleteBoard = jest.fn(); // Logic relies on global deleteBoard?
-        window.updateBoardStatus = jest.fn();
+        window.joinBoardPersistent = vi.fn();
+        window.deleteBoard = vi.fn(); // Logic relies on global deleteBoard?
+        window.updateBoardStatus = vi.fn();
 
         // Ensure applyDashboardFilters exists
-        window.applyDashboardFilters = jest.fn();
+        window.applyDashboardFilters = vi.fn();
     });
 
     test('loadBoards should fetch and render active boards by default', async () => {
@@ -70,6 +71,8 @@ describe('DashboardController', () => {
         expect(mockGrid.children.length).toBe(1);
         expect(mockGrid.innerHTML).toContain('Active Board');
         expect(dashboardController.cache).toEqual(mockBoards);
+        // Ensure empty state hidden
+        expect(document.getElementById('emptyDashboard').style.display).toBe('none');
     });
 
     test('should update view when filtering', async () => {
@@ -88,8 +91,10 @@ describe('DashboardController', () => {
     });
 
     test('renderBoards should handle empty list', () => {
-        dashboardController.renderBoards([]);
-        expect(mockGrid.textContent).toContain('msg.no_boards');
+        dashboardController.renderList([]); // Corrected method name to renderList as used in class
+        // Expect empty state to be visible
+        const emptyState = document.getElementById('emptyDashboard');
+        expect(emptyState.style.display).toBe('flex');
     });
 
     // Reproduction Scenario: Reactivity Test
@@ -102,6 +107,7 @@ describe('DashboardController', () => {
         await dashboardController.loadBoards();
 
         expect(mockGrid.children.length).toBe(1);
+        expect(document.getElementById('emptyDashboard').style.display).toBe('none');
 
         // 2. Simulate "Delete" (Service returns empty array)
         boardService.getAll.mockResolvedValue([]);
@@ -109,10 +115,9 @@ describe('DashboardController', () => {
         // 3. Reload
         await dashboardController.loadBoards();
 
-        // Expect View to be empty
-        // Verified Bug Potential: If filter logic uses old cache or doesn't re-render, this fails.
-        expect(mockGrid.textContent).toContain('msg.no_boards');
-        expect(mockGrid.children.length).toBe(1); // The "No boards" p tag
+        // Expect View to be empty grid and Empty State VISIBLE
+        expect(mockGrid.children.length).toBe(0);
+        expect(document.getElementById('emptyDashboard').style.display).toBe('flex');
     });
 
     test('loadBoards should maintain current filter after reload', async () => {

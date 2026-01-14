@@ -6,4 +6,4 @@ RUN npm install
 # Copy source code
 COPY web/ ./
 # Run tests
-# RUN npm test
+RUN npm test

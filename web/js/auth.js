@@ -30,7 +30,8 @@ export function closeLoginModal() {
     const modal = document.getElementById('loginModal');
     if (modal) modal.style.display = 'none';
     if (window.returnToUserModal) {
-        document.getElementById('userModal').style.display = 'block';
+        const userModal = document.getElementById('userModal');
+        if (userModal) userModal.style.display = 'block';
         window.returnToUserModal = false;
     }
 }
@@ -59,7 +60,8 @@ export function closeRegisterModal() {
     const modal = document.getElementById('registerModal');
     if (modal) modal.style.display = 'none';
     if (window.returnToUserModal) {
-        document.getElementById('userModal').style.display = 'block';
+        const userModal = document.getElementById('userModal');
+        if (userModal) userModal.style.display = 'block';
         window.returnToUserModal = false;
     }
 }

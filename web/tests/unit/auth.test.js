@@ -1,11 +1,11 @@
 /**
- * @jest-environment jsdom
+ * @vi-environment jsdom
  */
 
 import { openLoginModal } from '../../js/auth.js';
 
 // Mock dependencies
-jest.mock('../../js/i18n.js', () => ({
+vi.mock('../../js/i18n.js', () => ({
     i18n: {
         t: (key) => key,
     }
@@ -20,7 +20,7 @@ describe('auth.js', () => {
     beforeEach(() => {
         // Reset DOM
         document.body.innerHTML = '';
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     test('openLoginModal should display userModal and hide registerModal', () => {
