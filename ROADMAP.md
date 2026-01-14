@@ -14,13 +14,12 @@
 - [x] **Features**:
     - [x] Display Board Members (Avatars) in Retro View.
     - [x] Remove legacy Google Login button.
-    - [ ] **Verification Pending**: Docker Build & Kubernetes Test (Network Blocked).
-- [ ] **Navigation Redesign**:
-    - [ ] Hamburger Menu Transparency & Blur.
-    - [ ] Menu Items hover effects.
-- [ ] **Dashboard Polish**:
-    - [ ] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
-    - [ ] Verify Board Status Badges (Fixed in v0.13.0).
+- [x] **Navigation Redesign**:
+    - [x] Hamburger Menu Transparency & Blur.
+    - [x] Menu Items hover effects.
+- [x] **Dashboard Polish**:
+    - [x] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
+    - [x] Verify Board Status Badges (Fixed in v0.13.0).
 
 ### v0.13.4 - UI Polish & UX Enhancements (Current)
 - **Glassmorphism**: Standardized header buttons, language dropdown, and sidebar menu.
@@ -79,7 +78,7 @@
 
 ### v0.12.x - Polish & Security (Next Steps)
 **Focus:** User Experience gaps and Backend Security integrity.
-- [ ] **Guest UX**: Improve experience for unauthenticated/guest users accessing boards/teams.
+- [x] **Guest UX**: Improve experience for unauthenticated/guest users accessing boards/teams.
 - [x] **Voting Phase Verification**: Ensure Backend strictly rejects votes outside the 'voting' phase (Security/Integrity).
 - [ ] **Cleanup**: Remove any remaining legacy comments or unused files.
 

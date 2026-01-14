@@ -139,7 +139,7 @@ export async function handleLoginSubmit(event) {
         const hash = window.location.hash.substring(1);
         if (hash.startsWith('board/')) {
             const boardId = hash.split('/')[1];
-            loadBoard(boardId);
+            boardController.init({ id: boardId });
         } else {
             if (window.showDashboard) window.showDashboard();
         }

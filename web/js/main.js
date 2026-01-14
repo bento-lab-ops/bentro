@@ -928,3 +928,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
+// Global Shims for content loaded by other modules
+window.loadBoard = async (boardId) => {
+    console.log('Global loadBoard called for:', boardId);
+    if (boardController) {
+        await boardController.init({ id: boardId });
+    }
+};
+
+window.loadBoards = async () => {
+    console.log('Global loadBoards called');
+    if (dashboardController) {
+        await dashboardController.init();
+    }
+};

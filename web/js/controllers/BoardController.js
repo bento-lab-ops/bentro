@@ -113,6 +113,16 @@ export class BoardController extends Controller {
 
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
+            if (error.message.includes('401') || error.message.includes('Unauthorized') || error.message.includes('unauthorized')) {
+                if (window.openLoginModal) {
+                    window.openLoginModal();
+                    // Optional: Show specific message?
+                    // window.showAlert('Authentication Required', 'Please login to view this board.');
+                }
+            } else {
+                // Generic error handling
+                if (window.showAlert) window.showAlert('Error', 'Failed to load board: ' + error.message);
+            }
         }
     }
 

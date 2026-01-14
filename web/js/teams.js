@@ -5,6 +5,19 @@ import { escapeHtml, showToast } from './utils.js';
 
 let currentTeamId = null;
 
+function renderLoginRequiredState() {
+    return `
+        <div class="empty-state">
+            <div class="empty-icon">🔒</div>
+            <h3>Authentication Required</h3>
+            <p class="text-secondary mb-3">You need to login to access Teams features.</p>
+            <button class="btn btn-primary" onclick="openLoginModal()">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </div>
+    `;
+}
+
 // Load Teams View
 async function loadTeamsView() {
     // Hide other views
@@ -31,6 +44,19 @@ async function loadTeamsView() {
     // Update URL hash
     if (window.location.hash !== '#teams') {
         window.location.hash = '#teams';
+    }
+
+    // Check Authentication
+    if (!window.currentUserId) {
+        document.getElementById('teamsList').innerHTML = renderLoginRequiredState();
+        document.getElementById('availableTeamsList').innerHTML = ''; // Clear other list
+        document.getElementById('exploreTeamsContent').style.display = 'none'; // Simplify view
+        document.getElementById('myTeamsContent').style.display = 'block'; // Ensure container is visible
+
+        // Ensure tabs are hidden or disabled if desired, but for now just showing specific message in main area
+        // Or better: Override the entire view content temporarily?
+        // Let's stick to the user request: "guest deve ver uma mensagem"
+        return;
     }
 
     // Fetch and render
