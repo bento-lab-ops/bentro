@@ -2,11 +2,23 @@
 
 ## Current Version: **v0.15.4**
 
+
 ---
+
+> [!TIP]
+> **Development Workflow**: Please refer to [docs/WORKFLOW.md](docs/WORKFLOW.md) for our branching strategy and release process.
+
+---
+
 
 ## 🚀 Future Plans (Backlog)
 
-### v0.16.x - Real-time Collaboration II
+### v0.16.x - Performance & Stability
+- [ ] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
+- [ ] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
+- [ ] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
+
+### v0.17.x - Real-time Collaboration II
 - [ ] **Real-time Cursors**: See other users' mouse positions on the board.
 - [ ] **Real-time Online Presence**: Visual indicators (e.g., green avatar outline) for users currently active.
 - [ ] **Typing Indicators**: "User is typing..." notifications.
