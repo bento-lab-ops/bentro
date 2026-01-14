@@ -38,6 +38,11 @@ Each test suite runs inside a Docker container to ensure environment consistency
     - [x] `vote_handler.go` & `reaction_handler.go` - **Covered**
     - [x] `user_handler.go` & `admin_handler.go` - **Covered**
     - [x] `team_handler.go` - **Covered**
+    - [x] `websocket_handler.go` - **Covered**
 
 ## Execution Log
-- *Pending start*
+- [x] Started `internal/handlers` coverage.
+- [x] Completed `auth`, `board`, `column/card`, `vote/reaction`, `user/admin`.
+- [x] Completed `team_handler`.
+- [x] Completed `websocket_handler`.
+- **Final Coverage**: ~56.3% for `internal/handlers`.
