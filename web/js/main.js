@@ -1,3 +1,4 @@
+import './logger.js';
 import { CONFIG, APP_VERSION } from './config.js';
 import './i18n.js';
 import { i18n } from './i18n.js';
@@ -520,6 +521,10 @@ window.openBoardSettings = openBoardSettings;
 window.closeBoardSettingsModal = closeBoardSettingsModal;
 
 // Main Execution
+
+
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     await loadModals();
 

@@ -28,7 +28,7 @@ services:
   app:
     # Use the specific architecture version if needed, or the manifest tag if available
     image: dnlouko/bentro-app:v0.15.4-amd64 # Or -arm64 for Raspberry Pi
-    container_name: retro-app
+    container_name: bentro-app
     ports:
       - "8081:8080" # Access at http://localhost:8081
     environment:

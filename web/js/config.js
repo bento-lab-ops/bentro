@@ -1,6 +1,7 @@
 // Application Configuration
 export const CONFIG = {
-    API_URL: '/api' // Relative to origin for ingress/proxy
+    API_URL: '/api', // Relative to origin for ingress/proxy
+    DEBUG_MODE: false // Set to true for verbose logging, or use localStorage.setItem('DEBUG', 'true')
 };
 
 export const APP_VERSION = 'v0.15.4';

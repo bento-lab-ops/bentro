@@ -3,8 +3,8 @@ package handlers
 import (
 	"fmt"
 	"os"
-	"retro-app/internal/database"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/database"
+	"github.com/bento-lab-ops/bentro/internal/models"
 	"testing"
 
 	"github.com/glebarez/sqlite"

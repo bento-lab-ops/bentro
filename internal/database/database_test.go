@@ -2,7 +2,7 @@ package database
 
 import (
 	"os"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/models"
 	"testing"
 
 	"github.com/glebarez/sqlite"

@@ -39,3 +39,5 @@ sonar-project.properties
 server
 *.db
 .agent/
+
+docs/DOCKERHUB_README.md

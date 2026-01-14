@@ -3,8 +3,8 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"retro-app/internal/database"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/database"
+	"github.com/bento-lab-ops/bentro/internal/models"
 	"time"
 
 	"github.com/gin-gonic/gin"

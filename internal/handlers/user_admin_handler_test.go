@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"retro-app/internal/database"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/database"
+	"github.com/bento-lab-ops/bentro/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"

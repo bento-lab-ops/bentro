@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/models"
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/postgres"

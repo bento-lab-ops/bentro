@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"os"
-	"retro-app/internal/database"
-	"retro-app/internal/handlers"
+
+	"github.com/bento-lab-ops/bentro/internal/database"
+	"github.com/bento-lab-ops/bentro/internal/handlers"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

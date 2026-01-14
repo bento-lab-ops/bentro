@@ -96,3 +96,23 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
+99: [No Change]
+
+## 🔧 Troubleshooting
+
+### Frontend Debugging
+
+By default, the browser console is silent (logs are suppressed). To enable verbose logging for troubleshooting:
+
+1.  Open your browser's Developer Tools (F12).
+2.  Go to the **Console** tab.
+3.  Run the following command:
+    ```javascript
+    localStorage.setItem('DEBUG', 'true')
+    ```
+4.  Reference the page (F5). You should see `[DEBUG] Logger Active` and all subsequent logs.
+
+To disable:
+```javascript
+localStorage.removeItem('DEBUG')
+```

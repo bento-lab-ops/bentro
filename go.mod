@@ -1,4 +1,4 @@
-module retro-app
+module github.com/bento-lab-ops/bentro
 
 go 1.24.0
 

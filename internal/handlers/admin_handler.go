@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 	"os"
-	"retro-app/internal/database"
-	"retro-app/internal/models"
+	"github.com/bento-lab-ops/bentro/internal/database"
+	"github.com/bento-lab-ops/bentro/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
