@@ -1,44 +1,44 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.13.0-rc9**
+## Current Version: **v0.14.5**
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### v0.14.2 - Visual & Feature Polish (Completed)
-**Focus:** Aesthetics, Board Members Display, and Code Cleanup.
-- [x] **Header Redesign**:
-    - [x] Make Main Header Glassmorphic.
-    - [x] Update Header Buttons (New Board, Dashboard, Menu) to Glassmorphic style.
-- [x] **Features**:
-    - [x] Display Board Members (Avatars) in Retro View.
-    - [x] Remove legacy Google Login button.
-- [x] **Navigation Redesign**:
-    - [x] Hamburger Menu Transparency & Blur.
-    - [x] Menu Items hover effects.
-- [x] **Dashboard Polish**:
-    - [x] Check "My Retrospectives" title contrast (Fixed in v0.13.0).
-    - [x] Verify Board Status Badges (Fixed in v0.13.0).
+### v0.15.0 - Feature Expansion (Planned)
+**Focus:** New interactive features and integrations.
+- [ ] **Real-time Cursors**: See other users' cursors on the board.
+- [ ] **Sound Effects**: Optional sounds for timer, voting, and reactions.
+- [ ] **Sorting & Filtering**: Advanced sorting options for cards.
 
-### v0.13.4 - UI Polish & UX Enhancements (Current)
-- **Glassmorphism**: Standardized header buttons, language dropdown, and sidebar menu.
-- **Date Picker**: Integrated Flatpickr for a modern, themed date selection experience.
-- **Micro-interactions**: Improved various button alignments and hover states.
-- **Cleanup**: Removed deprecated admin password input from settings.
+### v0.14.x - Polish, Fixes & Guest UX (Completed)
+**Focus:** Guest experience, bug fixes, and CI/CD stability.
+- [x] **v0.14.5 (Polish)**:
+    - [x] Added missing `admin.stat_total_teams` translation.
+- [x] **v0.14.4 (Bug Fixes)**:
+    - [x] Fixed `i18n.translatePage` regression in `admin-users.js`.
+    - [x] Fixed CI/CD SonarQube `projectKey` error.
+- [x] **v0.14.3 (Guest UX)**:
+    - [x] **Board Access**: Redirect unauthenticated users to Login, then back to Board.
+    - [x] **Teams Access**: Show "Login Required" state instead of breaking.
+- [x] **v0.14.2 (Visuals)**:
+    - [x] Board Members Avatars display.
+    - [x] Google Login button removal.
+
+### v0.14.1 - Critical Bug Fixes (Completed)
+**Focus:** Registration flow and Team permissions.
+- [x] **Registration**: Split Name/Surname, Avatar Selection, Password Validation.
+- [x] **Teams**: Allow Owners to add members.
+- [x] **Search**: Fix Case-insensitive user search (SQLite/Postgres compatibility).
 
 ### v0.14.0 - Performance & Optimization (Completed)
 **Focus:** Code cleanup, performance tuning, and removing technical debt.
-- [x] **Code Cleanup**:
-    - [x] Remove legacy commented-out code in `main.js` and controllers.
-    - [x] Delete unused backup files (e.g., `main.js.new`, `main.js.clean`).
-- [x] **Performance**:
-    - [x] Audit and fix potential event listener leaks in `BoardController`.
-    - [x] Optimize Drag & Drop re-renders (SortableJS).
-- [x] **UI Fixes**:
-    - [x] Fixed Help Modal Double Scrollbar.
+- [x] **Code Cleanup**: Removed legacy comments and backup files.
+- [x] **Performance**: Optimized Drag & Drop and Event Listeners.
+- [x] **UI Fixes**: Modal scrollbars and layouts.
 - [ ] **Architecture**:
-    - [ ] Ensure `Nav`, `Dashboard`, and `Board` controllers have clear separation of concerns (Refactored in v0.12, continuously improving).
+    - [ ] Ensure `Nav`, `Dashboard`, and `Board` controllers have clear separation of concerns (Ongoing).
 
 ### v0.13.3 - Teams UX & Polish (Completed)
 **Focus:** Fix regressions in Teams view and standardize modals.

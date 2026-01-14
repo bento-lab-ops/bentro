@@ -14,7 +14,7 @@ export async function openAdminUsersModal() {
 
     // Refresh i18n
     if (window.i18n) {
-        window.i18n.translatePage();
+        window.i18n.updatePage();
     }
 }
 
