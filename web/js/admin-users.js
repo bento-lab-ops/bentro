@@ -40,7 +40,7 @@ export async function loadAllUsers() {
         renderUsersTable(users);
     } catch (error) {
         console.error('Error loading users:', error);
-        alert('Failed to load users: ' + error.message);
+        if (window.showAlert) await window.showAlert('Error', 'Failed to load users: ' + error.message);
     }
 }
 
@@ -85,7 +85,7 @@ export function renderUsersTable(users) {
 }
 
 export async function updateUserRole(userId, newRole, userName) {
-    if (!confirm(`Change ${userName}'s role to ${newRole}?`)) {
+    if (!await window.showConfirm("Change Role?", `Change ${userName}'s role to ${newRole}?`)) {
         // Reload to reset dropdown
         await loadAllUsers();
         return;
@@ -104,17 +104,17 @@ export async function updateUserRole(userId, newRole, userName) {
             throw new Error(error.error || 'Failed to update role');
         }
 
-        alert(`Successfully changed ${userName}'s role to ${newRole}`);
+        if (window.showAlert) await window.showAlert('Success', `Successfully changed ${userName}'s role to ${newRole}`);
         await loadAllUsers();
     } catch (error) {
         console.error('Error updating role:', error);
-        alert('Failed to update role: ' + error.message);
+        if (window.showAlert) await window.showAlert('Error', 'Failed to update role: ' + error.message);
         await loadAllUsers();
     }
 }
 
 export async function resetUserPassword(userId, userName) {
-    if (!confirm(`Reset password for ${userName}?\n\nThe password will be reset to "bentro" and the user will be required to change it on next login.`)) {
+    if (!await window.showConfirm("Reset Password?", `Reset password for ${userName}?\n\nThe password will be reset to "bentro" and the user will be required to change it on next login.`)) {
         return;
     }
 
@@ -129,20 +129,20 @@ export async function resetUserPassword(userId, userName) {
             throw new Error(error.error || 'Failed to reset password');
         }
 
-        alert(`Password reset successfully for ${userName}!\n\nNew password: "bentro"\nUser will be required to change it on next login.`);
+        if (window.showAlert) await window.showAlert('Success', `Password reset successfully for ${userName}!\n\nNew password: "bentro"\nUser will be required to change it on next login.`);
     } catch (error) {
         console.error('Error resetting password:', error);
-        alert('Failed to reset password: ' + error.message);
+        if (window.showAlert) await window.showAlert('Error', 'Failed to reset password: ' + error.message);
     }
 }
 
 export async function deleteUser(userId, userName) {
-    if (!confirm(`⚠️ DELETE USER: ${userName}?\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`)) {
+    if (!await window.showConfirm("Delete User?", `DELETE USER: ${userName}?\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`, { isDanger: true, confirmText: 'Delete' })) {
         return;
     }
 
     // Double confirmation
-    if (!confirm(`Final confirmation: Delete ${userName}?`)) {
+    if (!await window.showConfirm("Final Confirmation", `Final confirmation: Delete ${userName}?`, { isDanger: true, confirmText: 'YES, DELETE' })) {
         return;
     }
 
@@ -157,11 +157,11 @@ export async function deleteUser(userId, userName) {
             throw new Error(error.error || 'Failed to delete user');
         }
 
-        alert(`User ${userName} has been deleted successfully.`);
+        if (window.showAlert) await window.showAlert('Success', `User ${userName} has been deleted successfully.`);
         await loadAllUsers();
     } catch (error) {
         console.error('Error deleting user:', error);
-        alert('Failed to delete user: ' + error.message);
+        if (window.showAlert) await window.showAlert('Error', 'Failed to delete user: ' + error.message);
     }
 }
 

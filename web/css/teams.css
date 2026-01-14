@@ -1,0 +1,90 @@
+/* Teams View Specific Styles */
+
+/* Teams Grid Layout */
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+/* Premium Card Styling */
+.team-card-premium {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-card-premium:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary, #7c3aed);
+}
+
+.team-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.team-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary, #f3f4f6);
+    margin: 0;
+}
+
+.team-card-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-light, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    color: var(--text-secondary, #9ca3af);
+    border: 1px solid var(--border, #374151);
+    margin-left: 0.5rem;
+}
+
+.team-card-desc {
+    color: var(--text-secondary, #9ca3af);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.team-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    padding-top: 1rem;
+    margin-top: auto;
+}
+
+.team-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary, #9ca3af);
+}
+
+.team-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+}
+
+/* Ensure responsiveness */
+@media (max-width: 768px) {
+    .teams-grid {
+        grid-template-columns: 1fr;
+    }
+}

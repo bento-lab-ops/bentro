@@ -1,6 +1,10 @@
 import { i18n } from '../i18n.js';
 import { logout } from '../api.js';
 import { boardController } from './BoardController.js';
+import { dashboardController } from './DashboardController.js';
+import { teamsController } from './TeamsController.js';
+import { actionItemsController } from './ActionItemsController.js';
+import { adminController } from './AdminController.js';
 
 export class NavController {
     constructor() {
@@ -30,6 +34,57 @@ export class NavController {
 
         // Register global shims for HTML onclick attributes
         this.registerGlobalShims();
+
+        // Initialize Routing
+        // this.bindRouting(); // Manual start required to ensure Auth is ready
+    }
+
+    start() {
+        this.bindRouting();
+    }
+
+    bindRouting() {
+        window.addEventListener('hashchange', () => this.handleRouting());
+        // Handle initial route
+        this.handleRouting();
+    }
+
+    async handleRouting() {
+        // Basic User Visibility Check shim
+        if (!window.currentUser && document.getElementById('userModal')) {
+            document.getElementById('userModal').style.display = 'block';
+            return;
+        }
+
+        const hash = window.location.hash;
+
+        // Hide Modals by default on route change
+        if (document.getElementById('returningUserModal')) document.getElementById('returningUserModal').style.display = 'none';
+        if (document.getElementById('userModal')) document.getElementById('userModal').style.display = 'none';
+
+        if (!hash || hash === '#dashboard') {
+            await dashboardController.showView();
+        } else if (hash.startsWith('#board/')) {
+            const boardId = hash.split('#board/')[1];
+            if (boardId) {
+                // Phase 4: Use BoardController
+                await boardController.init({ id: boardId });
+            }
+        } else if (hash === '#admin') {
+            await adminController.showView();
+        } else if (hash === '#teams') {
+            await teamsController.showView();
+        } else if (hash === '#action-items') {
+            await actionItemsController.showView();
+        } else if (hash.startsWith('#team/')) {
+            const teamId = hash.replace('#team/', '');
+            if (teamId) {
+                teamsController.openTeamDetails(teamId);
+            }
+        } else {
+            // Fallback
+            await dashboardController.showView();
+        }
     }
 
     registerGlobalShims() {
@@ -105,7 +160,11 @@ export class NavController {
     navigateTo(route) {
         if (route === '') {
             window.location.hash = '';
-            if (window.showDashboard) window.showDashboard();
+            if (window.showDashboard) window.showDashboard(); // Legacy shim fallback
+            // Trigger hash change manually if it was already empty?
+            // No, setting hash to '' triggers hashchange usually, but duplicate check might prevent it.
+            // If we are already at '', force reload? No.
+            this.handleRouting();
         } else {
             window.location.hash = `#${route}`;
         }

@@ -50,6 +50,7 @@ func main() {
 
 		// Granular mapping to avoid wildcard conflicts and match Build structure:
 		router.Static("/static/js", "./web/js")
+		router.Static("/static/css", "./web/css")
 		router.StaticFile("/static/modals.html", "./web/public/modals.html")
 		router.StaticFile("/static/board-templates.json", "./web/public/board-templates.json") // Fix template 404
 		router.StaticFile("/static/bentro.css", "./web/bentro.css")

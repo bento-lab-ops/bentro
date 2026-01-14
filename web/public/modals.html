@@ -33,11 +33,11 @@
         <form id="loginForm" onsubmit="handleLoginSubmit(event)">
             <div class="form-group">
                 <label for="loginEmail" data-i18n="label.email">Email</label>
-                <input type="email" id="loginEmail" class="form-input" required>
+                <input type="email" id="loginEmail" class="form-input" required autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="loginPassword" data-i18n="label.password">Password</label>
-                <input type="password" id="loginPassword" class="form-input" required>
+                <input type="password" id="loginPassword" class="form-input" required autocomplete="current-password">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.login">Login</button>
         </form>
@@ -56,24 +56,26 @@
             <div class="form-row" style="display: flex; gap: 10px;">
                 <div class="form-group" style="flex: 1;">
                     <label for="registerFirstName" data-i18n="label.first_name">First Name</label>
-                    <input type="text" id="registerFirstName" class="form-input" required>
+                    <input type="text" id="registerFirstName" class="form-input" required autocomplete="given-name">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label for="registerLastName" data-i18n="label.last_name">Last Name</label>
-                    <input type="text" id="registerLastName" class="form-input" required>
+                    <input type="text" id="registerLastName" class="form-input" required autocomplete="family-name">
                 </div>
             </div>
             <div class="form-group">
                 <label for="registerDisplayName" data-i18n="label.display_name">Display Name (Nickname)</label>
-                <input type="text" id="registerDisplayName" class="form-input" required minlength="3">
+                <input type="text" id="registerDisplayName" class="form-input" required minlength="3"
+                    autocomplete="nickname">
             </div>
             <div class="form-group">
                 <label for="registerEmail" data-i18n="label.email">Email</label>
-                <input type="email" id="registerEmail" class="form-input" required>
+                <input type="email" id="registerEmail" class="form-input" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label for="registerPassword" data-i18n="label.password">Password</label>
-                <input type="password" id="registerPassword" class="form-input" required minlength="6">
+                <input type="password" id="registerPassword" class="form-input" required minlength="6"
+                    autocomplete="new-password">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;"
                 data-i18n="btn.register">Register</button>
@@ -136,17 +138,21 @@
             </div>
         </div>
         <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)">
+            <input type="email" id="changePasswordUsername" name="username" autocomplete="username"
+                style="display:none;" aria-hidden="true">
             <div class="form-group">
                 <label for="currentPassword" data-i18n="label.old_password">Current Password</label>
-                <input type="password" id="currentPassword" class="form-input" required>
+                <input type="password" id="currentPassword" class="form-input" required autocomplete="current-password">
             </div>
             <div class="form-group">
                 <label for="newPassword" data-i18n="label.new_password">New Password</label>
-                <input type="password" id="newPassword" class="form-input" required minlength="6">
+                <input type="password" id="newPassword" class="form-input" required minlength="6"
+                    autocomplete="new-password">
             </div>
             <div class="form-group">
                 <label for="confirmPassword" data-i18n="label.confirm_password">Confirm New Password</label>
-                <input type="password" id="confirmPassword" class="form-input" required minlength="6">
+                <input type="password" id="confirmPassword" class="form-input" required minlength="6"
+                    autocomplete="new-password">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.change_password">Change
                 Password</button>
@@ -199,7 +205,7 @@
 
             <div class="form-group">
                 <label for="userNameInput" data-i18n="label.your_name">Your Name</label>
-                <input type="text" id="userNameInput" class="form-input" required>
+                <input type="text" id="userNameInput" class="form-input" required autocomplete="name">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.join_retro">Join
                 Retrospective</button>
@@ -230,12 +236,14 @@
             <hr>
             <h3 data-i18n="help.shortcuts">Keyboard Shortcuts</h3>
             <ul class="shortcuts-list">
-                <li><kbd>?</kbd> Toggle Help</li>
-                <li><kbd>Esc</kbd> Close Modals</li>
-                <li><kbd>Shift</kbd> + <kbd>E</kbd> Export CSV</li>
-                <li><kbd>Shift</kbd> + <kbd>T</kbd> Toggle Timer</li>
-                <li><kbd>Shift</kbd> + <kbd>V</kbd> Switch Phase</li>
-                <li><kbd>Shift</kbd> + <kbd>N</kbd> New Card</li>
+                <li><kbd>?</kbd> <span data-i18n="help.shortcut.toggle_help">Toggle Help</span></li>
+                <li><kbd>Esc</kbd> <span data-i18n="help.shortcut.close_modals">Close Modals</span></li>
+                <li><kbd>Shift</kbd> + <kbd>E</kbd> <span data-i18n="help.shortcut.export_csv">Export CSV</span></li>
+                <li><kbd>Shift</kbd> + <kbd>T</kbd> <span data-i18n="help.shortcut.toggle_timer">Toggle Timer</span>
+                </li>
+                <li><kbd>Shift</kbd> + <kbd>V</kbd> <span data-i18n="help.shortcut.switch_phase">Switch Phase</span>
+                </li>
+                <li><kbd>Shift</kbd> + <kbd>N</kbd> <span data-i18n="help.shortcut.new_card">New Card</span></li>
             </ul>
             <hr>
             <p><a href="https://github.com/bento-lab-ops/bentro" id="githubLink" target="_blank"
@@ -256,7 +264,7 @@
             <div class="form-group">
                 <label for="boardName" data-i18n="label.board_name">Board Name</label>
                 <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective"
-                    data-i18n="placeholder.board_name" data-i18n-target="placeholder" required>
+                    data-i18n="placeholder.board_name" data-i18n-target="placeholder" required autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="boardTeamSelect" data-i18n="label.team_optional">Team (Optional)</label>
@@ -365,106 +373,21 @@
             <input type="date" id="actionItemDueDate" class="form-input">
         </div>
         <input type="hidden" id="actionItemCardId">
-        <div class="modal-actions" style="display: flex; justify-content: space-between; gap: 1rem;">
-            <button class="btn btn-danger btn-outline" onclick="removeActionItem()"
-                data-i18n="btn.remove_action_item">Remove Action Item</button>
-            <button class="btn btn-primary" onclick="saveActionItem()" data-i18n="btn.save_details">Save
-                Details</button>
+        <div class="modal-actions" style="justify-content: space-between;">
+            <button class="btn btn-danger" onclick="actionItemsController.handleRemove()">Remove Action Status</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="actionItemsController.closeEditModal()"
+                    data-i18n="btn.cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="actionItemsController.handleSave()"
+                    data-i18n="btn.save">Save</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Settings Modal -->
-<div id="boardSettingsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeBoardSettingsModal()">&times;</span>
-        <h2>Board Settings</h2>
-        <div class="form-group">
-            <label for="settingVoteLimit">Vote Limit per User (0 = unlimited)</label>
-            <input type="number" id="settingVoteLimit" class="form-input" min="0">
-        </div>
-        <div class="form-group">
-            <label for="settingBlindVoting" style="display:flex; align-items:center; gap:0.5rem;">
-                <input type="checkbox" id="settingBlindVoting">
-                Enable Blind Voting (Hide counts during voting)
-            </label>
-        </div>
-        <button class="btn btn-primary" onclick="saveBoardSettings()">Save Settings</button>
-    </div>
-</div>
-
-<div id="settingsModal" class="modal">
-    <div class="modal-content settings-modal-content">
-        <span class="close" onclick="closeSettingsModal()">&times;</span>
-        <h2>Settings</h2>
-        <div id="settingsContent">
-            <!-- Content will be rendered by JS -->
-        </div>
-    </div>
-</div>
-
-<!-- Complete Action Item Modal -->
-<div id="completeActionItemModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeCompleteActionItemModal()">&times;</span>
-        <h2 data-i18n="heading.complete_action">✅ Complete Action Item</h2>
-        <p data-i18n="text.resolution_details">Add details about the resolution.</p>
-        <form id="completeActionItemForm" onsubmit="submitActionItemCompletion(event)">
-            <input type="hidden" id="completeActionItemId">
-
-            <div class="form-group">
-                <label data-i18n="label.completion_date">Completion Date</label>
-                <input type="date" id="completeActionItemDate" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-                <label data-i18n="label.link_optional">Link / PR (Optional)</label>
-                <input type="url" id="completeActionItemLink" class="form-input" placeholder="https://github.com/...">
-            </div>
-
-            <div class="form-group">
-                <label data-i18n="label.desc_optional">Description / Notes (Optional)</label>
-                <textarea id="completeActionItemDesc" class="form-textarea" placeholder="What was done..."
-                    data-i18n="placeholder.what_done" data-i18n-target="placeholder"></textarea>
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeCompleteActionItemModal()"
-                    data-i18n="modal.cancel">Cancel</button>
-                <button type="submit" class="btn btn-success" data-i18n="btn.complete_item">Complete Item</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Read-Only Details Modal -->
-<div id="actionItemDetailsModal" class="modal" style="z-index: 1005;">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeActionItemDetailsModal()">&times;</span>
-        <h2>ℹ️ Action Item Details</h2>
-
-        <div class="form-group">
-            <label>Link</label>
-            <div id="detailsLinkContainer" style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px;">
-                <a id="detailsLink" href="#" target="_blank" style="color: var(--accent-color);">No Link</a>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label data-i18n="label.desc_notes">Description / Notes</label>
-            <div id="detailsDesc"
-                style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px; white-space: pre-wrap; min-height: 50px;">
-                No description provided.
-            </div>
-        </div>
-
-        <div class="modal-actions" style="justify-content: flex-end;">
-            <button type="button" class="btn btn-primary" onclick="closeActionItemDetailsModal()">Close</button>
-        </div>
-    </div>
-</div><!-- Modal for Admin User Management -->
+<!-- Modal for Admin Users Management -->
 <div id="adminUsersModal" class="modal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content modal-large">
         <span class="close-modal" onclick="closeAdminUsersModal()">&times;</span>
         <h2 data-i18n="admin.user_management">User Management</h2>
 
@@ -473,7 +396,8 @@
                 <thead>
                     <tr style="border-bottom: 2px solid var(--border);">
                         <th style="padding: 0.75rem; text-align: left;" data-i18n="label.avatar">Avatar</th>
-                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.display_name">Display Name</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.display_name">Display Name
+                        </th>
                         <th style="padding: 0.75rem; text-align: left;" data-i18n="label.email">Email</th>
                         <th style="padding: 0.75rem; text-align: left;" data-i18n="admin.role">Role</th>
                         <th style="padding: 0.75rem; text-align: center;" data-i18n="admin.actions">Actions</th>
@@ -499,7 +423,8 @@
 
         <div class="admin-toolbar">
             <div class="search-box">
-                <input type="text" id="adminBoardSearch" placeholder="Search boards..." onkeyup="filterAdminBoards()">
+                <input type="text" id="adminBoardSearch" placeholder="Search boards..." onkeyup="filterAdminBoards()"
+                    autocomplete="off">
             </div>
             <div class="filter-box">
                 <select id="adminBoardFilter" onchange="filterAdminBoards()">
@@ -539,7 +464,8 @@
 
         <div class="admin-toolbar">
             <div class="search-box">
-                <input type="text" id="adminActionSearch" placeholder="Search items..." onkeyup="filterAdminActions()">
+                <input type="text" id="adminActionSearch" placeholder="Search items..." onkeyup="filterAdminActions()"
+                    autocomplete="off">
             </div>
             <div class="filter-box">
                 <select id="adminActionFilter" onchange="filterAdminActions()">
@@ -609,6 +535,94 @@
         <div class='modal-actions' style='justify-content: center; gap: 1rem;'>
             <button id='btnConfirmCancel' class='btn btn-outline' style='min-width: 100px;'>Cancel</button>
             <button id='btnConfirmOk' class='btn btn-primary' style='min-width: 100px;'>Confirm</button>
+        </div>
+    </div>
+</div><!-- Settings Modal -->
+<div id="boardSettingsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBoardSettingsModal()">&times;</span>
+        <h2>Board Settings</h2>
+        <div class="form-group">
+            <label for="settingVoteLimit">Vote Limit per User (0 = unlimited)</label>
+            <input type="number" id="settingVoteLimit" class="form-input" min="0">
+        </div>
+        <div class="form-group">
+            <label for="settingBlindVoting" style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="checkbox" id="settingBlindVoting">
+                Enable Blind Voting (Hide counts during voting)
+            </label>
+        </div>
+        <button class="btn btn-primary" onclick="saveBoardSettings()">Save Settings</button>
+    </div>
+</div>
+
+<div id="settingsModal" class="modal">
+    <div class="modal-content settings-modal-content">
+        <span class="close" onclick="closeSettingsModal()">&times;</span>
+        <h2>Settings</h2>
+        <div id="settingsContent">
+            <!-- Content will be rendered by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Complete Action Item Modal -->
+<div id="completeActionItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="actionItemsController.closeCompleteModal()">&times;</span>
+        <h2 data-i18n="heading.complete_action">✅ Complete Action Item</h2>
+        <p data-i18n="text.resolution_details">Add details about the resolution.</p>
+        <form id="completeActionItemForm" onsubmit="actionItemsController.handleCompleteSubmit(event)">
+            <input type="hidden" id="completeActionItemId">
+
+            <div class="form-group">
+                <label data-i18n="label.completion_date">Completion Date</label>
+                <input type="date" id="completeActionItemDate" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="label.link_optional">Link / PR (Optional)</label>
+                <input type="url" id="completeActionItemLink" class="form-input" placeholder="https://github.com/...">
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="label.desc_optional">Description / Notes (Optional)</label>
+                <textarea id="completeActionItemDesc" class="form-textarea" placeholder="What was done..."
+                    data-i18n="placeholder.what_done" data-i18n-target="placeholder"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="actionItemsController.closeCompleteModal()"
+                    data-i18n="modal.cancel">Cancel</button>
+                <button type="submit" class="btn btn-success" data-i18n="btn.complete_item">Complete Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Read-Only Details Modal -->
+<div id="actionItemDetailsModal" class="modal" style="z-index: 1005;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="actionItemsController.closeDetails()">&times;</span>
+        <h2>ℹ️ Action Item Details</h2>
+
+        <div class="form-group">
+            <label>Link</label>
+            <div id="detailsLinkContainer" style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px;">
+                <a id="detailsLink" href="#" target="_blank" style="color: var(--accent-color);">No Link</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label data-i18n="label.desc_notes">Description / Notes</label>
+            <div id="detailsDesc"
+                style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px; white-space: pre-wrap; min-height: 50px;">
+                No description provided.
+            </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-primary" onclick="actionItemsController.closeDetails()">Close</button>
         </div>
     </div>
 </div>

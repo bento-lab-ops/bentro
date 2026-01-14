@@ -9,22 +9,11 @@ import { escapeHtml, closeModals } from './utils.js';
 import { dashboardController } from './controllers/DashboardController.js';
 import { boardController } from './controllers/BoardController.js';
 import { boardService } from './services/BoardService.js';
-import {
-    selectAvatar,
-    getUserAvatar,
-    setUserAvatar,
-    AVAILABLE_AVATARS
-} from './avatars.js';
-import { loadAdminView } from './admin.js';
+import { userController } from './controllers/UserController.js';
+import { adminController } from './controllers/AdminController.js';
 import { loadModals } from './modals.js';
-import {
-    loadTeamsView,
-    openTeamDetails,
-    populateBoardTeamSelect,
-    addTeamToBoard,
-    openManageTeamsModal
-} from './teams.js';
-import { loadActionItemsView } from './action_items.js';
+import { teamsController } from './controllers/TeamsController.js';
+import { actionItemsController } from './controllers/ActionItemsController.js';
 import './auth.js';
 import { navController } from './controllers/NavController.js';
 import './admin-users.js';
@@ -45,8 +34,11 @@ import './admin-actions.js';
 async function initUI() {
     console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
 
-    // Load board templates from JSON
-    loadBoardTemplates();
+    // Load Modals
+    await loadModals();
+
+    // Initialize Dashboard Controller (Templates, etc)
+    dashboardController.init();
 
     // Request notification permission for timer sounds
     if (typeof requestNotificationPermission === 'function') {
@@ -82,55 +74,13 @@ async function initUI() {
 async function initApp() {
     // 1. Initialize UI Skeleton first
     await initUI();
-    // populateAvatarSelector depends on DOM, initUI calls it? No, initUI calls it but I need to define it.
 
-    // 2. Initialize User State (Auth)
-    console.log('%c👤 Checking User Status...', 'color: #2196F3;');
-
-    // First, check if we have a server-side session (Google Auth)
-    try {
-        const response = await fetch('/api/user/me');
-        if (response.ok) {
-            const user = await response.json();
-            window.currentUser = user.display_name || user.name;
-            window.currentUserAvatar = user.avatar_url || '👤';
-            window.currentUserId = user.id;
-            window.currentUserEmail = user.email;
-            window.currentUserFullName = user.name;
-            window.currentUserRole = user.role;
-            window.isGoogleAuth = true;
-            console.log('%c🔐 Logged in via Google', 'color: #4CAF50; font-weight: bold;');
-        }
-    } catch (e) {
-        console.log('No active session');
-    }
-
-    // Fallback to LocalStorage if no session
-    if (!window.currentUser) {
-        const storedUser = localStorage.getItem('retroUser');
-        if (storedUser) {
-            window.currentUser = storedUser;
-            window.currentUserAvatar = localStorage.getItem('retroUserAvatar') || '👤';
-        }
-    }
+    // 2. Initialize User State (Auth) & UI
+    await userController.init();
 
     // 3. Handle Routing & View State
-    window.addEventListener('popstate', handleUrlHash);
-    window.addEventListener('hashchange', handleUrlHash);
-    handleUrlHash(); // Initial route
-
-    // 4. Final UI Adjustments based on User State
-    if (!window.currentUser) {
-        console.log('%c📝 Showing login modal', 'color: #FF9800; font-style: italic;');
-        document.getElementById('userModal').style.display = 'block';
-        populateAvatarSelector(); // Call explicitly here
-    } else {
-        updateUserDisplay();
-        if (!window.location.hash || window.location.hash === '#dashboard') {
-            console.log('%c👋 User authenticated, showing dashboard', 'color: #4CAF50; font-style: italic;');
-            showDashboard();
-        }
-    }
+    // Decoupled start ensures User Auth is resolved first
+    navController.start();
 
     // Set version in Help Modal
     const versionSpan = document.getElementById('appVersion');
@@ -139,45 +89,7 @@ async function initApp() {
     }
 }
 
-// Handle URL routing based on hash
-// Handle URL routing based on hash
-async function handleUrlHash() {
-    // Basic User Visibility Check shim
-    if (!window.currentUser && document.getElementById('userModal')) {
-        document.getElementById('userModal').style.display = 'block';
-        return;
-    }
-
-    const hash = window.location.hash;
-
-    // Hide Modals by default on route change
-    if (document.getElementById('returningUserModal')) document.getElementById('returningUserModal').style.display = 'none';
-    if (document.getElementById('userModal')) document.getElementById('userModal').style.display = 'none';
-
-    if (!hash || hash === '#dashboard') {
-        await dashboardController.showView();
-    } else if (hash.startsWith('#board/')) {
-        const boardId = hash.split('#board/')[1];
-        if (boardId) {
-            // Phase 4: Use BoardController
-            await boardController.init({ id: boardId });
-        }
-    } else if (hash === '#admin') {
-        await loadAdminView();
-    } else if (hash === '#teams') {
-        await loadTeamsView();
-    } else if (hash === '#action-items') {
-        await loadActionItemsView();
-    } else if (hash.startsWith('#team/')) {
-        const teamId = hash.replace('#team/', '');
-        if (teamId && openTeamDetails) {
-            openTeamDetails(teamId);
-        }
-    } else {
-        // Fallback
-        await dashboardController.showView();
-    }
-}
+// Handle URL routing based on hash - MOVED TO NavController.js
 
 // Theme Management
 function initTheme() {
@@ -203,42 +115,7 @@ function updateThemeIcon(theme) {
     }
 }
 
-function showReturningUserModal(username) {
-    const avatar = getUserAvatar();
-    document.getElementById('returningUserName').textContent = `${avatar} ${username}`;
-    document.getElementById('returningUserModal').style.display = 'block';
-}
-
-function confirmReturningUser() {
-    window.currentUserAvatar = getUserAvatar();
-    document.getElementById('returningUserModal').style.display = 'none';
-    updateUserDisplay();
-    const editBtn = document.getElementById('editUserBtn');
-    if (editBtn) editBtn.style.display = 'inline-block';
-    handleUrlHash();
-}
-
-function openEditUserModal() {
-    const modal = document.getElementById('userModal');
-    document.getElementById('userNameInput').value = window.currentUser || '';
-    populateAvatarSelector();
-    modal.style.display = 'block';
-    document.getElementById('userNameInput').focus();
-}
-
-function updateUserDisplay() {
-    const avatar = window.currentUserAvatar || getUserAvatar();
-    const userDisplay = document.getElementById('userDisplay');
-    if (userDisplay) {
-        userDisplay.innerHTML = `${avatar} ${escapeHtml(window.currentUser)} <span class="edit-icon" title="Edit Profile">✏️</span>`;
-    }
-    const editBtn = document.getElementById('editUserBtn');
-    if (editBtn) editBtn.style.display = 'inline-block';
-
-    // Also show New Board button if on dashboard (or generic init)
-    const newBoardBtn = document.getElementById('newBoardBtn');
-    if (newBoardBtn) newBoardBtn.style.display = 'inline-block';
-}
+// updateUserDisplay removed (moved to UserController)
 
 // Replaced by DashboardController
 function showDashboard() {
@@ -255,84 +132,7 @@ function showDashboard() {
     }
 }
 
-// Board Templates
-let BOARD_TEMPLATES = {};
-let RAW_TEMPLATES = {};
-
-async function loadBoardTemplates() {
-    const paths = [
-        `/static/board-templates.json?v=${new Date().getTime()}`,
-        `/board-templates.json?v=${new Date().getTime()}`,
-        `/public/board-templates.json?v=${new Date().getTime()}`
-    ];
-
-    for (const path of paths) {
-        try {
-            const response = await fetch(path);
-            if (response.ok) {
-                const templates = await response.json();
-                RAW_TEMPLATES = templates;
-                BOARD_TEMPLATES = {};
-                for (const [key, value] of Object.entries(templates)) {
-                    BOARD_TEMPLATES[key] = value.columns;
-                }
-                populateTemplateDropdown();
-                console.log(`%c✅ Board templates loaded from ${path}`, 'color: #4CAF50; font-weight: bold;', Object.keys(BOARD_TEMPLATES).length, 'templates');
-                return; // Success, exit
-            }
-        } catch (e) {
-            console.warn(`Failed to load templates from ${path}`, e);
-        }
-    }
-
-    // Fallback if all paths fail
-    console.error('All template paths failed. Using hardcoded defaults.');
-    BOARD_TEMPLATES = {
-        'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
-        'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
-        '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
-        'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
-        'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
-    };
-    RAW_TEMPLATES = {};
-    for (const [key, cols] of Object.entries(BOARD_TEMPLATES)) {
-        RAW_TEMPLATES[key] = { name: key, columns: cols };
-    }
-    populateTemplateDropdown();
-}
-
-function populateTemplateDropdown() {
-    const select = document.getElementById('boardTemplate');
-    if (!select) return;
-    const currentSelection = select.value;
-    select.innerHTML = '';
-
-    const customOption = document.createElement('option');
-    customOption.value = 'custom';
-    customOption.textContent = i18n.t('template.custom') || 'Custom (Manual Entry)';
-    select.appendChild(customOption);
-
-    for (const [key, value] of Object.entries(RAW_TEMPLATES)) {
-        const option = document.createElement('option');
-        option.value = key;
-        const nameKey = `template.${key}.name`;
-        const translatedName = i18n.t(nameKey);
-        option.textContent = (translatedName && translatedName !== nameKey) ? translatedName : value.name;
-        select.appendChild(option);
-    }
-
-    if (currentSelection && (RAW_TEMPLATES[currentSelection] || currentSelection === 'custom')) {
-        select.value = currentSelection;
-    }
-}
-
-document.addEventListener('languageChanged', () => {
-    populateTemplateDropdown();
-    const select = document.getElementById('boardTemplate');
-    if (select && select.value !== 'custom' && BOARD_TEMPLATES[select.value]) {
-        select.dispatchEvent(new Event('change'));
-    }
-});
+// Board Templates handling moved to DashboardController
 
 // Helper for New Card Modal (previously in board.js)
 function openNewCardModal(columnId) {
@@ -355,18 +155,20 @@ function setupEventListeners() {
         const name = document.getElementById('userNameInput').value.trim();
         const avatar = document.getElementById('selectedAvatar').value;
         if (name) {
-            window.currentUser = name;
-            window.currentUserAvatar = avatar;
+            userController.currentUser = name;
+            userController.currentUserAvatar = avatar;
             localStorage.setItem('retroUser', name);
             localStorage.setItem('retroUserAvatar', avatar);
+
+            userController.syncGlobalState(); // Update window vars
             document.getElementById('userModal').style.display = 'none';
-            updateUserDisplay();
-            handleUrlHash();
+            userController.updateDisplay();
+            navController.handleRouting();
         }
     });
 
     document.getElementById('dashboardBtn')?.addEventListener('click', () => {
-        showDashboard();
+        window.location.hash = '';
     });
     document.getElementById('actionItemsBtn')?.addEventListener('click', () => {
         window.location.hash = 'action-items';
@@ -374,7 +176,7 @@ function setupEventListeners() {
 
     document.getElementById('newBoardBtn')?.addEventListener('click', async () => {
         document.getElementById('newBoardModal').style.display = 'block';
-        await populateBoardTeamSelect();
+        await teamsController.populateBoardTeamSelect();
     });
 
     document.getElementById('newBoardForm')?.addEventListener('submit', async (e) => {
@@ -392,40 +194,7 @@ function setupEventListeners() {
         }
     });
 
-    // Template Selection Listener
-    const templateSelect = document.getElementById('boardTemplate');
-    const handleTemplateChange = (e) => {
-        const selectedValue = e.target.value;
-        const columnNamesTextarea = document.getElementById('columnNames');
-
-        console.log('Template changed to:', selectedValue);
-
-        if (!columnNamesTextarea) {
-            console.error('Column Names textarea not found');
-            return;
-        }
-
-        if (selectedValue === 'custom') {
-            columnNamesTextarea.value = '';
-            columnNamesTextarea.placeholder = 'Enter custom columns...';
-        } else if (BOARD_TEMPLATES[selectedValue]) {
-            const template = BOARD_TEMPLATES[selectedValue];
-            console.log('Applying template:', template);
-            if (Array.isArray(template)) {
-                columnNamesTextarea.value = template.join('\n');
-            }
-        }
-    };
-
-    if (templateSelect) {
-        templateSelect.addEventListener('change', handleTemplateChange);
-    }
-    // Backup delegation in case of DOM replacement
-    document.addEventListener('change', (e) => {
-        if (e.target && e.target.id === 'boardTemplate') {
-            handleTemplateChange(e);
-        }
-    });
+    // Template Selection Listener moved to DashboardController
 
     document.getElementById('newCardForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -520,15 +289,9 @@ function setupEventListeners() {
     });
 
     // ... user auth listeners unchanged ...
-    document.getElementById('continueAsUserBtn')?.addEventListener('click', confirmReturningUser);
-    document.getElementById('changeUserBtn')?.addEventListener('click', () => {
-        document.getElementById('returningUserModal').style.display = 'none';
-        window.currentUser = null;
-        localStorage.removeItem('retroUser');
-        localStorage.removeItem('adminToken');
-        document.getElementById('userModal').style.display = 'block';
-    });
-    document.getElementById('editUserBtn')?.addEventListener('click', openEditUserModal);
+    document.getElementById('continueAsUserBtn')?.addEventListener('click', () => userController.confirmReturningUser());
+    document.getElementById('changeUserBtn')?.addEventListener('click', () => userController.handleChangeUser());
+    document.getElementById('editUserBtn')?.addEventListener('click', () => userController.openEditUserModal());
     document.getElementById('helpBtn')?.addEventListener('click', () => {
         document.getElementById('helpModal').style.display = 'block';
     });
@@ -569,128 +332,10 @@ function setupEventListeners() {
         });
     }
 
-    // Initialize Dashboard Filters
-    setupDashboardFilters();
+
 }
 
-// Dashboard Filtering Logic
-const activeFilters = new Set();
-
-function setupDashboardFilters() {
-    const searchInput = document.getElementById('boardSearchInput');
-    const filterToggles = document.querySelectorAll('.filter-toggle');
-    const clearBtn = document.getElementById('clearFiltersBtn');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', applyDashboardFilters);
-    }
-
-    filterToggles.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const filterType = btn.dataset.filter;
-            if (activeFilters.has(filterType)) {
-                activeFilters.delete(filterType);
-                btn.classList.remove('active');
-            } else {
-                activeFilters.add(filterType);
-                btn.classList.add('active');
-            }
-            applyDashboardFilters();
-        });
-    });
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            activeFilters.clear();
-            document.querySelectorAll('.filter-toggle').forEach(b => b.classList.remove('active'));
-            if (searchInput) searchInput.value = '';
-            applyDashboardFilters();
-        });
-    }
-}
-
-window.applyDashboardFilters = function () {
-    const searchInput = document.getElementById('boardSearchInput');
-    const searchText = searchInput ? searchInput.value.toLowerCase() : '';
-    const cards = document.querySelectorAll('#dashboardGrid .board-card');
-    let visibleCount = 0;
-
-    const myUser = (window.currentUser || '').toLowerCase();
-
-    cards.forEach(card => {
-        let isVisible = true;
-
-        // Text Search
-        const titleEl = card.querySelector('h3');
-        const title = titleEl ? titleEl.innerText.toLowerCase() : '';
-        if (searchText && !title.includes(searchText)) {
-            isVisible = false;
-        }
-
-        // Filters
-        if (isVisible && activeFilters.size > 0) {
-            // Need to reverse-engineer card properties from DOM or data attributes
-            // Ideally cards should have data attributes, but we can parse text
-            // "Owner: name", "Team: name"
-
-            const metaRows = card.querySelectorAll('.meta-row');
-            let owner = '';
-            let team = '';
-            let participants = '0';
-
-            metaRows.forEach(row => {
-                const label = row.querySelector('span:first-child')?.innerText || '';
-                const value = row.querySelector('span:last-child')?.innerText || '';
-
-                if (label.includes('Owner')) owner = value.toLowerCase();
-                if (label.includes('Team')) team = value.toLowerCase();
-            });
-
-            // Participants logic is hard without raw data, but let's assume if I'm not owner I might be participant
-            // Actually, we passed isMember to render actions. 
-            // We can check if "Join" button exists -> Not Member. If "Return" -> Member.
-            const hasJoinBtn = card.querySelector('.btn-success');
-            const hasReturnBtn = card.querySelector('.btn-primary[title*="Return"], .btn-primary[title*="View"]');
-
-            const isOwner = (owner === myUser);
-            // I am participant if I have Return button AND I am not owner (loosely)
-            // Or simple: Is Member = !hasJoinBtn (if active)
-
-            const isParticipating = hasReturnBtn !== null;
-
-            if (activeFilters.has('myBoards')) {
-                if (!isOwner) isVisible = false;
-            }
-            if (activeFilters.has('participant')) {
-                if (!isParticipating) isVisible = false;
-            }
-            if (activeFilters.has('teamBoards')) {
-                if (!team) isVisible = false;
-            }
-        }
-
-        card.style.display = isVisible ? 'flex' : 'none';
-        if (isVisible) visibleCount++;
-    });
-
-    // Update Badge
-    const badge = document.getElementById('activeFiltersBadge');
-    const countSpan = document.getElementById('activeFiltersCount');
-    const clearBtn = document.getElementById('clearFiltersBtn');
-
-    if (badge && countSpan) {
-        if (activeFilters.size > 0) {
-            badge.style.display = 'inline-flex';
-            countSpan.innerText = activeFilters.size;
-            if (clearBtn) clearBtn.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
-            if (clearBtn) clearBtn.style.display = 'none'; // Only show clear if filters active
-            // Actually check if search is active too
-            if (searchText && clearBtn) clearBtn.style.display = 'inline-block';
-        }
-    }
-};
+// Dashboard Filtering moved to DashboardController
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -750,20 +395,7 @@ function setupKeyboardShortcuts() {
 }
 
 // Avatar Logic (Local implementation for userModal)
-function populateAvatarSelector() {
-    const selector = document.getElementById('avatarSelector');
-    if (!selector) return;
-
-    const currentAvatar = getUserAvatar() || '👤';
-
-    selector.innerHTML = AVAILABLE_AVATARS.map(avatar => `
-        <div class="avatar-option ${avatar === currentAvatar ? 'selected' : ''}" 
-             data-avatar="${avatar}"
-             onclick="selectAvatar('${avatar}')">
-             ${avatar}
-        </div>
-    `).join('');
-}
+// populateAvatarSelector removed (moved to UserController)
 
 
 // Wrappers
@@ -789,7 +421,6 @@ window.exportCurrentBoard = function () {
 window.initApp = initApp;
 window.initUI = initUI;
 window.showDashboard = () => dashboardController.showView();
-window.handleUrlHash = handleUrlHash;
 window.toggleTheme = toggleTheme;
 window.filterBoards = (status) => dashboardController.filterBoards(status);
 window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
@@ -939,6 +570,6 @@ window.loadBoard = async (boardId) => {
 window.loadBoards = async () => {
     console.log('Global loadBoards called');
     if (dashboardController) {
-        await dashboardController.init();
+        await dashboardController.loadBoards();
     }
 };

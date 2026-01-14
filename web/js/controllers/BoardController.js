@@ -336,10 +336,11 @@ export class BoardController extends Controller {
 
             // If turning ON, show the modal to let user set Owner/Due Date
             if (isActionItem) {
-                if (window.openActionItemModal) {
-                    window.openActionItemModal(cardId);
+                // Use the imported controller instance
+                if (window.actionItemsController) {
+                    window.actionItemsController.openEditModal(cardId);
                 } else {
-                    console.warn('Action Item Modal function not found on window');
+                    console.warn('ActionItemsController not found on window');
                 }
             }
 
@@ -353,11 +354,10 @@ export class BoardController extends Controller {
     }
 
     handleOpenActionModal(cardId) {
-        // Legacy Bridge
-        if (window.openActionItemModal) {
-            window.openActionItemModal(cardId);
+        if (window.actionItemsController) {
+            window.actionItemsController.openEditModal(cardId);
         } else {
-            alert('Action Item Modal not ported yet.');
+            console.warn('ActionItemsController not found');
         }
     }
 
@@ -688,7 +688,9 @@ export class BoardController extends Controller {
     handleCancelSelection() {
         console.log('Canceling Selection');
         this.selectedCardId = null;
-        this.view.render(this.board, window.currentUser, null);
+        if (this.board) {
+            this.view.render(this.board, window.currentUser, null);
+        }
     }
 
     async handleMergeCard(targetCardId) {
@@ -708,13 +710,10 @@ export class BoardController extends Controller {
     }
 
     handleActionItem(cardId) {
-        if (window.openActionItemModal) {
-            const card = this.findCard(cardId);
-            const content = card ? card.content : '';
-            window.openActionItemModal(cardId, content);
+        if (window.actionItemsController) {
+            window.actionItemsController.openEditModal(cardId);
         } else {
-            console.error('Action Item Modal not globally available');
-            alert('Action Item Modal not ported yet.');
+            console.error('Action Item Controller not globally available');
         }
     }
 

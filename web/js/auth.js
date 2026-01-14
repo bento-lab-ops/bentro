@@ -1,6 +1,7 @@
 // Auth UI Logic
 import { login, register, apiCall } from './api.js';
 import { boardController } from './controllers/BoardController.js';
+import { userController } from './controllers/UserController.js';
 import { i18n } from './i18n.js';
 
 export function openLoginModal() {
@@ -102,12 +103,8 @@ export async function handleLoginSubmit(event) {
         // Login success
         // Token is set in cookie by backend
         // Update UI
-        window.currentUser = response.user.display_name || response.user.name;
-        window.currentUserAvatar = response.user.avatar_url || '👤';
-        window.currentUserId = response.user.id;
-        window.currentUserEmail = response.user.email;
-        window.currentUserFullName = response.user.name;
-        window.currentUserRole = response.user.role; // Store role for admin check
+        // Update User State via Controller
+        userController.setUserState(response.user);
 
         // Check if password change is required
         if (response.require_password_change) {
@@ -126,8 +123,8 @@ export async function handleLoginSubmit(event) {
         const userModal = document.getElementById('userModal');
         if (userModal) userModal.style.display = 'none';
 
-        // Refresh UI via window global (main.js)
-        if (window.updateUserDisplay) window.updateUserDisplay();
+        // Refresh UI via window global (main.js) (NOW CONTROLLER)
+        userController.updateDisplay();
 
         // Refresh menu via module or window
         // Ensure menu.js is loaded and renderMenuLinks is global
@@ -141,7 +138,7 @@ export async function handleLoginSubmit(event) {
             const boardId = hash.split('/')[1];
             boardController.init({ id: boardId });
         } else {
-            if (window.showDashboard) window.showDashboard();
+            if (window.showDashboard) window.location.hash = ''; // Use routing instead of direct view manipulation
         }
 
         console.log('✅ Login successful!');
@@ -268,10 +265,12 @@ export async function saveProfileChanges() {
         });
 
         // Update global state
-        window.currentUserAvatar = window.selectedProfileAvatar;
+        // Update Controller State
+        userController.currentUserAvatar = window.selectedProfileAvatar;
+        userController.syncGlobalState();
 
         // Update UI
-        if (window.updateUserDisplay) window.updateUserDisplay();
+        userController.updateDisplay();
 
         await window.showAlert(i18n.t('msg.success'), i18n.t('msg.profile_updated') || 'Profile updated successfully!');
         closeUserProfileModal();
@@ -297,6 +296,12 @@ export function openChangePasswordModal(forced = false) {
         warningDiv.style.display = 'none';
         const closeBtn = modal.querySelector('.close-modal');
         if (closeBtn) closeBtn.style.display = ''; // Let CSS handle it (was 'inline')
+    }
+
+    // Populate hidden username for accessibility / password managers
+    const usernameInput = document.getElementById('changePasswordUsername');
+    if (usernameInput) {
+        usernameInput.value = window.currentUserEmail || '';
     }
 
     modal.style.display = 'block';

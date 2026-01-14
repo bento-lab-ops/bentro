@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.14.5">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.15.0">
+    <link rel="stylesheet" href="/static/css/teams.css?v=v0.15.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -66,7 +67,8 @@
 
             <!-- Search and Custom Filters -->
             <div class="dashboard-filters-container">
-                <input type="text" id="boardSearchInput" class="search-input-premium" placeholder="Search boards...">
+                <input type="text" id="boardSearchInput" class="search-input-premium" placeholder="Search boards..."
+                    autocomplete="off">
 
                 <div class="filter-toggles">
                     <button class="filter-toggle" id="myBoardsToggle" data-filter="myBoards">
@@ -116,8 +118,8 @@
         <!-- Teams View -->
         <div id="teamsView" class="dashboard-view" style="display: none;">
             <div class="page-hero">
-                <h1 class="page-title">Teams</h1>
-                <p class="page-subtitle">Collaborate and manage your squads</p>
+                <h1 class="page-title" data-i18n="heading.teams">Teams</h1>
+                <p class="page-subtitle" data-i18n="subtitle.teams">Collaborate and manage your squads</p>
             </div>
 
             <!-- Teams Navigation Tabs -->
@@ -165,7 +167,7 @@
                 <form onsubmit="handleCreateTeam(event)">
                     <div class="form-group">
                         <label for="createTeamName">Team Name</label>
-                        <input type="text" id="createTeamName" class="form-input" required>
+                        <input type="text" id="createTeamName" class="form-input" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="createTeamDesc">Description (Optional)</label>
@@ -219,7 +221,7 @@
                 <form onsubmit="handleEditTeam(event)">
                     <div class="form-group">
                         <label for="editTeamName">Team Name</label>
-                        <input type="text" id="editTeamName" class="form-input" required>
+                        <input type="text" id="editTeamName" class="form-input" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="editTeamDesc">Description</label>
@@ -314,7 +316,7 @@
 
                         <div class="timer-controls-group">
                             <input type="number" id="timerMinutes" class="timer-input" placeholder="Min" min="1"
-                                max="60" value="5">
+                                max="60" value="5" autocomplete="off">
                             <span style="opacity:0.5; font-size:0.8rem">min</span>
                             <div style="width: 1px; height: 20px; background: var(--glass-border); margin: 0 5px;">
                             </div>
@@ -422,11 +424,11 @@
                 <div class="form-group" style="display: flex; gap: 1rem;">
                     <div style="flex: 1;">
                         <label data-i18n="label.first_name">First Name</label> <span style="color:red">*</span>
-                        <input type="text" id="regFirstName" class="form-input" required>
+                        <input type="text" id="regFirstName" class="form-input" required autocomplete="given-name">
                     </div>
                     <div style="flex: 1;">
                         <label data-i18n="label.last_name">Last Name</label> <span style="color:red">*</span>
-                        <input type="text" id="regLastName" class="form-input" required>
+                        <input type="text" id="regLastName" class="form-input" required autocomplete="family-name">
                     </div>
                 </div>
                 <div class="form-group">
@@ -460,7 +462,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-    <script type="module" src="/static/js/main.js?v=v0.14.5"></script>
+    <script type="module" src="/static/js/main.js?v=v0.15.0"></script>
 </body>
 
 </html>

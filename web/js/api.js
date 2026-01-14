@@ -57,7 +57,8 @@ export function handleWebSocketMessage(message) {
         case 'board_update':
             // DashboardController listens to 'board:update' (global)
             // BoardController listens to 'board:update' (specific)
-            if (document.getElementById('dashboardView') && window.loadBoards) {
+            const dashboardEl = document.getElementById('dashboardView');
+            if (dashboardEl && dashboardEl.style.display !== 'none' && window.loadBoards) {
                 window.loadBoards();
             }
             // window.loadBoard calls removed here, BoardController must handle it

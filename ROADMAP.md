@@ -1,16 +1,34 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.14.5**
+## Current Version: **v0.15.1**
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### v0.15.0 - Feature Expansion (Planned)
+### v0.16.0 - Feature Expansion (Planned)
 **Focus:** New interactive features and integrations.
 - [ ] **Real-time Cursors**: See other users' cursors on the board.
 - [ ] **Sound Effects**: Optional sounds for timer, voting, and reactions.
 - [ ] **Sorting & Filtering**: Advanced sorting options for cards.
+
+### v0.15.1 - Regression Fixes (Completed)
+**Focus:** Fix regressions introduced by Refactoring (v0.15.0).
+- [x] **Modal Fixes**: Restored `loadModals()` call in `main.js`.
+- [x] **Action Item Modal**: Restored missing "Due Date" and buttons layout.
+- [x] **Board Controller**: Updated to use `ActionItemsController`.
+- [x] **Admin UI**: Replaced native `alert`/`confirm` with Glassmorphic Modals.
+- [x] **Accessibility**: Added `autocomplete` attributes and hidden username fields to fix console warnings.
+
+### v0.15.0 - Architecture Refactoring (Completed)
+**Focus:** Separation of concerns, code cleanup, and stability.
+- [x] **Refactor to DashboardController**: Centralized template and filter logic.
+- [x] **Refactor to NavController**: Centralized routing logic.
+- [x] **Refactor to TeamsController**: Centralize teams management logic (removed `teams.js`).
+- [x] **Refactor to UserController**: Centralize user/profile logic (removed remnants from `main.js`).
+- [x] **Refactor to AdminController**: Centralize admin logic (removed `admin.js`).
+- [x] **Refactor to ActionItemsController**: Centralize action items logic (removed `action_items.js`).
+- [x] **i18n**: Fixed missing translations in Templates and Help Modal.
 
 ### v0.14.x - Polish, Fixes & Guest UX (Completed)
 **Focus:** Guest experience, bug fixes, and CI/CD stability.

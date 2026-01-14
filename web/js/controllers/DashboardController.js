@@ -10,11 +10,29 @@ export class DashboardController {
         this.cache = [];
         this.currentFilter = 'active';
         this.containerId = 'dashboardView';
+        this.templates = {};
+        this.rawTemplates = {};
+        this.activeFilters = new Set();
+        this.initialized = false;
     }
 
     async init() {
-        await this.loadBoards();
-        this.showView();
+        if (this.initialized) return;
+
+        await this.loadTemplates();
+        this.setupFilters();
+
+        // Listen for language changes to update dropdown
+        document.addEventListener('languageChanged', () => {
+            this.populateTemplateDropdown();
+            // Re-trigger change if needed, logic ported from main.js
+            const select = document.getElementById('boardTemplate');
+            if (select && select.value !== 'custom' && this.templates[select.value]) {
+                select.dispatchEvent(new Event('change'));
+            }
+        });
+
+        this.initialized = true;
     }
 
     async showView() {
@@ -208,6 +226,211 @@ export class DashboardController {
         }
     }
 
+    // --- Template Logic ---
+    async loadTemplates() {
+        const paths = [
+            `/static/board-templates.json?v=${new Date().getTime()}`,
+            `/board-templates.json?v=${new Date().getTime()}`,
+            `/public/board-templates.json?v=${new Date().getTime()}`
+        ];
+
+        let success = false;
+        for (const path of paths) {
+            try {
+                const response = await fetch(path);
+                if (response.ok) {
+                    const templates = await response.json();
+                    this.rawTemplates = templates;
+                    this.templates = {};
+                    for (const [key, value] of Object.entries(templates)) {
+                        this.templates[key] = value.columns;
+                    }
+                    console.log(`[DashboardController] Templates loaded from ${path}`);
+                    success = true;
+                    break;
+                }
+            } catch (e) {
+                console.warn(`Failed to load templates from ${path}`, e);
+            }
+        }
+
+        if (!success) {
+            console.error('[DashboardController] All template paths failed. Using defaults.');
+            this.templates = {
+                'start-stop-continue': ['Start Doing', 'Stop Doing', 'Continue Doing'],
+                'mad-sad-glad': ['Mad 😠', 'Sad 😢', 'Glad 😊'],
+                '4ls': ['Liked 👍', 'Learned 💡', 'Lacked 🤔', 'Longed For 🌟'],
+                'wwn-badly-action': ['What Went Well ✅', 'Needs Attention ⚠️', 'Action Items 🎯'],
+                'sailboat': ['Wind 💨', 'Anchor ⚓', 'Rocks 🪨', 'Island 🏝️']
+            };
+            this.rawTemplates = {};
+            for (const [key, cols] of Object.entries(this.templates)) {
+                this.rawTemplates[key] = { name: key, columns: cols };
+            }
+        }
+        this.populateTemplateDropdown();
+        this.bindTemplateEvents();
+    }
+
+    populateTemplateDropdown() {
+        const select = document.getElementById('boardTemplate');
+        if (!select) return;
+        const currentSelection = select.value;
+        select.innerHTML = '';
+
+        const customOption = document.createElement('option');
+        customOption.value = 'custom';
+        customOption.textContent = i18n.t('template.custom') || 'Custom (Manual Entry)';
+        select.appendChild(customOption);
+
+        for (const [key, value] of Object.entries(this.rawTemplates)) {
+            const option = document.createElement('option');
+            option.value = key;
+            const nameKey = `template.${key}.name`;
+            const translatedName = i18n.t(nameKey);
+            option.textContent = (translatedName && translatedName !== nameKey) ? translatedName : value.name;
+            select.appendChild(option);
+        }
+
+        if (currentSelection && (this.rawTemplates[currentSelection] || currentSelection === 'custom')) {
+            select.value = currentSelection;
+        }
+    }
+
+    bindTemplateEvents() {
+        const select = document.getElementById('boardTemplate');
+        if (select) {
+            // Remove old listeners? No easy way, but this init runs once.
+            select.onchange = (e) => {
+                const selectedValue = e.target.value;
+                const columnNamesTextarea = document.getElementById('columnNames');
+                if (!columnNamesTextarea) return;
+
+                if (selectedValue === 'custom') {
+                    columnNamesTextarea.value = '';
+                    columnNamesTextarea.placeholder = 'Enter custom columns...';
+                } else if (this.templates[selectedValue]) {
+                    const templateColumns = this.templates[selectedValue];
+                    if (Array.isArray(templateColumns)) {
+                        // Attempt to translate each column
+                        const translatedColumns = templateColumns.map((col, index) => {
+                            const colKey = `template.${selectedValue}.col${index + 1}`;
+                            const translated = i18n.t(colKey);
+                            // If translation matches key, it means missing translation, fallback to original 'col' (which is default english)
+                            return (translated && translated !== colKey) ? translated : col;
+                        });
+                        columnNamesTextarea.value = translatedColumns.join('\n');
+                    }
+                }
+            };
+        }
+    }
+
+    // --- Filter Logic ---
+    setupFilters() {
+        const searchInput = document.getElementById('boardSearchInput');
+        const filterToggles = document.querySelectorAll('.filter-toggle');
+        const clearBtn = document.getElementById('clearFiltersBtn');
+
+        if (searchInput) {
+            searchInput.oninput = () => this.applyFilters();
+        }
+
+        filterToggles.forEach(btn => {
+            btn.onclick = () => {
+                const filterType = btn.dataset.filter;
+                if (this.activeFilters.has(filterType)) {
+                    this.activeFilters.delete(filterType);
+                    btn.classList.remove('active');
+                } else {
+                    this.activeFilters.add(filterType);
+                    btn.classList.add('active');
+                }
+                this.applyFilters();
+            };
+        });
+
+        if (clearBtn) {
+            clearBtn.onclick = () => {
+                this.activeFilters.clear();
+                document.querySelectorAll('.filter-toggle').forEach(b => b.classList.remove('active'));
+                if (searchInput) searchInput.value = '';
+                this.applyFilters();
+            };
+        }
+    }
+
+    applyFilters() {
+        const searchInput = document.getElementById('boardSearchInput');
+        const searchText = searchInput ? searchInput.value.toLowerCase() : '';
+        const cards = document.querySelectorAll('#dashboardGrid .board-card');
+        let visibleCount = 0;
+
+        const myUser = (window.currentUser || '').toLowerCase();
+
+        cards.forEach(card => {
+            let isVisible = true;
+            const titleEl = card.querySelector('h3');
+            const title = titleEl ? titleEl.innerText.toLowerCase() : '';
+            if (searchText && !title.includes(searchText)) isVisible = false;
+
+            if (isVisible && this.activeFilters.size > 0) {
+                // DOM Parsing logic adapted
+                const metaRows = card.querySelectorAll('.meta-row');
+                let owner = '';
+                let team = '';
+                metaRows.forEach(row => {
+                    const label = row.querySelector('span:first-child')?.innerText || '';
+                    const value = row.querySelector('span:last-child')?.innerText || '';
+                    if (label.includes('Owner') || label.includes(i18n.t('label.owner'))) owner = value.toLowerCase();
+                    if (label.includes('Team') || label.includes(i18n.t('label.team'))) team = value.toLowerCase();
+                });
+
+                // Check buttons for participation status
+                const hasReturnBtn = card.querySelector('.btn-primary[onclick*="view"], .btn-primary[title*="Return"], .btn-primary[onclick*="router.navigate"]');
+                // Note: The logic in main.js relied on specific attributes. The renderActions in DashboardController uses onclick="router.navigate".
+                // If I am member/owner, I see "Return". If not, I see "Join" (btn-success).
+                const isParticipating = hasReturnBtn !== null;
+
+                // Note: owner check might be tricky if "Me" vs "Username". 
+                // renderActions uses `isOwner` passed in.
+
+                if (this.activeFilters.has('myBoards')) {
+                    // Simple check: owner name matches currentUser
+                    if (owner !== myUser) isVisible = false;
+                }
+                if (this.activeFilters.has('participant')) {
+                    if (!isParticipating) isVisible = false;
+                }
+                if (this.activeFilters.has('teamBoards')) {
+                    if (!team || team === '-') isVisible = false;
+                }
+            }
+
+            card.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) visibleCount++;
+        });
+
+        // Badge Update
+        const badge = document.getElementById('activeFiltersBadge');
+        const countSpan = document.getElementById('activeFiltersCount');
+        const clearBtn = document.getElementById('clearFiltersBtn');
+
+        if (badge && countSpan) {
+            if (this.activeFilters.size > 0) {
+                badge.style.display = 'inline-flex';
+                countSpan.innerText = this.activeFilters.size;
+                if (clearBtn) clearBtn.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+                if (clearBtn) {
+                    // Check search
+                    clearBtn.style.display = searchText ? 'inline-block' : 'none';
+                }
+            }
+        }
+    }
+
     async handleCreateBoard(name, columns, teamId) {
         try {
             const payload = {
@@ -220,8 +443,6 @@ export class DashboardController {
             }
 
             const board = await boardService.create(payload);
-            // Auto-join handled by backend usually, but let's assume we load it.
-            // loadBoard(board.id); // Replaced by router
             router.navigate(`board/${board.id}`);
             return board;
         } catch (error) {
