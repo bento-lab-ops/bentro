@@ -21,5 +21,10 @@ export default defineConfig({
         environment: 'jsdom',
         globals: true,
         setupFiles: ['./tests/setup.js'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'json', 'lcov'],
+            reportsDirectory: './coverage'
+        }
     },
 });
