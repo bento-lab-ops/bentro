@@ -26,9 +26,10 @@ Each test suite runs inside a Docker container to ensure environment consistency
 - [x] Test `internal/database` (Connection & Migration) - **100% Coverage**
 
 
-### Phase 3: Core Logic (Frontend)
-- [ ] Test `web/js/services/BoardService.js` (Mocking fetch).
-- [ ] Test `web/js/controllers/BoardController.js` (Complex state).
+### Phase 3: Core Logic (Frontend) [COMPLETED]
+- [x] Test `web/js/services/BoardService.js` (Mocking fetch) - **Covered**
+- [x] Test `web/js/controllers/BoardController.js` (Complex state) - **Covered**
+- [x] Test `web/js/controllers/TeamsController.js` - **Covered**
 
 ### Phase 4: Core Logic (Backend)
 - [ ] Test `internal/handlers` (HTTP Endpoints)
@@ -45,4 +46,8 @@ Each test suite runs inside a Docker container to ensure environment consistency
 - [x] Completed `auth`, `board`, `column/card`, `vote/reaction`, `user/admin`.
 - [x] Completed `team_handler`.
 - [x] Completed `websocket_handler`.
-- **Final Coverage**: ~56.3% for `internal/handlers`.
+- **Backend Coverage**: ~56.3% for `internal/handlers`.
+- [x] Completed Frontend Phase 3: Controllers & Services
+- **Frontend Coverage**: ~21.5% overall (Controllers well covered)
+- **Total Test Files**: 7 frontend + Backend handlers
+- **Total Tests**: 38 frontend + Backend handlers
