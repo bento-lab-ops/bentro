@@ -31,7 +31,8 @@ Each test suite runs inside a Docker container to ensure environment consistency
 - [ ] Test `web/js/controllers/BoardController.js` (Complex state).
 
 ### Phase 4: Core Logic (Backend)
-- [ ] Test `internal/handlers` (HTTP Endpoints).
+- [ ] Test `internal/handlers` (HTTP Endpoints)
+    - [x] `auth_handler.go` & `init_admin.go` - **Covered**
 
 ## Execution Log
 - *Pending start*
