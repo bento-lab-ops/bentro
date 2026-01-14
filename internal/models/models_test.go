@@ -58,3 +58,60 @@ func TestCard_BeforeCreate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEqual(t, uuid.Nil, c.ID)
 }
+
+func TestVote_BeforeCreate(t *testing.T) {
+	v := &Vote{VoteType: "like"}
+	assert.Equal(t, uuid.Nil, v.ID)
+	err := v.BeforeCreate(nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, uuid.Nil, v.ID)
+}
+
+func TestReaction_BeforeCreate(t *testing.T) {
+	r := &Reaction{ReactionType: "love"}
+	assert.Equal(t, uuid.Nil, r.ID)
+	err := r.BeforeCreate(nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, uuid.Nil, r.ID)
+}
+
+func TestTeam_BeforeCreate(t *testing.T) {
+	tm := &Team{Name: "Dream Team"}
+	assert.Equal(t, uuid.Nil, tm.ID)
+	err := tm.BeforeCreate(nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, uuid.Nil, tm.ID)
+}
+
+func TestHooks_DoNotOverwriteExistingID(t *testing.T) {
+	// Setup with pre-defined UUID
+	id := uuid.New()
+	
+	u := &User{ID: id}
+	_ = u.BeforeCreate(nil)
+	assert.Equal(t, id, u.ID)
+
+	b := &Board{ID: id}
+	_ = b.BeforeCreate(nil)
+	assert.Equal(t, id, b.ID)
+	
+	c := &Column{ID: id}
+	_ = c.BeforeCreate(nil)
+	assert.Equal(t, id, c.ID)
+
+	cd := &Card{ID: id}
+	_ = cd.BeforeCreate(nil)
+	assert.Equal(t, id, cd.ID)
+
+	v := &Vote{ID: id}
+	_ = v.BeforeCreate(nil)
+	assert.Equal(t, id, v.ID)
+
+	r := &Reaction{ID: id}
+	_ = r.BeforeCreate(nil)
+	assert.Equal(t, id, r.ID)
+
+	tm := &Team{ID: id}
+	_ = tm.BeforeCreate(nil)
+	assert.Equal(t, id, tm.ID)
+}

@@ -22,7 +22,8 @@ Each test suite runs inside a Docker container to ensure environment consistency
 
 ### Phase 2: Foundation (Backend) [COMPLETED]
 - [x] Setup `testify` dependencies.
-- [x] Test `internal/models` (Struct validation & Hooks).
+- [x] Test `internal/models` (Struct validation & Hooks) - **100% Coverage**
+- [x] Test `internal/database` (Connection & Migration) - **100% Coverage**
 - [ ] Test `internal/utils` (if applicable).
 
 ### Phase 3: Core Logic (Frontend)

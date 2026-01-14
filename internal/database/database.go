@@ -57,7 +57,21 @@ func InitDB() error {
 	}
 
 	// Auto-migrate models
-	err = DB.AutoMigrate(
+	if err := PerformMigrations(DB); err != nil {
+		return err
+	}
+
+	log.Println("Database migration completed")
+
+	// Migrate existing TeamID to Many-to-Many table
+	MigrateLegacyData(DB)
+
+	return nil
+}
+
+// PerformMigrations handles schema migration
+func PerformMigrations(db *gorm.DB) error {
+	return db.AutoMigrate(
 		&models.Board{},
 		&models.Column{},
 		&models.Card{},
@@ -68,16 +82,13 @@ func InitDB() error {
 		&models.TeamMember{},
 		&models.BoardMember{},
 	)
-	if err != nil {
-		return fmt.Errorf("failed to migrate database: %w", err)
-	}
+}
 
-	log.Println("Database migration completed")
-
-	// Migrate existing TeamID to Many-to-Many table
+// MigrateLegacyData handles data updates for backward compatibility
+func MigrateLegacyData(db *gorm.DB) {
 	// This is a one-time migration for v0.10.x upgrade
 	// We use raw SQL to ensure it runs even if GORM structs change later
-	err = DB.Exec(`
+	err := db.Exec(`
 		INSERT INTO board_teams (board_id, team_id)
 		SELECT id, team_id FROM boards 
 		WHERE team_id IS NOT NULL 
@@ -89,8 +100,6 @@ func InitDB() error {
 	} else {
 		log.Println("Migrated legacy team_id data to board_teams table")
 	}
-
-	return nil
 }
 
 // getEnv gets environment variable with a default value
