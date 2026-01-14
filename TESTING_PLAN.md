@@ -33,6 +33,7 @@ Each test suite runs inside a Docker container to ensure environment consistency
 ### Phase 4: Core Logic (Backend)
 - [ ] Test `internal/handlers` (HTTP Endpoints)
     - [x] `auth_handler.go` & `init_admin.go` - **Covered**
+    - [x] `board_handler.go` - **Covered**
 
 ## Execution Log
 - *Pending start*

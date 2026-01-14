@@ -155,7 +155,8 @@ func UpdateBoardStatus(c *gin.Context) {
 		board.FinishedAt = nil
 	}
 
-	if err := database.DB.Save(&board).Error; err != nil {
+	// Use Select to force update of FinishedAt (even if nil)
+	if err := database.DB.Model(&board).Select("Status", "FinishedAt").Save(&board).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update board status"})
 		return
 	}
