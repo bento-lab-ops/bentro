@@ -258,8 +258,9 @@ export class ActionItemsController {
         }
 
         // Pre-fill
+        let card = null;
         if (boardController) {
-            const card = boardController.findCard(cardId);
+            card = boardController.findCard(cardId);
             if (card) {
                 if (ownerSelect) ownerSelect.value = card.owner || '';
                 if (card.due_date) {
@@ -268,6 +269,16 @@ export class ActionItemsController {
                     document.getElementById('actionItemDueDate').value = '';
                 }
             }
+        }
+
+        const removeBtn = document.querySelector('#actionItemModal .btn-danger');
+        if (removeBtn) {
+            removeBtn.style.display = (card && card.is_action_item) ? 'block' : 'none';
+        }
+
+        // Ensure translations are applied if i18n is available
+        if (window.i18n && window.i18n.translatePage) {
+            window.i18n.translatePage();
         }
 
         modal.style.display = 'block';

@@ -12,6 +12,21 @@
 - [ ] **Sound Effects**: Optional sounds for timer, voting, and reactions.
 - [ ] **Sorting & Filtering**: Advanced sorting options for cards.
 
+### v0.15.4 - Multi-Architecture Support (Completed)
+**Focus:** ARM64/AMD64 Hybrid Builds.
+- [x] **Dockerfile**: Updated to use `GOARCH=${TARGETARCH}` and Cross-Compilation.
+- [x] **Deployment**: Pushed v0.15.4 (ARM64 optimized for Raspberry Pi).
+
+### v0.15.3 - Critical UI & Modal Fixes (Completed)
+**Focus:** Fix card creation, CSS loading, and Action Item modal issues.
+- [x] **Card Creation**: Fixed duplicate modal initialization preventing card add.
+- [x] **CSS Loading**: Fixed `teams.css` 404 error (Dockerfile & Static Config).
+- [x] **Action Items**: Fixed "Remove" button visibility and "Save" translation.
+
+### v0.15.2 - Deployment Hotfix (Completed)
+**Focus:** Deployment configuration updates.
+- [x] **Kubernetes**: Updated deployment manifests.
+
 ### v0.15.1 - Regression Fixes (Completed)
 **Focus:** Fix regressions introduced by Refactoring (v0.15.0).
 - [x] **Modal Fixes**: Restored `loadModals()` call in `main.js`.

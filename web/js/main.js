@@ -34,8 +34,8 @@ import './admin-actions.js';
 async function initUI() {
     console.log(`%c🎯 BenTro ${APP_VERSION} `, 'background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
 
-    // Load Modals
-    await loadModals();
+    // Load Modals - handled in DOMContentLoaded
+    // await loadModals();
 
     // Initialize Dashboard Controller (Templates, etc)
     dashboardController.init();
@@ -200,16 +200,6 @@ function setupEventListeners() {
         e.preventDefault();
         const columnId = document.getElementById('cardColumnId').value;
         const content = document.getElementById('cardContent').value;
-        // Delegated to BoardController -> handleAddCard logic? 
-        // Or directly call API via Controller? Controller exposes methods?
-        // BoardController doesn't export `createCard` but it handles "submit" if it managed the modal.
-        // Since modal is global, let's call API and refresh Controller.
-        // Actually, BoardService is available.
-        // BUT, we want to trigger Controller refresh.
-        // boardController.createCard?
-
-        // Let's implement `createCard` in main.js using BoardService? 
-        // Or better: boardController.addCard(columnId, content) ?
 
         if (boardController && boardController.boardId) {
             const { apiCall } = await import('./api.js');

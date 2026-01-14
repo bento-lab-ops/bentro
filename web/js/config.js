@@ -3,7 +3,7 @@ export const CONFIG = {
     API_URL: '/api' // Relative to origin for ingress/proxy
 };
 
-export const APP_VERSION = 'v0.15.1';
+export const APP_VERSION = 'v0.15.4';
 
 // Global Shim
 window.CONFIG = CONFIG;
