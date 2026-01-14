@@ -199,7 +199,7 @@ func UnmergeCard(c *gin.Context) {
 
 	// Clear merged relationship
 	card.MergedWithID = nil
-	if err := database.DB.Save(&card).Error; err != nil {
+	if err := database.DB.Model(&card).Select("MergedWithID").Save(&card).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmerge card"})
 		return
 	}

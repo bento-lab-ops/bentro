@@ -1,0 +1,149 @@
+=== RUN   TestRegister
+[GIN] 2026/01/14 - 07:52:18 | 201 |     47.8017ms |                 | POST     "/register"
+
+2026/01/14 07:52:18 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/auth_handler.go:69 [35;1mconstraint failed: UNIQUE constraint failed: users.email (2067)
+[0m[33m[0.000ms] [34;1m[rows:0][0m INSERT INTO `users` (`id`,`email`,`display_name`,`password_hash`,`name`,`avatar_url`,`role`,`require_password_change`,`last_login`,`created_at`,`updated_at`) VALUES ("b6752ede-0108-442c-b415-3f853978b695","john@example.com","johndoe","$2a$10$XM4nKcGUJKe0bccPK5nGZu9T2yBhEaZwlhic/WySQM7rHde7lKM1.","John Doe","","user",false,"2026-01-14 07:52:18.447","2026-01-14 07:52:18.447","2026-01-14 07:52:18.447")
+[GIN] 2026/01/14 - 07:52:18 | 409 |     47.2011ms |                 | POST     "/register"
+--- PASS: TestRegister (0.10s)
+=== RUN   TestLogin
+[GIN] 2026/01/14 - 07:52:18 | 200 |     47.0644ms |                 | POST     "/login"
+[GIN] 2026/01/14 - 07:52:18 | 401 |     47.4038ms |                 | POST     "/login"
+--- PASS: TestLogin (0.14s)
+=== RUN   TestAuthMiddleware
+AuthMiddleware: No token found
+[GIN] 2026/01/14 - 07:52:18 | 401 |            0s |                 | GET      "/me"
+[GIN] 2026/01/14 - 07:52:18 | 200 |     48.1794ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: user for user: me@test.com
+[GIN] 2026/01/14 - 07:52:18 | 200 |            0s |                 | GET      "/me"
+--- PASS: TestAuthMiddleware (0.09s)
+=== RUN   TestAdminMiddleware
+[GIN] 2026/01/14 - 07:52:18 | 200 |     47.2579ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: user for user: user@test.com
+AdminMiddleware - role exists: true, role value: user
+[GIN] 2026/01/14 - 07:52:18 | 403 |            0s |                 | GET      "/admin/users"
+[GIN] 2026/01/14 - 07:52:18 | 200 |      46.651ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: admin for user: admin@test.com
+AdminMiddleware - role exists: true, role value: admin
+[GIN] 2026/01/14 - 07:52:18 | 200 |            0s |                 | GET      "/admin/users"
+--- PASS: TestAdminMiddleware (0.14s)
+=== RUN   TestUpdateProfile
+[GIN] 2026/01/14 - 07:52:18 | 200 |     48.3972ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: user for user: u@t.com
+
+2026/01/14 07:52:18 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/auth_handler.go:213 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `users` WHERE display_name = "newname" AND id != "ad0b2f20-9fd2-4f66-8735-fc645643008d" ORDER BY `users`.`id` LIMIT 1
+[GIN] 2026/01/14 - 07:52:18 | 200 |       744.7┬╡s |                 | PUT      "/profile"
+AuthMiddleware: Setting user_role to: user for user: u@t.com
+[GIN] 2026/01/14 - 07:52:18 | 409 |            0s |                 | PUT      "/profile"
+--- PASS: TestUpdateProfile (0.10s)
+=== RUN   TestChangePassword
+[GIN] 2026/01/14 - 07:52:19 | 200 |     48.7145ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: user for user: cp@t.com
+[GIN] 2026/01/14 - 07:52:19 | 401 |     46.9413ms |                 | POST     "/change-password"
+AuthMiddleware: Setting user_role to: user for user: cp@t.com
+[GIN] 2026/01/14 - 07:52:19 | 200 |     93.7412ms |                 | POST     "/change-password"
+[GIN] 2026/01/14 - 07:52:19 | 200 |     47.8086ms |                 | POST     "/login"
+--- PASS: TestChangePassword (0.30s)
+=== RUN   TestAdminUserManagement
+[GIN] 2026/01/14 - 07:52:19 | 200 |     54.3418ms |                 | POST     "/login"
+AuthMiddleware: Setting user_role to: admin for user: adm@t.com
+AdminMiddleware - role exists: true, role value: admin
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/admin/users/432986c7-0fed-4797-9b89-eec74cd841ff/role"
+AuthMiddleware: Setting user_role to: admin for user: adm@t.com
+AdminMiddleware - role exists: true, role value: admin
+[GIN] 2026/01/14 - 07:52:19 | 200 |     47.2083ms |                 | POST     "/admin/users/432986c7-0fed-4797-9b89-eec74cd841ff/reset-password"
+AuthMiddleware: Setting user_role to: admin for user: adm@t.com
+AdminMiddleware - role exists: true, role value: admin
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | DELETE   "/admin/users/432986c7-0fed-4797-9b89-eec74cd841ff"
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/auth_handler_test.go:332 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `users` WHERE id = "432986c7-0fed-4797-9b89-eec74cd841ff" AND `users`.`id` = "432986c7-0fed-4797-9b89-eec74cd841ff" ORDER BY `users`.`id` LIMIT 1
+--- PASS: TestAdminUserManagement (0.16s)
+=== RUN   TestLogout
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/logout"
+--- PASS: TestLogout (0.00s)
+=== RUN   TestCreateBoard
+[GIN] 2026/01/14 - 07:52:19 | 201 |       525.2┬╡s |                 | POST     "/boards"
+[GIN] 2026/01/14 - 07:52:19 | 201 |       546.2┬╡s |                 | POST     "/boards"
+--- PASS: TestCreateBoard (0.00s)
+=== RUN   TestGetBoard
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | GET      "/boards/da5431eb-1571-4fc4-9eaa-8f6584e592a3"
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/board_handler.go:229 [35;1mrecord not found
+[0m[33m[0.508ms] [34;1m[rows:0][0m SELECT * FROM `boards` WHERE `boards`.`id` = "65f9446e-504d-4ac0-a9ab-f147ae94e8da" AND `boards`.`deleted_at` IS NULL ORDER BY `boards`.`id` LIMIT 1
+[GIN] 2026/01/14 - 07:52:19 | 404 |       507.9┬╡s |                 | GET      "/boards/65f9446e-504d-4ac0-a9ab-f147ae94e8da"
+--- PASS: TestGetBoard (0.00s)
+=== RUN   TestUpdateBoardStatus
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/boards/aa90ba0a-bb91-410e-af3f-28865b3ea228/status"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/boards/aa90ba0a-bb91-410e-af3f-28865b3ea228/status"
+--- PASS: TestUpdateBoardStatus (0.00s)
+=== RUN   TestUpdateBoardSettings
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/boards/906cf974-cdc4-48b4-819e-aea0987fa9bd"
+--- PASS: TestUpdateBoardSettings (0.00s)
+=== RUN   TestJoinAndLeaveBoard
+[JoinBoard] User user1 joined board 054a627d-4c0c-4725-b52a-9438f4bdc54b.
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/boards/054a627d-4c0c-4725-b52a-9438f4bdc54b/join"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/boards/054a627d-4c0c-4725-b52a-9438f4bdc54b/leave"
+[GIN] 2026/01/14 - 07:52:19 | 400 |       511.4┬╡s |                 | POST     "/boards/054a627d-4c0c-4725-b52a-9438f4bdc54b/join"
+--- PASS: TestJoinAndLeaveBoard (0.00s)
+=== RUN   TestClaimAndUnclaimBoard
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/boards/c16cbc13-2fcd-4f0d-89bb-032449593933/claim"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/boards/c16cbc13-2fcd-4f0d-89bb-032449593933/claim"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/boards/c16cbc13-2fcd-4f0d-89bb-032449593933/unclaim"
+--- PASS: TestClaimAndUnclaimBoard (0.00s)
+=== RUN   TestDeleteBoard
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | DELETE   "/boards/0a83fe6f-bf0f-4128-bf56-8d0adcc26833"
+--- PASS: TestDeleteBoard (0.00s)
+=== RUN   TestColumnCRUD
+[GIN] 2026/01/14 - 07:52:19 | 201 |            0s |                 | POST     "/boards/77258011-75fc-41c6-a291-bc7fa48d9e19/columns"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/columns/41f16750-1602-4773-b6f5-82233db78b67"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | PUT      "/columns/41f16750-1602-4773-b6f5-82233db78b67/position"
+[GIN] 2026/01/14 - 07:52:19 | 201 |            0s |                 | POST     "/boards/77258011-75fc-41c6-a291-bc7fa48d9e19/columns"
+[GIN] 2026/01/14 - 07:52:19 | 200 |       508.2┬╡s |                 | DELETE   "/columns/41f16750-1602-4773-b6f5-82233db78b67"
+--- PASS: TestColumnCRUD (0.00s)
+=== RUN   TestCardCRUD
+[GIN] 2026/01/14 - 07:52:19 | 201 |            0s |                 | POST     "/columns/533e4edd-13e7-4daa-9f07-fb86befa859e/cards"
+[GIN] 2026/01/14 - 07:52:19 | 200 |       511.1┬╡s |                 | PUT      "/cards/08b24c95-efc0-40ea-bad6-0107659d19f1"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | DELETE   "/cards/08b24c95-efc0-40ea-bad6-0107659d19f1"
+--- PASS: TestCardCRUD (0.00s)
+=== RUN   TestMoveCard
+[GIN] 2026/01/14 - 07:52:19 | 200 |       505.7┬╡s |                 | PUT      "/cards/8b17c961-77dc-4894-b091-5f0f33fda181/move"
+--- PASS: TestMoveCard (0.00s)
+=== RUN   TestMergeAndUnmergeCard
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/cards/43072a83-c467-459b-9863-ad0f0ea4d270/merge"
+[GIN] 2026/01/14 - 07:52:19 | 200 |            0s |                 | POST     "/cards/43072a83-c467-459b-9863-ad0f0ea4d270/unmerge"
+    column_card_handler_test.go:239: 
+        	Error Trace:	C:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/column_card_handler_test.go:239
+        	Error:      	Expected nil, but got: &uuid.UUID{0xb4, 0xf8, 0x39, 0x7a, 0x5c, 0xba, 0x41, 0x27, 0xaf, 0xe9, 0x69, 0xdb, 0x5, 0x7f, 0x2d, 0x3f}
+        	Test:       	TestMergeAndUnmergeCard
+--- FAIL: TestMergeAndUnmergeCard (0.00s)
+=== RUN   TestSadPaths
+[GIN] 2026/01/14 - 07:52:19 | 400 |            0s |       192.0.2.1 | PUT      "/columns/invalid-uuid"
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/column_handler.go:75 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `columns` WHERE `columns`.`id` = "99770655-df5a-4136-b4c8-bced18625d2f" AND `columns`.`deleted_at` IS NULL ORDER BY `columns`.`id` LIMIT 1
+[GIN] 2026/01/14 - 07:52:19 | 404 |            0s |       192.0.2.1 | PUT      "/columns/99770655-df5a-4136-b4c8-bced18625d2f"
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/card_handler.go:171 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `cards` WHERE `cards`.`id` = "a734cd24-39aa-49c3-a4b1-f114d6064e55" AND `cards`.`deleted_at` IS NULL ORDER BY `cards`.`id` LIMIT 1
+[GIN] 2026/01/14 - 07:52:19 | 404 |            0s |                 | POST     "/cards/ea4fce12-0587-4042-99af-9c3e6fad3d52/merge"
+--- PASS: TestSadPaths (0.00s)
+=== RUN   TestEnsureAdminUser_CreateNew
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/init_admin.go:17 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `users` WHERE email = "admin@system.local" ORDER BY `users`.`id` LIMIT 1
+ΓÜá ADMIN_PASSWORD not set, using default: bentro
+Γ£ô Admin user created successfully (email: admin@system.local)
+--- PASS: TestEnsureAdminUser_CreateNew (0.10s)
+=== RUN   TestEnsureAdminUser_AlreadyExists
+Γ£ô Admin user already exists
+--- PASS: TestEnsureAdminUser_AlreadyExists (0.10s)
+=== RUN   TestEnsureAdminUser_CustomPassword
+
+2026/01/14 07:52:19 [31;1mC:/Users/danbn/.gemini/antigravity/scratch/retro-app/internal/handlers/init_admin.go:17 [35;1mrecord not found
+[0m[33m[0.000ms] [34;1m[rows:0][0m SELECT * FROM `users` WHERE email = "admin@system.local" ORDER BY `users`.`id` LIMIT 1
+Γ£ô Admin user created successfully (email: admin@system.local)
+--- PASS: TestEnsureAdminUser_CustomPassword (0.11s)
+FAIL
+FAIL	retro-app/internal/handlers	1.491s
+FAIL
