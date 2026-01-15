@@ -348,8 +348,8 @@ export class BoardView {
         if (showStats) {
             footerHtml = `
                 <div class="card-stats">
-                    <span title="Likes"><i class="fas fa-thumbs-up"></i> ${likes}</span>
-                    <span title="Dislikes"><i class="fas fa-thumbs-down"></i> ${dislikes}</span>
+                    <span title="Likes" data-section="likes"><i class="fas fa-thumbs-up"></i> ${likes}</span>
+                    <span title="Dislikes" data-section="dislikes"><i class="fas fa-thumbs-down"></i> ${dislikes}</span>
                     ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
                 </div>
             `;

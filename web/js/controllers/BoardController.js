@@ -10,6 +10,8 @@ import { playTimerSound } from '../timer.js';
 export class BoardController extends Controller {
     constructor() {
         super();
+        console.log('✅ BoardController Instantiated'); // DEBUG
+        window.boardController = this; // Expose for debugging
         this.boardId = null;
         this.board = null;
         this.view = new BoardView('columnsContainer');
@@ -39,6 +41,8 @@ export class BoardController extends Controller {
 
         this.bindEvents();
         this.bindWebSocketEvents();
+        this.lastPollState = new Map(); // Initialize diff cache
+        this.startPolling();
     }
 
     bindWebSocketEvents() {
@@ -67,6 +71,11 @@ export class BoardController extends Controller {
             onTimerStop: (e) => {
                 console.log('Timer Stop Event');
                 if (this.stopTimerUI) this.stopTimerUI();
+            },
+            onVoteUpdate: (e) => {
+                if (e.detail.board_id === this.boardId) {
+                    this.handleVoteUpdate(e.detail);
+                }
             }
         };
 
@@ -75,9 +84,15 @@ export class BoardController extends Controller {
         window.addEventListener('participants:update', this.wsHandlers.onParticipantsUpdate);
         window.addEventListener('timer:start', this.wsHandlers.onTimerStart);
         window.addEventListener('timer:stop', this.wsHandlers.onTimerStop);
+        window.addEventListener('vote:update', this.wsHandlers.onVoteUpdate);
     }
 
     stopPolling() {
+        this.isPolling = false;
+        if (this.pollingTimer) {
+            clearTimeout(this.pollingTimer);
+            this.pollingTimer = null;
+        }
         this.destroy();
     }
 
@@ -91,6 +106,7 @@ export class BoardController extends Controller {
             window.removeEventListener('participants:update', this.wsHandlers.onParticipantsUpdate);
             window.removeEventListener('timer:start', this.wsHandlers.onTimerStart);
             window.removeEventListener('timer:stop', this.wsHandlers.onTimerStop);
+            window.removeEventListener('vote:update', this.wsHandlers.onVoteUpdate);
         }
 
         if (this.cleanup) this.cleanup();
@@ -709,6 +725,41 @@ export class BoardController extends Controller {
         }
     }
 
+    handleVoteUpdate(data) {
+        console.log('[Controller] Received vote update:', data);
+
+
+
+        // data: { card_id, likes, dislikes }
+        // Try strict selector
+        const cardEl = document.querySelector(`.retro-card[data-id="${data.card_id}"]`);
+
+        if (!cardEl) {
+            return;
+        }
+
+        // If Blind Voting, we assume UI handles it (shows ???) or we do nothing
+        if (data.likes === -1) return;
+
+        const likeSpan = cardEl.querySelector('.card-stats span[data-section="likes"]') ||
+            cardEl.querySelector('.card-stats span[title="Likes"]');
+
+        const dislikeSpan = cardEl.querySelector('.card-stats span[data-section="dislikes"]') ||
+            cardEl.querySelector('.card-stats span[title="Dislikes"]');
+
+        if (likeSpan) {
+            likeSpan.innerHTML = `<i class="fas fa-thumbs-up"></i> ${data.likes}`;
+            likeSpan.classList.add('updated-flash');
+            setTimeout(() => likeSpan.classList.remove('updated-flash'), 500);
+        }
+
+        if (dislikeSpan) {
+            dislikeSpan.innerHTML = `<i class="fas fa-thumbs-down"></i> ${data.dislikes}`;
+            dislikeSpan.classList.add('updated-flash');
+            setTimeout(() => dislikeSpan.classList.remove('updated-flash'), 500);
+        }
+    }
+
     handleActionItem(cardId) {
         if (window.actionItemsController) {
             window.actionItemsController.openEditModal(cardId);
@@ -785,6 +836,70 @@ export class BoardController extends Controller {
                 }
             });
         });
+    }
+    // --- Polling Fallback Logic ---
+    // --- Smart Polling Logic ---
+    startPolling() {
+        if (this.isPolling) return; // Prevent multiple loops
+        this.isPolling = true;
+        this.pollFailures = 0;
+        console.log('[BoardController] Starting smart polling loop');
+        this.pollLoop();
+    }
+
+    async pollLoop() {
+        if (!this.isPolling) return; // Stop if stopped
+
+        await this.syncBoardState();
+
+        // Determine next delay with backoff
+        let delay = 3000;
+        if (this.pollFailures > 0) {
+            // Exponential backoff: 3s -> 4.5s -> 6.75s ... max 30s
+            delay = Math.min(3000 * Math.pow(1.5, this.pollFailures), 30000);
+            console.warn(`[BoardController] Poll cooling down... next tick in ${delay}ms`);
+        }
+
+        this.pollingTimer = setTimeout(() => this.pollLoop(), delay);
+    }
+
+    async syncBoardState() {
+        if (!this.boardId) return;
+
+        try {
+            const freshBoard = await boardService.getById(this.boardId);
+            this.pollFailures = 0; // Reset error count on success
+
+            if (freshBoard && freshBoard.columns) {
+                // console.log('[BoardController] Poll data received', freshBoard);
+                freshBoard.columns.forEach(col => {
+                    if (col.cards) {
+                        col.cards.forEach(card => {
+                            // Smart Diffing: Only update if votes actually changed
+                            const likes = card.votes ? card.votes.filter(v => v.vote_type === 'like').length : 0;
+                            const dislikes = card.votes ? card.votes.filter(v => v.vote_type === 'dislike').length : 0;
+
+                            // Create a signature of the state we care about
+                            const stateSignature = `${card.id}:L${likes}D${dislikes}`;
+
+                            if (this.lastPollState.get(card.id) !== stateSignature) {
+                                // console.log(`[BoardController] Vote update detected for ${card.id}`);
+                                this.lastPollState.set(card.id, stateSignature);
+
+                                this.handleVoteUpdate({
+                                    card_id: card.id,
+                                    likes: likes,
+                                    dislikes: dislikes
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('[BoardController] Polling request failed:', e);
+            this.pollFailures = (this.pollFailures || 0) + 1;
+        }
     }
 }
 
