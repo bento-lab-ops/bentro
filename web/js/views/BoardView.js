@@ -267,7 +267,6 @@ export class BoardView {
     createCardHTML(card, board, currentUser, selectedCardId) {
         const isOwner = card.owner === currentUser;
         const isBoardOwner = board.owner === currentUser;
-        // Managers can edit/delete too
         const isManager = board.managers && board.managers.includes(currentUser);
         const canControl = isOwner || isBoardOwner || isManager;
         const isFinished = board.status === 'finished';
@@ -275,158 +274,123 @@ export class BoardView {
         const isSelected = selectedCardId === card.id;
         const isMergeTarget = selectedCardId && !isSelected;
 
-        // DEBUG LOG
-        if (selectedCardId) {
-            console.log(`[View] Card ${card.id.substring(0, 4)} | SelectedId: ${selectedCardId.substring(0, 4)} | isSelected: ${isSelected} | isMergeTarget: ${isMergeTarget}`);
-        }
-
-        // Voting Logic
-        // Voting Logic - Aggregation Strategy
+        // Voting Logic - Aggregation
         let allVotes = [...(card.votes || [])];
         if (card.merged_cards) {
             card.merged_cards.forEach(mc => {
-                if (mc.votes) {
-                    allVotes = allVotes.concat(mc.votes);
-                }
+                if (mc.votes) allVotes = allVotes.concat(mc.votes);
             });
         }
 
         const likes = allVotes.filter(v => v.vote_type === 'like').length;
-        const dislikes = allVotes.filter(v => v.vote_type === 'dislike').length;
-
-        // Check "My Vote" status across all aggregated votes
+        // const dislikes = allVotes.filter(v => v.vote_type === 'dislike').length;
         const userVotedLike = allVotes.some(v => v.user_name === currentUser && v.vote_type === 'like');
-        const userVotedDislike = allVotes.some(v => v.user_name === currentUser && v.vote_type === 'dislike');
 
         const isVotingPhase = board.phase === 'voting';
-        // Fix: backend sends 'blind_voting' at root, not in settings
         const isBlindVoting = isVotingPhase && board.blind_voting;
+        const showStats = !(isBlindVoting && !isFinished);
 
-        // --- Toolbar Buttons ---
-        let toolbarHtml = '';
+        // --- Card Menu (Kebab) ---
+        // Contains: Edit, Delete, Toggle Action Item
+        let menuHtml = '';
+        if (canControl && !isFinished) {
+            const isActionItem = card.is_action_item;
 
-        // 1. Voting (Only in Voting Phase, or if finished)
+            menuHtml = `
+                <div class="card-menu-btn" tabindex="0">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" data-action="itemEdit" data-card-id="${card.id}" data-content="${escapeHtml(card.content)}">
+                            <i class="fas fa-pen"></i> ${i18n.t('btn.edit')}
+                        </button>
+                        <button class="dropdown-item" data-action="toggleActionItem" data-card-id="${card.id}">
+                            <i class="fas ${isActionItem ? 'fa-square' : 'fa-check-square'}"></i> ${isActionItem ? 'Unmark Action Item' : 'Mark as Action Item'}
+                        </button>
+                        ${card.merged_cards && card.merged_cards.length > 0 ? `
+                        <button class="dropdown-item" data-action="unmerge" data-card-id="${card.id}">
+                            <i class="fas fa-undo"></i> Unmerge Last
+                        </button>
+                        ` : ''}
+                        <button class="dropdown-item danger" data-action="itemDelete" data-card-id="${card.id}">
+                            <i class="fas fa-trash"></i> ${i18n.t('btn.delete')}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Primary Actions (Visible) ---
+        // Vote, Merge, Reactions
+        let actionsHtml = '';
+
+        // 1. Voting
         if (isVotingPhase && !isFinished) {
-            toolbarHtml += `
-                <button class="btn-glass-icon ${userVotedLike ? 'active' : ''}" data-action="vote" data-vote-type="like" data-card-id="${card.id}" title="${i18n.t('card.vote')} Like">
+            actionsHtml += `
+                <button class="btn-glass-icon compact ${userVotedLike ? 'active' : ''}" data-action="vote" data-vote-type="like" data-card-id="${card.id}" title="Upvote">
                     <i class="fas fa-thumbs-up"></i>
                 </button>
-                <button class="btn-glass-icon ${userVotedDislike ? 'active' : ''}" data-action="vote" data-vote-type="dislike" data-card-id="${card.id}" title="${i18n.t('card.vote')} Dislike">
-                    <i class="fas fa-thumbs-down"></i>
-                </button>
             `;
         }
 
-        // 2. Edit/Delete (Owner/Manager)
-        if (canControl && !isFinished) {
-            toolbarHtml += `
-                <button class="btn-glass-icon" data-action="itemEdit" data-card-id="${card.id}" data-content="${escapeHtml(card.content)}" title="${i18n.t('btn.edit')}">
-                    <i class="fas fa-pen"></i>
-                </button>
-                <button class="btn-glass-icon danger" data-action="itemDelete" data-card-id="${card.id}" title="${i18n.t('btn.delete')}">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-        }
-
-        // 3. Action Item Toggle
-        const isActionItem = card.is_action_item;
-        toolbarHtml += `
-            <button class="btn-glass-icon ${isActionItem ? 'active' : ''}" data-action="toggleActionItem" data-card-id="${card.id}" title="Convert to Action Item">
-                <i class="fas fa-check-square"></i>
-            </button>
-        `;
-
-        // 4. Merge / Select Logic
+        // 2. Merge Logic
         if (!isFinished) {
             if (isSelected) {
-                // Cancel Selection
-                toolbarHtml += `
-                     <button class="btn-glass-icon active" data-action="cancelSelection" title="Cancel Selection">
+                actionsHtml += `
+                     <button class="btn-glass-icon compact active" data-action="cancelSelection" title="Cancel Selection">
                         <i class="fas fa-times-circle"></i>
                     </button>
                 `;
             } else if (isMergeTarget) {
-                // Merge Here
-                toolbarHtml += `
-                     <button class="btn-glass-icon primary" data-action="mergeCard" data-card-id="${card.id}" title="Merge Here">
+                actionsHtml += `
+                     <button class="btn-glass-icon compact primary" data-action="mergeCard" data-card-id="${card.id}" title="Merge Here">
                         <i class="fas fa-file-import"></i>
                     </button>
                 `;
             } else {
-                // Select to Start Merge
-                toolbarHtml += `
-                     <button class="btn-glass-icon" data-action="selectCard" data-card-id="${card.id}" title="Select to Merge">
+                actionsHtml += `
+                     <button class="btn-glass-icon compact" data-action="selectCard" data-card-id="${card.id}" title="Select to Merge" style="opacity:0.5;">
                         <i class="fas fa-hand-pointer"></i>
                     </button>
                 `;
             }
         }
 
-        // 5. Unmerge (if merged items exist)
+        // 3. Reactions (Emoji Picker Trigger?)
+        // TODO: Add reaction trigger here if we want standard reactions
+
+        // Footer Stats
         const mergedCount = (card.merged_cards && card.merged_cards.length) || (card.merged_count || 0);
 
-        if (mergedCount > 0 && !isFinished) {
-            toolbarHtml += `
-                 <button class="btn-glass-icon" data-action="unmerge" data-card-id="${card.id}" title="Unmerge Last">
-                    <i class="fas fa-undo"></i>
-                </button>
-            `;
-        }
+        const footerHtml = `
+            <div class="card-stats ${!showStats ? 'blind' : ''}">
+                ${showStats ?
+                `<span class="vote-count likes" data-section="likes"><i class="fas fa-thumbs-up"></i> ${likes}</span>` :
+                `<span><i class="fas fa-eye-slash"></i> ???</span>`
+            }
+                ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
+                ${card.is_action_item ? `<span class="badge warning" style="font-size:0.7em">Action Item</span>` : ''}
+            </div>
+            
+            <div class="card-primary-actions">
+                ${actionsHtml}
+            </div>
+        `;
 
-
-        // --- Footer Stats ---
-        // Show counts unless Blind Voting is active (and not finished)
-        // If finished, show all.
-        let showStats = true;
-        if (isBlindVoting && !isFinished) showStats = false;
-
-        let footerHtml = '';
-        if (showStats) {
-            footerHtml = `
-                <div class="card-stats">
-                    <span class="vote-count likes" title="Likes" data-section="likes"><i class="fas fa-thumbs-up"></i> ${likes}</span>
-                    <span class="vote-count dislikes" title="Dislikes" data-section="dislikes"><i class="fas fa-thumbs-down"></i> ${dislikes}</span>
-                    ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
-                </div>
-            `;
-        } else {
-            // Blind Voting Active
-            footerHtml = `
-                <div class="card-stats blind">
-                    <span title="Votes Hidden"><i class="fas fa-eye-slash"></i> ???</span>
-                    ${mergedCount > 0 ? `<span title="Merged Cards"><i class="fas fa-layer-group"></i> ${mergedCount}</span>` : ''}
-                </div>
-            `;
-        }
-
-        const cardClasses = `retro-card ${isSelected ? 'selected-source' : ''} ${isMergeTarget ? 'merge-target' : ''} ${isActionItem ? 'action-item' : ''} ${card.completed ? 'completed' : ''}`;
+        const cardClasses = `retro-card ${isSelected ? 'selected-source' : ''} ${isMergeTarget ? 'merge-target' : ''} ${card.is_action_item ? 'action-item' : ''} ${card.completed ? 'completed' : ''}`;
 
         return `
             <div class="${cardClasses}" data-id="${card.id}">
-                <!-- 1. Content -->
-                <!-- 1. Content -->
+                ${menuHtml} <!-- Absolute positioned top-right -->
+                
                 <div class="card-content">
                     ${escapeHtml(card.content)}
                     ${(card.merged_cards || []).map(mc => `
-                        <div class="merged-content-item" style="border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 0.5rem; padding-top: 0.5rem; opacity: 0.8; font-size: 0.9em;">
-                            <i class="fas fa-level-up-alt fa-rotate-90" style="margin-right: 5px; opacity: 0.5;"></i> 
+                        <div class="merged-content-item">
                             ${escapeHtml(mc.content)}
                         </div>
                     `).join('')}
                 </div>
 
-                <!-- 2. Toolbar Grid -->
-                <div class="card-toolbar-grid">
-                    ${toolbarHtml}
-                </div>
-
-                <!-- 3. Comments Placeholder -->
-                <div class="card-comments-placeholder" style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0; padding-top: 0.2rem; display:none;">
-                    <!-- Future Comments UI -->
-                </div>
-
-                <!-- 4. Footer -->
                 <div class="card-footer">
                     ${footerHtml}
                 </div>
