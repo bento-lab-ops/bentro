@@ -518,6 +518,24 @@ window.closeNewColumnModal = closeNewColumnModal;
 window.openBoardSettings = openBoardSettings;
 window.closeBoardSettingsModal = closeBoardSettingsModal;
 
+function openEditColumnModal(columnId, currentName) {
+    const modal = document.getElementById('editColumnModal');
+    if (modal) {
+        document.getElementById('editColumnId').value = columnId;
+        document.getElementById('columnNameEdit').value = currentName;
+        modal.style.display = 'block';
+        document.getElementById('columnNameEdit').focus();
+    }
+}
+
+function closeEditColumnModal() {
+    const modal = document.getElementById('editColumnModal');
+    if (modal) modal.style.display = 'none';
+}
+
+window.openEditColumnModal = openEditColumnModal;
+window.closeEditColumnModal = closeEditColumnModal;
+
 // Main Execution
 
 
