@@ -16,15 +16,40 @@ service:
 
 ingress:
   enabled: true
-  className: ""
-  annotations: {}
+  className: "nginx"
+  annotations:
+    # --- Configurações do NGINX ---
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # --- HTTPS (Cert-Manager) ---
+    # Global Default Issuer Configured on Cluster
+
+    # --- Integração com Homepage ---
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Bentro App"
+    gethomepage.dev/description: "App Retro"
+    gethomepage.dev/group: "Meus Projetos"
+    gethomepage.dev/icon: "/icons/bentrologo.png"
+    gethomepage.dev/namespace: "bentro"
+    gethomepage.dev/pod-selector: "app=bentro-app"
   hosts:
     - host: bentro.bento.lab
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
+  tls:
+   - secretName: bentro-app-tls
+     hosts:
+       - bentro.bento.lab
 
 resources:
+  # Capacity Planning Guide:
+  # Default (100m CPU, 128Mi RAM) x 2 Replicas supports approx 50-100 concurrent users.
+  # Scaling Heuristic:
+  # - Small Team (<50 users): Defaults are sufficient.
+  # - Department (50-200 users): Increase to 250m CPU, 256Mi RAM per replica.
+  # - Enterprise (200+ users): Use HPA (Horizontal Pod Autoscaler) target 70% CPU utilization.
   requests:
     memory: "128Mi"
     cpu: "100m"
@@ -38,7 +63,7 @@ postgresql:
   enabled: true
   image: postgres:15-alpine
   auth:
-    database: retrodb
+    database: bentrodb
     username: postgres
     # password defined in secret or auto-generated if using a real chart dependency
     # For now, we simulate the 'postgres-deployment' logic from k8s/
@@ -57,7 +82,7 @@ external:
     host: "my-rds-host"
     port: 5432
     user: "admin"
-    name: "retrodb"
+    name: "bentrodb"
   redis:
     host: "my-elasticache-host"
     port: 6379
