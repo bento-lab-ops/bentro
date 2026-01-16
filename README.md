@@ -29,6 +29,7 @@
 - **Backend**: Go (Golang) with Gin framework
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3 (No heavy frameworks)
 - **Database**: PostgreSQL
+- **Real-time Sync**: Redis (Optional, for multi-pod scaling) or In-Memory (Single instance)
 - **Infrastructure**: Docker & Kubernetes
 
 ## 📦 Installation
@@ -82,6 +83,9 @@ The application is configured via Environment Variables (defined in `k8s/configm
 | `DB_USER` | Database User | `retro_user` |
 | `DB_NAME` | Database Name | `retro_db` |
 | `DB_PASSWORD` | Database Password | *(Set in Secret)* |
+| `REDIS_ADDR` | Redis Address | `localhost:6379` (Optional) |
+
+> **Note on Redis**: BenTro works out-of-the-box without Redis (using in-memory synchronization). Redis is **only required** if you deploy multiple replicas (pods) of the application to sync state between them.
 
 ## 🤝 Contributing
 
