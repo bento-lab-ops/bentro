@@ -32,6 +32,44 @@
 - **Real-time Sync**: Redis (Optional, for multi-pod scaling) or In-Memory (Single instance)
 - **Infrastructure**: Docker & Kubernetes
 
+## 🚀 Deployment (Recommended: Helm)
+
+The recommended way to deploy BenTro is using **Helm**. This ensures all dependencies (PostgreSQL, Redis) and SSL certificates are configured correctly.
+
+### Prerequisites
+- Kubernetes Cluster (v1.24+)
+- Helm (v3.0+)
+- `kubectl` configured
+
+### Installation
+
+1. **Add/Update Chart** (if using a repo):
+   *For now, the chart is local in `./helm/bentro-chart`*
+
+2. **Install/Upgrade Release**:
+   ```bash
+   helm upgrade --install bentro ./helm/bentro-chart \
+     --namespace bentro \
+     --create-namespace
+   ```
+
+3. **Verify Deployment**:
+   ```bash
+   kubectl get pods -n bentro
+   kubectl get ingress -n bentro
+   ```
+
+### Configuration (`values.yaml`)
+The default configuration ("Happy Path") deploys:
+- **App**: 2 Replicas
+- **Database**: PostgreSQL container (with persistent storage)
+- **Cache**: Redis container
+- **SSL**: Auto-provisioned via `cert-manager` (requires cluster Issuer)
+
+To assume a custom database or external services, check `helm/bentro-chart/values.yaml` for `enabled: false` options.
+
+---
+
 ## 📦 Installation
 
 ### Prerequisites
