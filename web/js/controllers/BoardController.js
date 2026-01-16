@@ -6,6 +6,7 @@ import { router } from '../lib/Router.js';
 import { BoardView } from '../views/BoardView.js';
 import { apiCall } from '../api.js';
 import { playTimerSound } from '../timer.js';
+import { CursorController } from './CursorController.js';
 
 export class BoardController extends Controller {
     constructor() {
@@ -93,6 +94,7 @@ export class BoardController extends Controller {
         window.addEventListener('timer:stop', this.wsHandlers.onTimerStop);
         window.addEventListener('vote:update', this.wsHandlers.onVoteUpdate);
         window.addEventListener('card:move', this.wsHandlers.onCardMove);
+        // Cursor events handled directly by CursorController, no need to bind here unless we want validatino
     }
 
     stopPolling() {
@@ -118,6 +120,11 @@ export class BoardController extends Controller {
         }
 
         if (this.cleanup) this.cleanup();
+
+        if (this.cursorController) {
+            this.cursorController.destroy();
+            this.cursorController = null;
+        }
     }
 
     async loadBoardData() {
@@ -132,8 +139,14 @@ export class BoardController extends Controller {
             // Render View
             this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
 
-            // Initialize Sortable always (to allow moving between columns even if sorted)
+            // Initialize Sortable always
             this.initSortable();
+
+            // Initialize Real-time Cursors
+            if (!this.cursorController) {
+                this.cursorController = new CursorController(this.boardId, 'boardContainer');
+                this.cursorController.init();
+            }
 
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
