@@ -41,8 +41,10 @@
                     <button class="btn btn-glass btn-small" onclick="toggleLangMenu()" title="Select Language"
                         style="min-width: 42px; justify-content: center;">🌐</button>
                     <div id="langMenu" class="lang-dropdown">
-                        <button onclick="i18n.setLanguage('en')">English (US) 🇺🇸</button>
-                        <button onclick="i18n.setLanguage('pt-BR')">Português (BR) 🇧🇷</button>
+                        <button class="lang-btn" data-lang="en" onclick="i18n.setLanguage('en')">English (US)
+                            🇺🇸</button>
+                        <button class="lang-btn" data-lang="pt-BR" onclick="i18n.setLanguage('pt-BR')">Português (BR)
+                            🇧🇷</button>
                     </div>
                 </div>
                 <!-- Avatar Only -->

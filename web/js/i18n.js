@@ -603,6 +603,13 @@ const translations = {
         'label.select_team': 'Selecione um time...',
         'msg.no_teams': 'Nenhum time adicionado.',
         'confirm.remove_team': 'Tem certeza que deseja remover este time?',
+
+        // Sort & Filter
+        'sort.default': 'Padrão',
+        'sort.votes': 'Mais Votados',
+        'sort.newest': 'Mais Recentes',
+        'sort.date': 'Mais Recentes', // Alias
+        'btn.end_voting': 'Encerrar Votação', // Ensure override
     }
 };
 
