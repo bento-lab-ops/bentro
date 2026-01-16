@@ -41,12 +41,18 @@ The recommended way to deploy BenTro is using **Helm**. This ensures all depende
 - Helm (v3.0+)
 - `kubectl` configured
 
-### Installation
+### Installation (Local Chart)
 
-1. **Add/Update Chart** (if using a repo):
-   *For now, the chart is local in `./helm/bentro-chart`*
+Since the Helm chart is included in this repository, you do not need to add a remote repository (e.g., `helm repo add`).
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/bento-lab-ops/bentro.git
+   cd bentro
+   ```
 
 2. **Install/Upgrade Release**:
+   Run this command from the project root:
    ```bash
    helm upgrade --install bentro ./helm/bentro-chart \
      --namespace bentro \
