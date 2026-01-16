@@ -164,23 +164,12 @@ func DeleteVote(c *gin.Context) {
 // Helper to broadcast vote updates
 func broadcastVoteUpdate(cardID uuid.UUID) {
 	// Re-fetch data using the same logic as GetVotes
-	// We don't have "currentUser" context easily for the broadcast,
-	// so for granular updates we mostly care about the COUNTS for everyone.
-	// The "votes" array in the broadcast might be too user-specific if we want to show avatars?
-	// For now, let's send counts.
-
 	// We need to know if it's blind voting.
 	_, likes, dislikes, isBlind := getVoteData(cardID, "")
 
-	payload := map[string]interface{}{
-		"card_id":  cardID.String(),
-		"likes":    likes,
-		"dislikes": dislikes,
-	}
-
 	if isBlind {
-		payload["likes"] = -1
-		payload["dislikes"] = -1
+		likes = -1
+		dislikes = -1
 	}
 
 	// We need the BOARD ID to broadcast to the right room/hub
@@ -189,12 +178,8 @@ func broadcastVoteUpdate(cardID uuid.UUID) {
 	if err := database.DB.Select("column_id").First(&card, cardID).Error; err == nil {
 		var column models.Column
 		if err := database.DB.Select("board_id").First(&column, card.ColumnID).Error; err == nil {
-			payload["board_id"] = column.BoardID.String()
-			// DEBUG LOG
-			// fmt.Printf("[Vote Update] Broadcasting for Board %s, Card %s. Likes: %d, Dislikes: %d\n", column.BoardID, cardID, likes, dislikes)
-			// Use standard log
-			log.Printf("[Vote Update] Broadcasting for Board %s, Card %s. Likes: %d, Dislikes: %d\n", column.BoardID, cardID, likes, dislikes)
-			BroadcastMessage("vote_update", payload)
+			// Use the new granular broadcast function
+			BroadcastVoteUpdate(column.BoardID, cardID, likes, dislikes)
 		} else {
 			log.Printf("[Vote Update] Failed to find Board for Column %s: %v\n", card.ColumnID, err)
 		}

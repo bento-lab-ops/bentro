@@ -198,7 +198,8 @@ func MoveCard(c *gin.Context) {
 	// Check target column and get BoardID (for broadcast)
 	var targetColumn models.Column
 	if err := database.DB.First(&targetColumn, input.ColumnID).Error; err == nil {
-		BroadcastBoardUpdate(targetColumn.BoardID)
+		// Broadcast Granular Move Event
+		BroadcastCardMove(targetColumn.BoardID, card.ID, input.ColumnID, input.Position)
 	}
 
 	c.JSON(http.StatusOK, card)

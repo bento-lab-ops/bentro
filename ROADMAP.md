@@ -15,17 +15,12 @@
 
 ### v0.16.x - Performance & Stability
 - [ ] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
-- [ ] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
+- [x] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
 - [ ] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
 
-### v0.17.x - Real-time Collaboration II
-- [ ] **Real-time Cursors**: See other users' mouse positions on the board.
-- [ ] **Real-time Online Presence**: Visual indicators (e.g., green avatar outline) for users currently active.
-- [ ] **Typing Indicators**: "User is typing..." notifications.
-
-### v0.17.x - Enhanced Facilitation
-- [ ] **Sound Effects**: Optional sounds for timer end, new cards, and votes.
-- [ ] **Sorting & Filtering**: Sort cards by votes, date, or reactions.
+### v0.17.x - Improved UX (In Progress)
+- [x] **Sorting**: Sort cards by votes, date, or reactions.
+- [x] **Card Merging**: Group similar cards and sum their votes.
 - [ ] **Export Options**: PDF and Image export alongside CSV.
 
 ### Long Term

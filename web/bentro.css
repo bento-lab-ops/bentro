@@ -3778,3 +3778,22 @@ input[type="date"]:hover ::-webkit-calendar-picker-indicator {
 .lang-dropdown button:hover {
     background: var(--bg-light);
 }
+
+@keyframes highlightUpdate {
+    0% {
+        box-shadow: 0 0 0 0px rgba(52, 152, 219, 0.7);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0px rgba(52, 152, 219, 0);
+    }
+}
+
+.highlight-update {
+    animation: highlightUpdate 1s ease-out;
+    border-color: var(--primary-color) !important;
+}

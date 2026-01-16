@@ -77,6 +77,12 @@ export class BoardController extends Controller {
                 if (e.detail.board_id === this.boardId) {
                     this.handleVoteUpdate(e.detail);
                 }
+            },
+            onCardMove: (e) => {
+                if (e.detail.board_id === this.boardId) {
+                    console.log('BoardController: Received Card Move Event', e.detail);
+                    this.handleCardMove(e.detail);
+                }
             }
         };
 
@@ -86,6 +92,7 @@ export class BoardController extends Controller {
         window.addEventListener('timer:start', this.wsHandlers.onTimerStart);
         window.addEventListener('timer:stop', this.wsHandlers.onTimerStop);
         window.addEventListener('vote:update', this.wsHandlers.onVoteUpdate);
+        window.addEventListener('card:move', this.wsHandlers.onCardMove);
     }
 
     stopPolling() {
@@ -125,10 +132,8 @@ export class BoardController extends Controller {
             // Render View
             this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
 
-            // Initialize Sortable
-            if (this.sortOption === 'position') {
-                this.initSortable();
-            }
+            // Initialize Sortable always (to allow moving between columns even if sorted)
+            this.initSortable();
 
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
@@ -216,10 +221,8 @@ export class BoardController extends Controller {
         if (this.board) {
             this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
 
-            // Re-initialize DnD ONLY if sorting is by position (Default)
-            if (this.sortOption === 'position') {
-                this.initSortable();
-            }
+            // Re-initialize DnD always
+            this.initSortable();
         }
     }
 
@@ -837,6 +840,7 @@ export class BoardController extends Controller {
 
             new Sortable(container, {
                 group: 'shared', // Allow dragging between lists
+                sort: this.sortOption === 'position', // Disable sorting within list if not sorting by position
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
@@ -851,9 +855,18 @@ export class BoardController extends Controller {
                     const toColumnEl = evt.to.closest('.column');
                     const fromColumnEl = evt.from.closest('.column');
 
-                    // If dropped in same list and same position, do nothing (or reorder if we supported it)
-                    if (evt.to === evt.from && evt.newIndex === evt.oldIndex) {
-                        return;
+                    // If dropped in same list
+                    if (evt.to === evt.from) {
+                        // If same position, do nothing
+                        if (evt.newIndex === evt.oldIndex) return;
+
+                        // If NOT sorting by position, we cannot reorder within the same column.
+                        // Revert the UI change because the list is essentially "locked" by the sort order.
+                        if (this.sortOption !== 'position') {
+                            console.warn('Cannot reorder manually when custom sort is active. Reverting.');
+                            this.loadBoardData(); // Reverts DOM
+                            return;
+                        }
                     }
 
                     if (cardId && toColumnEl && toColumnEl.dataset.columnId) {
@@ -939,6 +952,91 @@ export class BoardController extends Controller {
             console.warn('[BoardController] Polling request failed:', e);
             this.pollFailures = (this.pollFailures || 0) + 1;
         }
+    }
+
+    handleVoteUpdate(data) {
+        const cardId = data.card_id;
+        const cardEl = document.querySelector(`.retro-card[data-id="${cardId}"]`);
+        if (!cardEl) {
+            console.warn(`Card ${cardId} not found in DOM for vote update`);
+            return;
+        }
+
+        // Update vote counts
+        const likesEl = cardEl.querySelector('.vote-count.likes');
+        const dislikesEl = cardEl.querySelector('.vote-count.dislikes');
+
+        if (likesEl) likesEl.textContent = data.likes > 0 ? data.likes : '';
+        if (dislikesEl) dislikesEl.textContent = data.dislikes > 0 ? data.dislikes : '';
+
+        // Handle Blind Voting (likes == -1)
+        if (data.likes === -1) {
+            if (likesEl) likesEl.textContent = '?';
+            if (dislikesEl) dislikesEl.textContent = '?';
+        }
+
+        // We can't update "My Vote" blue status purely from broadcast (because it doesn't say IF I liked).
+        // BUT, the optimistic UI update handling the click should have already toggled the blue class.
+        // The broadcast settles the COUNT.
+        // If we wanted to sync "My Vote" status from another tab of the same user, we'd need user-specific info in broadcast.
+        // For now, this is sufficient for 99% cases.
+    }
+
+    handleCardMove(data) {
+        // data: { card_id, column_id, position }
+        const cardId = data.card_id;
+        const targetColumnId = data.column_id;
+        const newIndex = data.position;
+
+        const cardEl = document.querySelector(`.retro-card[data-id="${cardId}"]`);
+        const targetColumnEl = document.querySelector(`.column[data-column-id="${targetColumnId}"] .cards-container`);
+
+        if (!cardEl || !targetColumnEl) {
+            console.warn('Card or Target Column not found for move update');
+            this.loadBoardData(); // Fallback
+            return;
+        }
+
+        // Check if already in correct place (to avoid jitter if I was the mover)
+        // SortableJS might have already moved it if I did the drag.
+        // We can check if parent is correct and index is approximately correct.
+
+        const currentParent = cardEl.parentElement;
+        if (currentParent === targetColumnEl) {
+            // It's in the right column. Check index?
+            const children = Array.from(targetColumnEl.children).filter(c => !c.classList.contains('sortable-ghost'));
+            const currentIndex = children.indexOf(cardEl);
+            if (currentIndex === newIndex) {
+                console.log('Card already in correct position (likely local move)');
+                return;
+            }
+        }
+
+        // Move the element
+        // Re-insert at new index
+        // IMPORTANT: Filter out SortableJS ghosts/drags to avoid index mismatch
+        const siblings = Array.from(targetColumnEl.children).filter(c =>
+            c !== cardEl &&
+            !c.classList.contains('sortable-ghost') &&
+            !c.classList.contains('sortable-drag') &&
+            !c.classList.contains('sortable-chosen')
+        );
+
+        if (newIndex >= siblings.length) {
+            targetColumnEl.appendChild(cardEl);
+        } else {
+            // Find the correct sibling to insert before
+            const referenceNode = siblings[newIndex];
+            if (referenceNode) {
+                targetColumnEl.insertBefore(cardEl, referenceNode);
+            } else {
+                targetColumnEl.appendChild(cardEl);
+            }
+        }
+
+        // Highlight effect?
+        cardEl.classList.add('highlight-update');
+        setTimeout(() => cardEl.classList.remove('highlight-update'), 1000);
     }
 }
 

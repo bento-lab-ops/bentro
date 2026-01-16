@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const version = "v0.16.15"
+const version = "v0.16.17"
 
 func main() {
 	// Initialize database

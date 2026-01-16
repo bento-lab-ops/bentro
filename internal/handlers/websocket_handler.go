@@ -442,3 +442,27 @@ func BroadcastBoardUpdate(boardID uuid.UUID) {
 	}
 	BroadcastMessage("board_update", data)
 }
+
+// BroadcastVoteUpdate sends only the updated vote counts for a specific card
+func BroadcastVoteUpdate(boardID uuid.UUID, cardID uuid.UUID, likes int, dislikes int) {
+	data := map[string]interface{}{
+		"board_id": boardID.String(),
+		"card_id":  cardID.String(),
+		"likes":    likes,
+		"dislikes": dislikes,
+		"action":   "vote_updated",
+	}
+	BroadcastMessage("vote_update", data)
+}
+
+// BroadcastCardMove sends the new position of a card
+func BroadcastCardMove(boardID uuid.UUID, cardID uuid.UUID, columnID uuid.UUID, position int) {
+	data := map[string]interface{}{
+		"board_id":  boardID.String(),
+		"card_id":   cardID.String(),
+		"column_id": columnID.String(),
+		"position":  position,
+		"action":    "card_moved",
+	}
+	BroadcastMessage("card_move", data)
+}
