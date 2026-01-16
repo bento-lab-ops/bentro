@@ -306,6 +306,13 @@ const translations = {
         'btn.manage_teams': 'Manage Teams',
         'label.team_optional': 'Team (Optional)',
         'option.no_team': 'No Team (Personal)',
+
+        // Card Actions
+        'btn.mark_action': 'Mark as Action Item',
+        'btn.unmark_action': 'Unmark Action Item',
+        'btn.unmerge': 'Unmerge Last',
+        'btn.edit': 'Edit',
+        'btn.delete': 'Delete',
     },
     'pt-BR': {
         // Queue/Dashboard
@@ -610,6 +617,13 @@ const translations = {
         'sort.newest': 'Mais Recentes',
         'sort.date': 'Mais Recentes', // Alias
         'btn.end_voting': 'Encerrar Votação', // Ensure override
+
+        // Card Actions
+        'btn.mark_action': 'Marcar como Acionável',
+        'btn.unmark_action': 'Desmarcar Acionável',
+        'btn.unmerge': 'Desfazer Fusão',
+        'btn.edit': 'Editar',
+        'btn.delete': 'Excluir',
     }
 };
 

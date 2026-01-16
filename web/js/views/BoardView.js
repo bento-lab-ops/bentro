@@ -304,11 +304,11 @@ export class BoardView {
                             <i class="fas fa-pen"></i> ${i18n.t('btn.edit')}
                         </button>
                         <button class="dropdown-item" data-action="toggleActionItem" data-card-id="${card.id}">
-                            <i class="fas ${isActionItem ? 'fa-square' : 'fa-check-square'}"></i> ${isActionItem ? 'Unmark Action Item' : 'Mark as Action Item'}
+                            <i class="fas ${isActionItem ? 'fa-square' : 'fa-check-square'}"></i> ${isActionItem ? i18n.t('btn.unmark_action') : i18n.t('btn.mark_action')}
                         </button>
                         ${card.merged_cards && card.merged_cards.length > 0 ? `
                         <button class="dropdown-item" data-action="unmerge" data-card-id="${card.id}">
-                            <i class="fas fa-undo"></i> Unmerge Last
+                            <i class="fas fa-undo"></i> ${i18n.t('btn.unmerge')}
                         </button>
                         ` : ''}
                         <button class="dropdown-item danger" data-action="itemDelete" data-card-id="${card.id}">
