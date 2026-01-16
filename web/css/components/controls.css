@@ -132,6 +132,14 @@
     animation: fadeIn 0.15s ease;
 }
 
+/* Fix Blocking: Ensure the open menu card is On Top */
+.retro-card:hover,
+.retro-card:focus-within {
+    z-index: 500 !important;
+    /* Higher than siblings */
+    position: relative;
+}
+
 .card-menu-btn:focus-within .dropdown-menu {
     display: flex;
 }
@@ -175,4 +183,22 @@
 /* Fix z-index for drag */
 .sortable-ghost {
     opacity: 0.4;
+}
+
+/* Ensure columns don't clip dropdowns */
+.column {
+    overflow: visible !important;
+    /* NOTE: overflow: visible breaks scrolling within long columns if fixed height.
+       However, bentro.css .column doesn't seem to have fixed height or overflow: scroll.
+       It relies on the page scrolling usually.
+       If user has scrollable columns, this will break it.
+       User context: "Kanban style columns". Usually they scroll independently.
+       If independent scroll: dropdown MUST be clipped.
+       Solution for independent scroll: Dropdown must be position:fixed or use popover.
+       Given implementation is position: absolute (relative to card button),
+       If column scrolls, clipping is inevitable unless we use fixed.
+       
+       Let's assume page scroll for now based on 'min-height: 400px' in bentro.css and no max-height seen.
+       If it is page scroll, overflow: visible is fine.
+    */
 }
