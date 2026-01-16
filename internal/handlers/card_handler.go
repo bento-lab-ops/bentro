@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"net/http"
+	"time"
+
 	"github.com/bento-lab-ops/bentro/internal/database"
 	"github.com/bento-lab-ops/bentro/internal/models"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // CreateCard creates a new card in a column
@@ -29,7 +31,15 @@ func CreateCard(c *gin.Context) {
 		return
 	}
 
+	// Verify column and get BoardID for broadcast
+	var column models.Column
+	if err := database.DB.First(&column, columnID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Column not found"})
+		return
+	}
+
 	card := models.Card{
+		ID:       uuid.New(),
 		ColumnID: columnID,
 		Content:  input.Content,
 		Position: input.Position,
@@ -41,6 +51,7 @@ func CreateCard(c *gin.Context) {
 		return
 	}
 
+	BroadcastBoardUpdate(column.BoardID)
 	c.JSON(http.StatusCreated, card)
 }
 
@@ -82,8 +93,6 @@ func UpdateCard(c *gin.Context) {
 	}
 	if input.Completed != nil {
 		card.Completed = *input.Completed
-		// If marking as completed and date is provided, use it.
-		// If cleared (false), maybe clear date? For now, we keep history unless explicitly cleared.
 	}
 	if input.CompletionLink != nil {
 		card.CompletionLink = *input.CompletionLink
@@ -106,10 +115,16 @@ func UpdateCard(c *gin.Context) {
 		return
 	}
 
+	// Fetch BoardID for broadcast
+	var column models.Column
+	if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
+		BroadcastBoardUpdate(column.BoardID)
+	}
+
 	c.JSON(http.StatusOK, card)
 }
 
-// MoveCard moves a card to a different column
+// MoveCard moves a card to another column or position
 func MoveCard(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -133,11 +148,57 @@ func MoveCard(c *gin.Context) {
 		return
 	}
 
-	card.ColumnID = input.ColumnID
-	card.Position = input.Position
-	if err := database.DB.Save(&card).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to move card"})
+	// Reordering Logic
+	// 1. Get all cards in target column, ordered by position
+	var cards []models.Card
+	if err := database.DB.Where("column_id = ? AND deleted_at IS NULL", input.ColumnID).Order("position asc").Find(&cards).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cards for reordering"})
 		return
+	}
+
+	// 2. Remove the moved card from the slice if it exists (it might be moving within same column)
+	var reorderedCards []models.Card
+	for _, c := range cards {
+		if c.ID != id {
+			reorderedCards = append(reorderedCards, c)
+		}
+	}
+
+	// 3. Insert the card at the new position
+	if input.Position < 0 {
+		input.Position = 0
+	}
+	if input.Position > len(reorderedCards) {
+		input.Position = len(reorderedCards)
+	}
+
+	// Insert
+	reorderedCards = append(reorderedCards[:input.Position], append([]models.Card{card}, reorderedCards[input.Position:]...)...)
+
+	// 4. Submit updates in transaction
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		for i, c := range reorderedCards {
+			if c.Position != i || c.ColumnID != input.ColumnID {
+				if err := tx.Model(&models.Card{}).Where("id = ?", c.ID).Updates(map[string]interface{}{
+					"position":  i,
+					"column_id": input.ColumnID,
+				}).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reorder cards"})
+		return
+	}
+
+	// Check target column and get BoardID (for broadcast)
+	var targetColumn models.Column
+	if err := database.DB.First(&targetColumn, input.ColumnID).Error; err == nil {
+		BroadcastBoardUpdate(targetColumn.BoardID)
 	}
 
 	c.JSON(http.StatusOK, card)
@@ -180,6 +241,12 @@ func MergeCard(c *gin.Context) {
 		return
 	}
 
+	// Broadcast
+	var column models.Column
+	if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
+		BroadcastBoardUpdate(column.BoardID)
+	}
+
 	c.JSON(http.StatusOK, card)
 }
 
@@ -204,6 +271,12 @@ func UnmergeCard(c *gin.Context) {
 		return
 	}
 
+	// Broadcast
+	var column models.Column
+	if err := database.DB.First(&column, card.ColumnID).Error; err == nil {
+		BroadcastBoardUpdate(column.BoardID)
+	}
+
 	c.JSON(http.StatusOK, card)
 }
 
@@ -215,9 +288,24 @@ func DeleteCard(c *gin.Context) {
 		return
 	}
 
+	// Need to get card first to get column ID for broadcast
+	var card models.Card
+	if err := database.DB.First(&card, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Card not found"})
+		return
+	}
+
+	var column models.Column
+	// Best effort to get column for board ID
+	database.DB.First(&column, card.ColumnID)
+
 	if err := database.DB.Delete(&models.Card{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete card"})
 		return
+	}
+
+	if column.ID != uuid.Nil {
+		BroadcastBoardUpdate(column.BoardID)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Card deleted successfully"})

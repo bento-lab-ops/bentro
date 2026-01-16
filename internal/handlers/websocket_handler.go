@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -27,6 +30,9 @@ const (
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 1024
+
+	// Redis Pub/Sub Channel
+	redisChannel = "bentro:broadcast"
 )
 
 var upgrader = websocket.Upgrader{
@@ -34,6 +40,9 @@ var upgrader = websocket.Upgrader{
 		return true // Allow all origins for development
 	},
 }
+
+// Global Redis Client
+var rdb *redis.Client
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
@@ -73,6 +82,7 @@ func (c *Client) readPump() {
 		// To match previous logic, we will inspect the message content here
 
 		var msg map[string]interface{}
+		// Basic parsing to handle logic side-effects
 		if err := json.Unmarshal(message, &msg); err == nil {
 			msgType, _ := msg["type"].(string)
 
@@ -108,19 +118,35 @@ func (c *Client) readPump() {
 					}
 				}
 			} else if msgType == "phase_change" {
+				// Persist phase change to DB locally (only once per cluster)
+				// Concurrency note: Multiple pods might try this if multiple users trigger it,
+				// but DB transaction handles it.
 				if boardID, ok := msg["board_id"].(string); ok {
 					if phase, ok := msg["phase"].(string); ok && boardID != "" {
 						if err := database.DB.Model(&models.Board{}).Where("id = ?", boardID).Update("phase", phase).Error; err != nil {
 							log.Printf("Failed to update board phase: %v", err)
 						}
+						// Broadcast this update GLOBALLY via Redis
+						// Note: The message will be published below
 					}
 				}
 			}
 		}
 
-		// In standard Chat example, we broadcast everything back.
-		// In our app, 'broadcast' channel expects encoded JSON.
-		c.hub.broadcast <- message
+		// PUB/SUB INTEGRATION:
+		// Instead of sending directly to c.hub.broadcast (local only),
+		// we publish to Redis so ALL pods receive it.
+		if rdb != nil {
+			err := rdb.Publish(context.Background(), redisChannel, message).Err()
+			if err != nil {
+				log.Printf("Redis Publish Error: %v", err)
+				// Fallback to local broadcast if Redis fails
+				c.hub.broadcast <- message
+			}
+		} else {
+			// Fallback if Redis not initialized
+			c.hub.broadcast <- message
+		}
 	}
 }
 
@@ -200,13 +226,18 @@ var hub = &Hub{
 
 // Run starts the hub
 func (h *Hub) Run() {
+	// Start Redis Subscriber in background
+	if rdb != nil {
+		go h.subscribeToRedis()
+	}
+
 	for {
 		select {
 		case client := <-h.register:
 			h.mutex.Lock()
 			h.clients[client] = true
 			h.mutex.Unlock()
-			log.Printf("Client connected. Total clients: %d", len(h.clients))
+			// log.Printf("Client connected. Total clients: %d", len(h.clients))
 
 		case client := <-h.unregister:
 			h.mutex.Lock()
@@ -220,7 +251,7 @@ func (h *Hub) Run() {
 				close(client.send)
 			}
 			h.mutex.Unlock()
-			log.Printf("Client disconnected. Total clients: %d", len(h.clients))
+			// log.Printf("Client disconnected. Total clients: %d", len(h.clients))
 
 		case msg := <-h.joinBoard:
 			h.mutex.Lock()
@@ -241,6 +272,7 @@ func (h *Hub) Run() {
 			h.mutex.Unlock()
 			h.broadcastParticipants(msg.BoardID)
 
+		// This channel now receives messages from Redis Subscription OR fallback
 		case message := <-h.broadcast:
 			// Non-blocking broadcast
 			h.mutex.RLock()
@@ -254,6 +286,20 @@ func (h *Hub) Run() {
 			}
 			h.mutex.RUnlock()
 		}
+	}
+}
+
+func (h *Hub) subscribeToRedis() {
+	ctx := context.Background()
+	pubsub := rdb.Subscribe(ctx, redisChannel)
+	defer pubsub.Close()
+
+	ch := pubsub.Channel()
+	log.Printf("Subscribed to Redis channel: %s", redisChannel)
+
+	for msg := range ch {
+		// Forward message from Redis to local broadcast loop
+		h.broadcast <- []byte(msg.Payload)
 	}
 }
 
@@ -329,7 +375,16 @@ func BroadcastMessage(messageType string, data interface{}) {
 		return
 	}
 
-	hub.broadcast <- jsonData
+	// Publish to Redis instead of local hub directly
+	if rdb != nil {
+		err := rdb.Publish(context.Background(), redisChannel, jsonData).Err()
+		if err != nil {
+			log.Printf("Redis Broadcast Error: %v", err)
+			hub.broadcast <- jsonData
+		}
+	} else {
+		hub.broadcast <- jsonData
+	}
 }
 
 // HandleWebSocket handles WebSocket connections
@@ -355,6 +410,27 @@ func HandleWebSocket(c *gin.Context) {
 
 // InitWebSocketHub initializes and starts the WebSocket hub
 func InitWebSocketHub() {
+	// Initialize Redis
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379" // Fallback local
+		log.Println("REDIS_ADDR not set, using default localhost:6379")
+	}
+
+	rdb = redis.NewClient(&redis.Options{
+		Addr: redisAddr,
+	})
+
+	// Check connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		log.Printf("Warning: Failed to connect to Redis at %s: %v. Pub/Sub will be disabled.", redisAddr, err)
+		rdb = nil // Disable Redis
+	} else {
+		log.Printf("Connected to Redis at %s", redisAddr)
+	}
+
 	go hub.Run()
 }
 

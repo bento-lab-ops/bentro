@@ -346,6 +346,16 @@
                         ACTIONS</h5>
                     <div class="actions-grid"
                         style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                        <!-- Sorting -->
+                        <!-- Sorting Dropdown -->
+                        <div class="sort-controls" style="display: flex; align-items: center;">
+                            <select id="sortCardsSelect" class="glass-select" style="display: none;" title="Sort Cards">
+                                <option value="position">Default Order</option>
+                                <option value="votes">Sort by Votes</option>
+                                <option value="az">Sort A-Z</option>
+                            </select>
+                        </div>
+
                         <!-- Host Claims -->
                         <button id="claimManagerBtn" class="btn btn-primary" data-action="claimManager"
                             style="display: none;" title="Claim Host"><i class="fas fa-crown"></i></button>
@@ -391,74 +401,7 @@
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-    <!-- Auth Modals -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            <h2 data-i18n="btn.login">Login</h2>
-            <form onsubmit="handleLoginSubmit(event)">
-                <div class="form-group">
-                    <label data-i18n="label.email">Email</label>
-                    <input type="email" id="loginEmail" class="form-input" required autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label.password">Password</label>
-                    <input type="password" id="loginPassword" class="form-input" required
-                        autocomplete="current-password">
-                </div>
-                <div class="modal-footer"
-                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
-                    <a href="#" onclick="switchToRegister()" style="font-size: 0.9rem;">Need an account?
-                        Register</a>
-                    <button type="submit" class="btn btn-primary" data-i18n="btn.login">Login</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeRegisterModal()">&times;</span>
-            <h2>Register</h2>
-            <form onsubmit="handleRegisterSubmit(event)">
-                <div class="form-group" style="display: flex; gap: 1rem;">
-                    <div style="flex: 1;">
-                        <label data-i18n="label.first_name">First Name</label> <span style="color:red">*</span>
-                        <input type="text" id="regFirstName" class="form-input" required autocomplete="given-name">
-                    </div>
-                    <div style="flex: 1;">
-                        <label data-i18n="label.last_name">Last Name</label> <span style="color:red">*</span>
-                        <input type="text" id="regLastName" class="form-input" required autocomplete="family-name">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label.email">Email</label> <span style="color:red">*</span>
-                    <input type="email" id="regEmail" class="form-input" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label.password">Password</label> <span style="color:red">*</span>
-                    <input type="password" id="regPassword" class="form-input" required autocomplete="new-password"
-                        minlength="6" placeholder="Min. 6 characters">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="label.choose_avatar">Choose Your Avatar</label>
-                    <div class="avatar-selector-container">
-                        <div id="registerAvatarDisplay" class="current-avatar-large">👤</div>
-                        <div id="registerAvatarSelector" class="avatar-grid" style="display: none;"></div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleRegisterAvatarSelector()"
-                            data-i18n="btn.change_avatar">Change Avatar</button>
-                    </div>
-                </div>
-                <div class="modal-footer"
-                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
-                    <a href="#" onclick="switchToLogin()" style="font-size: 0.9rem;">Have
-                        an account? Login</a>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>

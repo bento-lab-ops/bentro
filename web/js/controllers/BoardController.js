@@ -16,6 +16,7 @@ export class BoardController extends Controller {
         this.board = null;
         this.view = new BoardView('columnsContainer');
         this.eventsBound = false;
+        this.sortOption = 'position';
 
         // Bind handlers once in constructor
         this.handleClick = this.handleClick.bind(this);
@@ -122,10 +123,12 @@ export class BoardController extends Controller {
             if (this.board.phase) window.currentPhase = this.board.phase;
 
             // Render View
-            this.view.render(this.board, window.currentUser, this.selectedCardId);
+            this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
 
             // Initialize Sortable
-            this.initSortable();
+            if (this.sortOption === 'position') {
+                this.initSortable();
+            }
 
         } catch (error) {
             console.error('BoardController: Failed to load data', error);
@@ -192,10 +195,32 @@ export class BoardController extends Controller {
         };
 
         container.addEventListener('click', this.handleClick);
-        // Native DnD listeners removed
+
+        // Sorting Select
+        const sortSelect = document.getElementById('sortCardsSelect');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.setSort(e.target.value);
+            });
+        }
 
         this.eventsBound = true;
         console.log('BoardController: Events bound');
+    }
+
+    setSort(option) {
+        console.log('BoardController: Set Sort Option', option);
+        this.sortOption = option;
+
+        // Render with new sort option
+        if (this.board) {
+            this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
+
+            // Re-initialize DnD ONLY if sorting is by position (Default)
+            if (this.sortOption === 'position') {
+                this.initSortable();
+            }
+        }
     }
 
     async handleClick(e) {
@@ -311,6 +336,25 @@ export class BoardController extends Controller {
             case 'mergeCard':
                 this.handleMergeCard(target.dataset.cardId);
                 break;
+            case 'setSort':
+                this.handleSetSort(target.dataset.sort);
+                break;
+        }
+    }
+
+    handleSetSort(option) {
+        console.log('BoardController: Setting sort option to', option);
+        this.sortOption = option;
+        // Re-render
+        if (this.board) {
+            this.view.render(this.board, window.currentUser, this.selectedCardId, this.sortOption);
+            // Re-init sortable ONLY if sort is position (otherwise drag shouldn't work or should be disabled)
+            // Actually, if we sort by votes, dragging effectively breaks "position" logic until re-sorted by position.
+            // We should probably disable DnD if sort != position, OR just let it act weird.
+            // Best to disable DnD if not sorting by position.
+            if (this.sortOption === 'position') {
+                this.initSortable();
+            }
         }
     }
 
@@ -815,15 +859,11 @@ export class BoardController extends Controller {
 
                     if (cardId && toColumnEl && toColumnEl.dataset.columnId) {
                         const columnId = toColumnEl.dataset.columnId;
-                        console.log(`[Sortable] Moved ${cardId} to Column ${columnId}`);
+                        const newIndex = evt.newIndex; // Get new index 0-based
+                        console.log(`[Sortable] Moved ${cardId} to Column ${columnId} at index ${newIndex}`);
                         try {
-                            await boardService.moveCard(cardId, columnId);
+                            await boardService.moveCard(cardId, columnId, newIndex);
                             // No need to reload, the WS update will trigger reload
-                            // But for snappiness we might leave it. 
-                            // Actually, if we rely on WS, we might get a flicker revert if WS is slow.
-                            // But usually loadBoardData is called after moveCard returns anyway
-                            // in previous logic. Let's see.
-                            // For now, let's call loadBoardData to confirm state match.
                             this.loadBoardData();
                         } catch (error) {
                             console.error('Move failed:', error);

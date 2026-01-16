@@ -6,14 +6,12 @@ export class BoardView {
         this.containerId = containerId;
     }
 
-    render(board, currentUser, selectedCardId = null) {
+    render(board, currentUser, selectedCardId = null, sortOption = 'position') {
         const container = document.getElementById(this.containerId);
         if (!container) return;
 
         // Render Header
-        // Check if correct version loaded
-        // console.log('BoardView RC63 Loaded');
-        this.renderHeader(board, currentUser);
+        this.renderHeader(board, currentUser, sortOption);
         this.renderParticipants(board.participants); // Render participants
         this.renderLinkedTeams(board);
 
@@ -21,7 +19,7 @@ export class BoardView {
         const boardEncodedName = escapeHtml(board.name);
         const columnsHtml = board.columns
             .sort((a, b) => a.position - b.position)
-            .map(col => this.createColumnHTML(col, board, currentUser, selectedCardId))
+            .map(col => this.createColumnHTML(col, board, currentUser, selectedCardId, sortOption))
             .join('');
 
         container.innerHTML = `
@@ -75,7 +73,8 @@ export class BoardView {
         container.innerHTML = avatarsHtml + remainingHtml;
     }
 
-    renderHeader(board, currentUser) {
+    renderHeader(board, currentUser, sortOption = 'position') {
+        // ... existing logic ...
         // 1. Update Title and Phase
         const titleEl = document.getElementById('boardTitle');
         if (titleEl) titleEl.textContent = board.name;
@@ -105,6 +104,14 @@ export class BoardView {
                 if (show) el.classList.remove('hidden');
             }
         };
+
+        // Sort Controls - Dropdown
+        const sortSelect = document.getElementById('sortCardsSelect');
+        if (sortSelect) {
+            sortSelect.style.display = 'inline-block';
+            sortSelect.value = sortOption;
+        }
+
 
         // Phase Switch (Only if not finished)
         const switchBtn = document.getElementById('switchPhaseBtn');
@@ -211,17 +218,36 @@ export class BoardView {
         }
     }
 
-    createColumnHTML(column, board, currentUser, selectedCardId) {
+    createColumnHTML(column, board, currentUser, selectedCardId, sortOption = 'position') {
         const visibleCards = (column.cards || []).filter(c => !c.merged_with_id);
+
+        // Sorting Logic
+        if (sortOption === 'votes') {
+            visibleCards.sort((a, b) => {
+                const votesA = (a.votes || []).filter(v => v.vote_type === 'like').length;
+                const votesB = (b.votes || []).filter(v => v.vote_type === 'like').length;
+                return votesB - votesA; // Descending
+            });
+        } else if (sortOption === 'az') {
+            visibleCards.sort((a, b) => a.content.localeCompare(b.content));
+        } else {
+            // Position (Default)
+            visibleCards.sort((a, b) => a.position - b.position);
+        }
+
         const cardsHtml = visibleCards
-            .sort((a, b) => a.position - b.position)
             .map(card => this.createCardHTML(card, board, currentUser, selectedCardId))
             .join('');
 
         return `
             <div class="column" data-column-id="${column.id}">
                 <div class="column-header">
-                    <h3>${escapeHtml(column.name)}</h3>
+                    <h3>
+                        ${escapeHtml(column.name)}
+                        <span class="badge" style="margin-left:8px; font-size:0.8rem; opacity:0.8; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:10px;">
+                            ${visibleCards.length}
+                        </span>
+                    </h3>
                     <div class="column-actions">
                          <!-- Use data-action for delegation -->
                          <button class="btn-icon" data-action="columnEdit" data-column-id="${column.id}"><i class="fas fa-pen"></i></button>

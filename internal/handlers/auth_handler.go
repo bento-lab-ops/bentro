@@ -67,8 +67,8 @@ func Register(c *gin.Context) {
 
 	// Save to DB
 	if err := database.DB.Create(&user).Error; err != nil {
-		// Check for duplicate email
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already registered"})
+		// Return the actual error for debugging E2E tests
+		c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("Registration failed: %v", err)})
 		return
 	}
 

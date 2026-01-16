@@ -6,7 +6,7 @@ metadata:
   labels:
     app: bentro-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: bentro-app
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bentro-app
-        image: dnlouko/bentro-app:v0.15.4
+        image: dnlouko/bentro-app:v0.16.10
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -55,6 +55,8 @@ spec:
             configMapKeyRef:
               name: bentro-app-config
               key: DB_NAME
+        - name: REDIS_ADDR
+          value: "bentro-redis:6379"
         resources:
           requests:
             memory: "128Mi"
