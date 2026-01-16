@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BenTro - Retrospectives, packed perfectly!</title>
     <link rel="icon" href="/static/bentrologo.png">
-    <link rel="stylesheet" href="/static/bentro.css?v=v0.15.1">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.16.29">
     <link rel="stylesheet" href="/static/css/teams.css?v=v0.15.1">
     <link rel="stylesheet" href="/static/css/components/toasts.css">
     <link rel="stylesheet" href="/static/css/components/cursors.css">
@@ -347,44 +347,90 @@
 
                 <!-- Col 3: Actions Grid -->
                 <div class="header-section actions-section">
-                    <h5 style="margin:0; opacity:0.7; font-size:0.8rem; margin-bottom:0.5rem; letter-spacing: 1px;">
-                        ACTIONS</h5>
+
                     <div class="actions-grid"
                         style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
                         <!-- Sorting -->
-                        <!-- Sorting Dropdown -->
-                        <div class="sort-controls" style="display: flex; align-items: center;">
-                            <select id="sortCardsSelect" class="glass-select" style="display: none;" title="Sort Cards">
-                                <option value="position">Default Order</option>
-                                <option value="votes">Sort by Votes</option>
-                                <option value="az">Sort A-Z</option>
-                            </select>
+                        <!-- Host Claims (Visible) -->
+                        <button id="claimManagerBtn" class="btn btn-glass btn-small action-btn-fixed"
+                            data-action="claimManager" style="display: none;" title="Claim Host">
+                            <i class="fas fa-crown"></i> <span data-i18n="btn.claim_host">Claim Host</span>
+                        </button>
+                        <button id="unclaimManagerBtn" class="btn btn-glass btn-small action-btn-fixed"
+                            data-action="unclaimManager" style="display: none;" title="Unclaim">
+                            <i class="fas fa-user-slash"></i> <span data-i18n="btn.unclaim">Relinquish</span>
+                        </button>
+
+                        <!-- Sorting (Visible) -->
+                        <div class="sort-dropdown-container" style="position: relative;">
+                            <button id="sortMenuBtn" class="btn btn-glass btn-small action-btn-fixed"
+                                onclick="toggleSortMenu()">
+                                <i class="fas fa-sort-amount-down"></i> <span id="currentSortLabel"
+                                    data-i18n="sort.default">Default Order</span>
+                            </button>
+                            <div id="sortDropdown" class="glass-dropdown-menu">
+                                <button class="dropdown-item"
+                                    onclick="boardController.setSort('position'); toggleSortMenu()">
+                                    <i class="fas fa-sort"></i> <span data-i18n="sort.default">Default Order</span>
+                                </button>
+                                <button class="dropdown-item"
+                                    onclick="boardController.setSort('votes'); toggleSortMenu()">
+                                    <i class="fas fa-thumbs-up"></i> <span data-i18n="sort.votes">Sort by Votes</span>
+                                </button>
+                                <button class="dropdown-item" onclick="boardController.setSort('az'); toggleSortMenu()">
+                                    <i class="fas fa-font"></i> <span data-i18n="sort.az">Sort A-Z</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Host Claims -->
-                        <button id="claimManagerBtn" class="btn btn-primary" data-action="claimManager"
-                            style="display: none;" title="Claim Host"><i class="fas fa-crown"></i></button>
-                        <button id="unclaimManagerBtn" class="btn btn-outline" data-action="unclaimManager"
-                            style="display: none;" title="Unclaim"><i class="fas fa-user-slash"></i></button>
+                        <!-- Actions Dropdown -->
+                        <div class="actions-dropdown-container" style="position: relative;">
+                            <button id="actionsMenuBtn" class="btn btn-glass btn-small action-btn-fixed"
+                                title="Actions">
+                                <i class="fas fa-ellipsis-v"></i> <span data-i18n="label.actions">Actions</span>
+                            </button>
 
-                        <!-- Tools -->
-                        <button id="addColumnBtn" class="btn btn-primary" style="display: none;" data-action="addColumn"
-                            title="Add Column"><i class="fas fa-plus"></i></button>
-                        <button id="manageTeamsBtn" class="btn btn-secondary" style="display: none;"
-                            data-action="manageTeams" title="Manage Teams"><i class="fas fa-users-cog"></i></button>
-                        <button id="adminSettingsBtn" class="btn btn-secondary" style="display: none;"
-                            data-action="openSettings" title="Board Settings"><i class="fas fa-cog"></i></button>
-                        <button id="exportBoardBtn" class="btn btn-secondary" data-action="exportBoard"
-                            style="display: none;" title="Export CSV"><i class="fas fa-file-csv"></i></button>
+                            <div id="actionsDropdown" class="glass-dropdown-menu">
+                                <!-- Tools inside dropdown -->
+                                <button id="addColumnBtn" class="dropdown-item" style="display: none;"
+                                    data-action="addColumn">
+                                    <i class="fas fa-plus"></i> <span data-i18n="btn.add_column">Add Column</span>
+                                </button>
+                                <button id="manageTeamsBtn" class="dropdown-item" style="display: none;"
+                                    data-action="manageTeams">
+                                    <i class="fas fa-users-cog"></i> <span data-i18n="btn.manage_teams">Manage
+                                        Teams</span>
+                                </button>
+                                <button id="adminSettingsBtn" class="dropdown-item" style="display: none;"
+                                    data-action="openSettings">
+                                    <i class="fas fa-cog"></i> <span data-i18n="btn.admin_settings">Settings</span>
+                                </button>
+                                <button id="exportBoardBtn" class="dropdown-item" data-action="exportBoard"
+                                    style="display: none;">
+                                    <i class="fas fa-file-csv"></i> <span data-i18n="btn.export_csv">Export CSV</span>
+                                </button>
 
-                        <!-- Meta -->
-                        <button id="finishRetroBtn" class="btn btn-danger" style="display: none;"
-                            data-action="finishRetro" title="Finish Retro"><i
-                                class="fas fa-flag-checkered"></i></button>
-                        <button id="reopenRetroBtn" class="btn btn-primary" style="display: none;"
-                            data-action="reopenRetro" title="Reopen Retro"><i class="fas fa-door-open"></i></button>
-                        <button id="leaveBoardBtn" class="btn btn-danger" style="display: none;"
-                            data-action="leaveBoard" title="Leave Board"><i class="fas fa-sign-out-alt"></i></button>
+                                <div class="dropdown-divider"></div>
+
+                                <!-- Meta actions -->
+                                <button id="finishRetroBtn" class="dropdown-item text-danger" style="display: none;"
+                                    data-action="finishRetro">
+                                    <i class="fas fa-flag-checkered"></i> <span data-i18n="btn.finish_retro">Finish
+                                        Retro</span>
+                                </button>
+                                <button id="reopenRetroBtn" class="dropdown-item" style="display: none;"
+                                    data-action="reopenRetro">
+                                    <i class="fas fa-door-open"></i> <span data-i18n="btn.reopen_retro">Reopen
+                                        Retro</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Leave Board (Always Visible) -->
+                        <button id="leaveBoardBtn" class="btn btn-glass btn-small action-btn-fixed text-danger"
+                            style="display: none;" data-action="leaveBoard" title="Leave Board">
+                            <i class="fas fa-sign-out-alt"></i> <span data-i18n="btn.leave">Leave</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -410,7 +456,7 @@
 
     <!-- Modals Container (Loaded dynamically) -->
     <div id="modals-container"></div>
-    <script type="module" src="/static/js/main.js?v=v0.15.6"></script>
+    <script type="module" src="/static/js/main.js?v=v0.16.29"></script>
 </body>
 
 </html>

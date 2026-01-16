@@ -414,6 +414,55 @@ window.initApp = initApp;
 window.initUI = initUI;
 window.showDashboard = () => dashboardController.showView();
 window.toggleTheme = toggleTheme;
+// Actions Menu Logic
+function setupActionsMenu() {
+    const btn = document.getElementById('actionsMenuBtn');
+    const menu = document.getElementById('actionsDropdown');
+
+    if (btn && menu) {
+        // Remove old listener if any (safety)
+        btn.onclick = null;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            menu.classList.toggle('show');
+            console.log('Actions Menu Toggled', menu.classList.contains('show'));
+        });
+    }
+}
+
+// Initialize on UI init and potentially on re-renders if needed
+// (But header is static, so once is enough)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupActionsMenu);
+} else {
+    setupActionsMenu();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (event) {
+    // Actions Dropdown
+    if (!event.target.closest('.actions-dropdown-container')) {
+        const menu = document.getElementById('actionsDropdown');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    }
+    // Sort Dropdown
+    if (!event.target.closest('.sort-dropdown-container')) {
+        const menu = document.getElementById('sortDropdown');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    }
+});
+window.toggleSortMenu = function () {
+    const menu = document.getElementById('sortDropdown');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
+};
 window.filterBoards = (status) => dashboardController.filterBoards(status);
 window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
 window.leaveBoardPersistent = async (boardId) => {

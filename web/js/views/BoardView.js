@@ -100,16 +100,23 @@ export class BoardView {
         const toggle = (id, show) => {
             const el = document.getElementById(id);
             if (el) {
-                el.style.display = show ? 'inline-flex' : 'none';
-                if (show) el.classList.remove('hidden');
+                if (show) {
+                    el.style.display = el.classList.contains('dropdown-item') ? 'flex' : 'inline-flex';
+                    el.classList.remove('hidden');
+                } else {
+                    el.style.display = 'none';
+                }
             }
         };
 
-        // Sort Controls - Dropdown
-        const sortSelect = document.getElementById('sortCardsSelect');
-        if (sortSelect) {
-            sortSelect.style.display = 'inline-block';
-            sortSelect.value = sortOption;
+        // Sort Controls - Label Update
+        const sortLabel = document.getElementById('currentSortLabel');
+        if (sortLabel) {
+            let labelKey = 'sort.default';
+            if (sortOption === 'votes') labelKey = 'sort.votes';
+            if (sortOption === 'az') labelKey = 'sort.az';
+            sortLabel.setAttribute('data-i18n', labelKey);
+            sortLabel.textContent = i18n.t(labelKey);
         }
 
 

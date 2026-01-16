@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.16.28**
+## Current Version: **v0.16.29**
 
 
 ---
@@ -18,6 +18,7 @@
 - [x] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
 - [x] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
 - [x] **UI & Language Polish**: Fixed language switcher, added missing translations, and improved modal consistency.
+- [x] **Board UI Redesign**: Standardized button styles, glassmorphic dropdowns for Actions/Sort, and simplified headers.
 
 ### v0.17.x - Improved UX & Teams (Next)
 - [x] **Sorting**: Sort cards by votes, date, or reactions.
