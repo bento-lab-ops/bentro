@@ -41,18 +41,20 @@ The recommended way to deploy BenTro is using **Helm**. This ensures all depende
 - Helm (v3.0+)
 - `kubectl` configured
 
-### Installation (Local Chart)
+### Installation (Recommended)
 
-Since the Helm chart is included in this repository, you do not need to add a remote repository (e.g., `helm repo add`).
-
-1. **Clone the Repository**:
+1. **Install from DockerHub (OCI)**:
+   This is the easiest method. No cloning required.
    ```bash
-   git clone https://github.com/bento-lab-ops/bentro.git
-   cd bentro
+   helm install bentro oci://registry-1.docker.io/dnlouko/bentro-app --version 0.1.0 \
+     --namespace bentro \
+     --create-namespace
    ```
 
-2. **Install/Upgrade Release**:
-   Run this command from the project root:
+### Installation (Local Dev)
+If you have cloned the repository:
+
+1. **Install/Upgrade Release**:
    ```bash
    helm upgrade --install bentro ./helm/bentro-chart \
      --namespace bentro \
