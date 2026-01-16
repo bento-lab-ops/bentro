@@ -1,0 +1,63 @@
+# Default values for bentro-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: dnlouko/bentro-app
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.16.29"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: bentro.bento.lab
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+# Dependencies Configuration
+# "Happy Path" Default: Everything enabled
+postgresql:
+  enabled: true
+  image: postgres:15-alpine
+  auth:
+    database: retrodb
+    username: postgres
+    # password defined in secret or auto-generated if using a real chart dependency
+    # For now, we simulate the 'postgres-deployment' logic from k8s/
+  service:
+    port: 5432
+
+redis:
+  enabled: true
+  image: redis:alpine
+  service:
+    port: 6379
+
+# External Connections (used if enabled: false above)
+external:
+  db:
+    host: "my-rds-host"
+    port: 5432
+    user: "admin"
+    name: "retrodb"
+  redis:
+    host: "my-elasticache-host"
+    port: 6379
