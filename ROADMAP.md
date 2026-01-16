@@ -14,18 +14,18 @@
 ## 🚀 Future Plans (Backlog)
 
 ### v0.16.x - Performance & Stability
-- [ ] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
+- [x] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
 - [x] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
-- [ ] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
+- [x] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
 
 ### v0.17.x - Improved UX (In Progress)
 - [x] **Sorting**: Sort cards by votes, date, or reactions.
 - [x] **Card Merging**: Group similar cards and sum their votes.
-- [ ] **Export Options**: PDF and Image export alongside CSV.
+- [ ] **Persistent Teams**: Enhanced team roles and cross-board analytics. (Moved from Long Term)
 
 ### Long Term
 - [ ] **SSO Integration**: OAuth2 / Google / GitHub Login support.
-- [ ] **Persistent Teams**: Enhanced team roles and cross-board analytics.
+- [ ] **Export Options**: PDF and Image export alongside CSV. (De-prioritized)
 - [ ] **Plugin System**: API for custom column types and widgets.
 
 ---

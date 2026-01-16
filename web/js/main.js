@@ -20,6 +20,7 @@ import { navController } from './controllers/NavController.js';
 import './admin-users.js';
 import './admin-boards.js';
 import './admin-actions.js';
+import './services/ToastService.js';
 
 
 
@@ -247,7 +248,7 @@ function setupEventListeners() {
                 }
                 closeModals();
             } catch (e) {
-                alert(e.message);
+                window.toast.error(e.message || 'Failed to create column');
             }
         }
     });
@@ -443,10 +444,7 @@ window.leaveBoardPersistent = async (boardId) => {
                 window.location.hash = '#dashboard';
             } catch (e) {
                 console.error('Leave failed:', e);
-                await window.showAlert('Error', 'Failed to leave: ' + e.message);
-                // Even if API fails, user wants to leave UI?
-                // For now, let's allow them to stay if error, or prompt?
-                // Standard behavior is usually block on error.
+                window.toast.error('Failed to leave board: ' + e.message);
             }
         }
     }
@@ -509,7 +507,7 @@ window.saveBoardSettings = async function () {
             // Reload board
             if (boardController) boardController.loadBoardData();
         } catch (e) {
-            await window.showAlert('Error', 'Failed to save settings: ' + e.message);
+            window.toast.error('Failed to save settings: ' + e.message);
         }
     }
 };

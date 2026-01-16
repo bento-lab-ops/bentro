@@ -269,7 +269,7 @@ export class BoardController extends Controller {
                     window.openManageTeamsModal();
                 } else {
                     console.warn('Manage Teams modal not found');
-                    alert('Feature not available');
+                    window.toast.warning('Feature not available');
                 }
                 break;
             case 'switchPhase':
@@ -411,7 +411,7 @@ export class BoardController extends Controller {
             }
         } catch (e) {
             console.error('Action Item toggle failed', e);
-            alert('Failed: ' + e.message);
+            window.toast.error('Failed: ' + e.message);
             this.loadBoardData(); // Revert UI
         }
     }
@@ -427,7 +427,7 @@ export class BoardController extends Controller {
     async handleUnmerge(parentId) {
         const parent = this.findCard(parentId);
         if (!parent || !parent.merged_cards || parent.merged_cards.length === 0) {
-            await window.showAlert('Notice', "No merged cards to unmerge.");
+            window.toast.info("No merged cards to unmerge.");
             return;
         }
 
@@ -441,7 +441,7 @@ export class BoardController extends Controller {
             await this.loadBoardData();
         } catch (e) {
             console.error('[Controller] Unmerge failed:', e);
-            await window.showAlert('Error', e.message);
+            window.toast.error(e.message);
         }
     }
 
@@ -463,7 +463,7 @@ export class BoardController extends Controller {
             }));
         } else {
             console.warn('WebSocket not connected, cannot switch phase');
-            await window.showAlert('Error', 'Connection lost. Please refresh.');
+            window.toast.error('Connection lost. Please refresh.');
         }
     }
 
@@ -553,7 +553,7 @@ export class BoardController extends Controller {
             await apiCall(`/boards/${this.boardId}/columns`, 'POST', { name });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            window.toast.error(e.message);
         }
     }
 
@@ -576,7 +576,7 @@ export class BoardController extends Controller {
             await apiCall(`/columns/${columnId}`, 'PUT', { name });
             await this.loadBoardData();
         } catch (e) {
-            alert(e.message);
+            window.toast.error(e.message);
         }
     }
 
@@ -586,7 +586,7 @@ export class BoardController extends Controller {
             await apiCall(`/columns/${columnId}`, 'DELETE');
             await this.loadBoardData();
         } catch (e) {
-            await window.showAlert('Error', e.message);
+            window.toast.error(e.message);
         }
     }
 
