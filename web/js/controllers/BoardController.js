@@ -16,7 +16,7 @@ export class BoardController extends Controller {
         this.board = null;
         this.view = new BoardView('columnsContainer');
         this.eventsBound = false;
-        this.sortOption = 'position';
+        this.sortOption = localStorage.getItem('bentro_board_sort') || 'position';
 
         // Bind handlers once in constructor
         this.handleClick = this.handleClick.bind(this);
@@ -216,6 +216,7 @@ export class BoardController extends Controller {
     setSort(option) {
         console.log('BoardController: Set Sort Option', option);
         this.sortOption = option;
+        localStorage.setItem('bentro_board_sort', option);
 
         // Render with new sort option
         if (this.board) {
@@ -840,7 +841,6 @@ export class BoardController extends Controller {
 
             new Sortable(container, {
                 group: 'shared', // Allow dragging between lists
-                sort: this.sortOption === 'position', // Disable sorting within list if not sorting by position
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
@@ -849,6 +849,17 @@ export class BoardController extends Controller {
                 scroll: true,
                 scrollSensitivity: 100, // Smoother scrolling near edges
                 bubbleScroll: true,
+
+                // Allow dragging between columns even when sorted!
+                // We just prevent "reordering" within the same list if custom sort is on.
+                onMove: (evt) => {
+                    const isCustomSort = this.sortOption !== 'position';
+                    if (isCustomSort && evt.to === evt.from) {
+                        return false; // Prevent sort within same list
+                    }
+                    return true; // Allow move to other list
+                },
+
                 onEnd: async (evt) => {
                     const itemEl = evt.item;
                     const cardId = itemEl.dataset.id;
