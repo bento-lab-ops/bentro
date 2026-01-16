@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.15.4**
+## Current Version: **v0.16.28**
 
 
 ---
@@ -13,12 +13,13 @@
 
 ## 🚀 Future Plans (Backlog)
 
-### v0.16.x - Performance & Stability
+### v0.16.x - Performance, Stability & UI Polish
 - [x] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
 - [x] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
 - [x] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
+- [x] **UI & Language Polish**: Fixed language switcher, added missing translations, and improved modal consistency.
 
-### v0.17.x - Improved UX (In Progress)
+### v0.17.x - Improved UX & Teams (Next)
 - [x] **Sorting**: Sort cards by votes, date, or reactions.
 - [x] **Card Merging**: Group similar cards and sum their votes.
 - [ ] **Persistent Teams**: Enhanced team roles and cross-board analytics. (Moved from Long Term)
