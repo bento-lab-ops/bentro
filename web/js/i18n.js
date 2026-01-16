@@ -313,6 +313,7 @@ const translations = {
         'btn.unmerge': 'Unmerge Last',
         'btn.edit': 'Edit',
         'btn.delete': 'Delete',
+        'btn.update_column': 'Update Column',
     },
     'pt-BR': {
         // Queue/Dashboard
@@ -624,6 +625,7 @@ const translations = {
         'btn.unmerge': 'Desfazer Fusão',
         'btn.edit': 'Editar',
         'btn.delete': 'Excluir',
+        'btn.update_column': 'Atualizar Coluna',
     }
 };
 
