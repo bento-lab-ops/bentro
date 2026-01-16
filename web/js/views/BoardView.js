@@ -281,11 +281,22 @@ export class BoardView {
         }
 
         // Voting Logic
-        const votes = card.votes || [];
-        const likes = votes.filter(v => v.vote_type === 'like').length;
-        const dislikes = votes.filter(v => v.vote_type === 'dislike').length;
-        const userVotedLike = votes.some(v => v.user_name === currentUser && v.vote_type === 'like');
-        const userVotedDislike = votes.some(v => v.user_name === currentUser && v.vote_type === 'dislike');
+        // Voting Logic - Aggregation Strategy
+        let allVotes = [...(card.votes || [])];
+        if (card.merged_cards) {
+            card.merged_cards.forEach(mc => {
+                if (mc.votes) {
+                    allVotes = allVotes.concat(mc.votes);
+                }
+            });
+        }
+
+        const likes = allVotes.filter(v => v.vote_type === 'like').length;
+        const dislikes = allVotes.filter(v => v.vote_type === 'dislike').length;
+
+        // Check "My Vote" status across all aggregated votes
+        const userVotedLike = allVotes.some(v => v.user_name === currentUser && v.vote_type === 'like');
+        const userVotedDislike = allVotes.some(v => v.user_name === currentUser && v.vote_type === 'dislike');
 
         const isVotingPhase = board.phase === 'voting';
         // Fix: backend sends 'blind_voting' at root, not in settings

@@ -234,10 +234,25 @@ func MergeCard(c *gin.Context) {
 		return
 	}
 
-	// Set merged relationship
-	card.MergedWithID = &input.TargetCardID
-	if err := database.DB.Save(&card).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to merge card"})
+	// Fetch source votes
+	var sourceVotes []models.Vote
+	if err := database.DB.Where("card_id = ?", card.ID).Find(&sourceVotes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch source votes"})
+		return
+	}
+
+	// Transaction to ensure atomicity
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		// Set merged relationship on source card
+		card.MergedWithID = &input.TargetCardID
+		if err := tx.Save(&card).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to merge card: " + err.Error()})
 		return
 	}
 
