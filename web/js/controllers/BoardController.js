@@ -389,23 +389,22 @@ export class BoardController extends Controller {
     async handleToggleActionItem(cardId, isActionItem) {
         console.log('Toggling Action Item Status:', cardId, isActionItem);
         try {
-            // We are toggling "Is Action Item", not "Completed"
-            await apiCall(`/cards/${cardId}`, 'PUT', {
-                is_action_item: isActionItem
-            });
-
-            // If turning ON, show the modal to let user set Owner/Due Date
+            // If turning ON, show the modal FIRST. 
+            // The modal's "Save" button will handle the API call to set is_action_item=true.
             if (isActionItem) {
-                // Use the imported controller instance
                 if (window.actionItemsController) {
                     window.actionItemsController.openEditModal(cardId);
                 } else {
                     console.warn('ActionItemsController not found on window');
+                    // Fallback if no modal: just toggle it
+                    await apiCall(`/cards/${cardId}`, 'PUT', { is_action_item: true });
+                    this.loadBoardData();
                 }
+            } else {
+                // If turning OFF, just do it immediately
+                await apiCall(`/cards/${cardId}`, 'PUT', { is_action_item: false });
+                this.loadBoardData();
             }
-
-            // WS update triggers reload but we reload just in case
-            this.loadBoardData();
         } catch (e) {
             console.error('Action Item toggle failed', e);
             alert('Failed: ' + e.message);
