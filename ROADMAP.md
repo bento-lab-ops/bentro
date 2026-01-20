@@ -13,12 +13,7 @@
 
 ## 🚀 Future Plans (Backlog)
 
-### v0.16.x - Performance, Stability & UI Polish
-- [x] **Granular State Updates**: Optimize WebSocket events to update only changed data instead of re-fetching the entire board ("Chatty App" fix). `feature/granular-updates`
-- [x] **Frontend Testing**: Implement Unit (Vitest) and E2E (Playwright) tests for critical flows. `feature/frontend-testing`
-- [x] **Toast Notifications**: Replace silent console errors with user-friendly toast messages. `feature/toast-notifications`
-- [x] **UI & Language Polish**: Fixed language switcher, added missing translations, and improved modal consistency.
-- [x] **Board UI Redesign**: Standardized button styles, glassmorphic dropdowns for Actions/Sort, and simplified headers.
+
 
 ### v0.17.x - Improved UX & Teams (Next)
 - [x] **Sorting**: Sort cards by votes, date, or reactions.
@@ -33,6 +28,14 @@
 ---
 
 ## 📜 History (Implemented Features)
+
+### v0.16.29 - Infrastructure & UI Polish
+- **Helm Chart**: Official Helm chart created with "Happy Path" defaults (Postgres/Redis included).
+- **Agnostic SSL**: `cert-manager` configured globally, enabling plug-and-play HTTPS for all apps.
+- **OCI Distribution**: Chart published to DockerHub (`oci://registry-1.docker.io/dnlouko/bentro-app`).
+- **Board UI Redesign**: Standardized button styles, glassmorphic dropdowns, and text labels for better accessibility.
+- **Granular State Updates**: Optimized WebSocket events to update only changed data.
+- **Frontend Testing**: Added Unit and E2E tests foundation.
 
 ### v0.15.0 - Architecture & Infrastructure
 - **Multi-Architecture Support**: Native support for ARM64 (Raspberry Pi/Apple Silicon) and AMD64.
