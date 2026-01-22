@@ -57,6 +57,12 @@ resources:
     memory: "256Mi"
     cpu: "200m"
 
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
 # Dependencies Configuration
 # "Happy Path" Default: Everything enabled
 postgresql:
