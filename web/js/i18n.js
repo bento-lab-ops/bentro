@@ -307,6 +307,13 @@ const translations = {
         'label.team_optional': 'Team (Optional)',
         'option.no_team': 'No Team (Personal)',
 
+        // Sort & Filter
+        'sort.default': 'Default',
+        'sort.votes': 'Most Voted',
+        'sort.newest': 'Newest',
+        'sort.date': 'Newest',
+        'sort.az': 'Sort A-Z',
+
         // Card Actions
         'btn.mark_action': 'Mark as Action Item',
         'btn.unmark_action': 'Unmark Action Item',

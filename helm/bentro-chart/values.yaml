@@ -8,7 +8,7 @@ image:
   repository: dnlouko/bentro-app
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.16.29"
+  tag: "v0.16.30"
 
 service:
   type: ClusterIP
@@ -22,8 +22,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 
-    # --- HTTPS (Cert-Manager) ---
-    # Global Default Issuer Configured on Cluster
+    # --- HTTPS (Cert-Manager) --- INSERT YOUR ANNOTATION HERE
 
     # --- Integração com Homepage ---
     gethomepage.dev/enabled: "true"
@@ -34,7 +33,7 @@ ingress:
     gethomepage.dev/namespace: "bentro"
     gethomepage.dev/pod-selector: "app=bentro-app"
   hosts:
-    - host: bentro.bento.lab
+    - host: bentro.bento.lab # YOUR DESIRED INGRESS URL
       paths:
         - path: /
           pathType: Prefix
@@ -58,6 +57,8 @@ resources:
     cpu: "200m"
 
 nodeSelector: {}
+  # Example: Run only on AMD64 nodes
+  # kubernetes.io/arch: amd64
 
 tolerations: []
 
