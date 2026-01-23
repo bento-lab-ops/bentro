@@ -1,6 +1,6 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.16.29**
+## Current Version: **v0.16.30**
 
 
 ---
@@ -29,7 +29,8 @@
 
 ## 📜 History (Implemented Features)
 
-### v0.16.29 - Infrastructure & UI Polish
+### v0.16.30 - Mobile Fixes & Polish
+- **Mobile Menu Fix**: Resolved an issue where the sidebar overlay blocked the screen on mobile devices.
 - **Helm Chart**: Official Helm chart created with "Happy Path" defaults (Postgres/Redis included).
 - **Agnostic SSL**: `cert-manager` configured globally, enabling plug-and-play HTTPS for all apps.
 - **OCI Distribution**: Chart published to DockerHub (`oci://registry-1.docker.io/dnlouko/bentro-app`).
