@@ -152,10 +152,13 @@ export async function handleLoginSubmit(event) {
 
 export async function handleRegisterSubmit(event) {
     event.preventDefault();
-    const firstName = document.getElementById('regFirstName').value.trim();
-    const lastName = document.getElementById('regLastName').value.trim();
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
+    const btn = event.target.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+
+    const firstName = document.getElementById('registerFirstName').value.trim();
+    const lastName = document.getElementById('registerLastName').value.trim();
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
 
     const fullName = `${firstName} ${lastName}`.trim();
 
@@ -163,14 +166,11 @@ export async function handleRegisterSubmit(event) {
         await register({
             first_name: firstName,
             last_name: lastName,
-            display_name: fullName,
+            display_name: document.getElementById('registerDisplayName').value.trim(), // Use actual input
             email,
             password,
             avatar: window.selectedRegisterAvatar || '👤'
         });
-        // Auto login after register?
-        // For now, ask to login
-        // alert('Registration successful! Please login.'); // REMOVED
         await window.showAlert(i18n.t('msg.success'), i18n.t('msg.reg_success'));
         switchToLogin();
         // Pre-fill email
@@ -178,6 +178,8 @@ export async function handleRegisterSubmit(event) {
 
     } catch (error) {
         alert('Registration Failed: ' + error.message);
+    } finally {
+        if (btn) btn.disabled = false;
     }
 }
 

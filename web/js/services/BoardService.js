@@ -65,8 +65,8 @@ export class BoardService {
         return await apiCall(`/cards/${cardId}/unmerge`, 'POST');
     }
 
-    async moveCard(cardId, columnId) {
-        return await apiCall(`/cards/${cardId}/move`, 'PUT', { column_id: columnId });
+    async moveCard(cardId, columnId, position) {
+        return await apiCall(`/cards/${cardId}/move`, 'PUT', { column_id: columnId, position: position });
     }
 }
 

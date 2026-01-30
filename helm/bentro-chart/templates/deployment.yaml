@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    app: {{ .Release.Name }}-app
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-app
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z -v -w30 $DB_HOST $DB_PORT; do echo "Waiting for database connection..."; sleep 2; done']
+          env:
+            - name: DB_HOST
+              value: {{ if .Values.postgresql.enabled }}"{{ .Release.Name }}-postgres"{{ else }}"{{ .Values.external.db.host }}"{{ end }}
+            - name: DB_PORT
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.service.port }}"{{ else }}"{{ .Values.external.db.port }}"{{ end }}
+      containers:
+        - name: bentro-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: {{ if .Values.postgresql.enabled }}"{{ .Release.Name }}-postgres"{{ else }}"{{ .Values.external.db.host }}"{{ end }}
+            - name: DB_PORT
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.service.port }}"{{ else }}"{{ .Values.external.db.port }}"{{ end }}
+            - name: DB_UID
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.auth.username }}"{{ else }}"{{ .Values.external.db.user }}"{{ end }}
+            - name: DB_USER
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.auth.username }}"{{ else }}"{{ .Values.external.db.user }}"{{ end }}
+            - name: DB_NAME
+              value: {{ if .Values.postgresql.enabled }}"{{ .Values.postgresql.auth.database }}"{{ else }}"{{ .Values.external.db.name }}"{{ end }}
+            # For simplicity in this demo chart, we pull password from a single secret or assume external has one
+            # In a real chart, we'd have more complex secret management
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: JWT_SECRET
+            - name: ADMIN_PASSWORD
+              value: "bentro"
+            - name: REDIS_ADDR
+              value: {{ if .Values.redis.enabled }}"{{ .Release.Name }}-redis:{{ .Values.redis.service.port }}"{{ else }}"{{ .Values.external.redis.host }}:{{ .Values.external.redis.port }}"{{ end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

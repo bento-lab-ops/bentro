@@ -6,5 +6,5 @@ metadata:
 data:
   DB_HOST: "postgres-service"
   DB_PORT: "5432"
-  DB_NAME: "retrodb"
+  DB_NAME: "bentrodb"
   DB_USER: "postgres"

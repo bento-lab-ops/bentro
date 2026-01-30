@@ -3,9 +3,10 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"time"
+
 	"github.com/bento-lab-ops/bentro/internal/database"
 	"github.com/bento-lab-ops/bentro/internal/models"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -224,6 +225,7 @@ func GetBoard(c *gin.Context) {
 		Preload("Columns.Cards.Votes").
 		Preload("Columns.Cards.Reactions").
 		Preload("Columns.Cards.MergedCards").
+		Preload("Columns.Cards.MergedCards.Votes").
 		Preload("Members").
 		Preload("Teams").
 		First(&board, id).Error; err != nil {

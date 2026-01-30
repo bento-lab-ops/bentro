@@ -4,7 +4,7 @@ export const CONFIG = {
     DEBUG_MODE: false // Set to true for verbose logging, or use localStorage.setItem('DEBUG', 'true')
 };
 
-export const APP_VERSION = 'v0.15.4';
+export const APP_VERSION = 'v0.16.30';
 
 // Global Shim
 window.CONFIG = CONFIG;

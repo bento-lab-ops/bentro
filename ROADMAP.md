@@ -1,29 +1,42 @@
 # BenTro Roadmap 🗺️
 
-## Current Version: **v0.15.4**
+## Current Version: **v0.16.30**
+
 
 ---
 
+> [!TIP]
+> **Development Workflow**: Please refer to [docs/WORKFLOW.md](docs/WORKFLOW.md) for our branching strategy and release process.
+
+---
+
+
 ## 🚀 Future Plans (Backlog)
 
-### v0.16.x - Real-time Collaboration II
-- [ ] **Real-time Cursors**: See other users' mouse positions on the board.
-- [ ] **Real-time Online Presence**: Visual indicators (e.g., green avatar outline) for users currently active.
-- [ ] **Typing Indicators**: "User is typing..." notifications.
 
-### v0.17.x - Enhanced Facilitation
-- [ ] **Sound Effects**: Optional sounds for timer end, new cards, and votes.
-- [ ] **Sorting & Filtering**: Sort cards by votes, date, or reactions.
-- [ ] **Export Options**: PDF and Image export alongside CSV.
+
+### v0.17.x - Improved UX & Teams (Next)
+- [x] **Sorting**: Sort cards by votes, date, or reactions.
+- [x] **Card Merging**: Group similar cards and sum their votes.
+- [ ] **Persistent Teams**: Enhanced team roles and cross-board analytics. (Moved from Long Term)
 
 ### Long Term
 - [ ] **SSO Integration**: OAuth2 / Google / GitHub Login support.
-- [ ] **Persistent Teams**: Enhanced team roles and cross-board analytics.
+- [ ] **Export Options**: PDF and Image export alongside CSV. (De-prioritized)
 - [ ] **Plugin System**: API for custom column types and widgets.
 
 ---
 
 ## 📜 History (Implemented Features)
+
+### v0.16.30 - Mobile Fixes & Polish
+- **Mobile Menu Fix**: Resolved an issue where the sidebar overlay blocked the screen on mobile devices.
+- **Helm Chart**: Official Helm chart created with "Happy Path" defaults (Postgres/Redis included).
+- **Agnostic SSL**: `cert-manager` configured globally, enabling plug-and-play HTTPS for all apps.
+- **OCI Distribution**: Chart published to DockerHub (`oci://registry-1.docker.io/dnlouko/bentro-app`).
+- **Board UI Redesign**: Standardized button styles, glassmorphic dropdowns, and text labels for better accessibility.
+- **Granular State Updates**: Optimized WebSocket events to update only changed data.
+- **Frontend Testing**: Added Unit and E2E tests foundation.
 
 ### v0.15.0 - Architecture & Infrastructure
 - **Multi-Architecture Support**: Native support for ARM64 (Raspberry Pi/Apple Silicon) and AMD64.

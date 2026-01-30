@@ -1,0 +1,95 @@
+# Default values for bentro-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: dnlouko/bentro-app
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.16.30"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    # --- Configurações do NGINX ---
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # --- HTTPS (Cert-Manager) --- INSERT YOUR ANNOTATION HERE
+
+    # --- Integração com Homepage ---
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Bentro App"
+    gethomepage.dev/description: "App Retro"
+    gethomepage.dev/group: "Meus Projetos"
+    gethomepage.dev/icon: "/icons/bentrologo.png"
+    gethomepage.dev/namespace: "bentro"
+    gethomepage.dev/pod-selector: "app=bentro-app"
+  hosts:
+    - host: bentro.bento.lab # YOUR DESIRED INGRESS URL
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+   - secretName: bentro-app-tls
+     hosts:
+       - bentro.bento.lab
+
+resources:
+  # Capacity Planning Guide:
+  # Default (100m CPU, 128Mi RAM) x 2 Replicas supports approx 50-100 concurrent users.
+  # Scaling Heuristic:
+  # - Small Team (<50 users): Defaults are sufficient.
+  # - Department (50-200 users): Increase to 250m CPU, 256Mi RAM per replica.
+  # - Enterprise (200+ users): Use HPA (Horizontal Pod Autoscaler) target 70% CPU utilization.
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+nodeSelector: {}
+  # Example: Run only on AMD64 nodes
+  # kubernetes.io/arch: amd64
+
+tolerations: []
+
+affinity: {}
+
+# Dependencies Configuration
+# "Happy Path" Default: Everything enabled
+postgresql:
+  enabled: true
+  image: postgres:15-alpine
+  auth:
+    database: bentrodb
+    username: postgres
+    # password defined in secret or auto-generated if using a real chart dependency
+    # For now, we simulate the 'postgres-deployment' logic from k8s/
+  service:
+    port: 5432
+
+redis:
+  enabled: true
+  image: redis:alpine
+  service:
+    port: 6379
+
+# External Connections (used if enabled: false above)
+external:
+  db:
+    host: "my-rds-host"
+    port: 5432
+    user: "admin"
+    name: "bentrodb"
+  redis:
+    host: "my-elasticache-host"
+    port: 6379

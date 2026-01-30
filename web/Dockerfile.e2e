@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/playwright:v1.49.0-jammy
+
+WORKDIR /app
+
+# Copy package info
+COPY package.json package-lock.json ./
+
+# Install dependencies (including Playwright browsers if needed, but base image has them)
+RUN npm ci
+
+# Copy test files
+COPY . .
+
+# Default command
+CMD ["npx", "playwright", "test"]

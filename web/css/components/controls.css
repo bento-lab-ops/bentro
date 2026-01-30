@@ -1,0 +1,204 @@
+/* Control Island - Central Toolbar */
+.control-island {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 30, 40, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 50px;
+    /* Pillow shape */
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .control-island {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.control-island:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateX(-50%) translateY(2px);
+}
+
+/* Island Elements */
+.timer-display {
+    font-family: 'Inter', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 80px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.control-separator {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Action Bar (Top Right) */
+.action-bar {
+    position: fixed;
+    top: 25px;
+    right: 30px;
+    display: flex;
+    gap: 12px;
+    z-index: 999;
+}
+
+.action-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(30, 30, 40, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.action-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+/* Card Menu (Kebab) */
+.card-menu-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    z-index: 10;
+}
+
+/* Show on hover */
+.retro-card:hover .card-menu-btn,
+.card-menu-btn:focus-within {
+    opacity: 1;
+}
+
+.card-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    min-width: 160px;
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    padding: 6px;
+    display: none;
+    z-index: 100;
+    flex-direction: column;
+    gap: 2px;
+    animation: fadeIn 0.15s ease;
+}
+
+/* Fix Blocking: Ensure the open menu card is On Top */
+.retro-card:hover,
+.retro-card:focus-within {
+    z-index: 500 !important;
+    /* Higher than siblings */
+    position: relative;
+}
+
+.card-menu-btn:focus-within .dropdown-menu {
+    display: flex;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.1s;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.dropdown-item.danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Override Header Layout */
+.app-header {
+    /* Hide layout parts that conflict */
+    /* Ensure header doesn't overlap the fixed island too awkwardly */
+    /* We might need to adjust padding of the main container */
+    padding-top: 80px !important;
+    /* Make space for fixed headers */
+}
+
+/* Fix z-index for drag */
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+/* Ensure columns don't clip dropdowns */
+.column {
+    overflow: visible !important;
+    /* NOTE: overflow: visible breaks scrolling within long columns if fixed height.
+       However, bentro.css .column doesn't seem to have fixed height or overflow: scroll.
+       It relies on the page scrolling usually.
+       If user has scrollable columns, this will break it.
+       User context: "Kanban style columns". Usually they scroll independently.
+       If independent scroll: dropdown MUST be clipped.
+       Solution for independent scroll: Dropdown must be position:fixed or use popover.
+       Given implementation is position: absolute (relative to card button),
+       If column scrolls, clipping is inevitable unless we use fixed.
+       
+       Let's assume page scroll for now based on 'min-height: 400px' in bentro.css and no max-height seen.
+       If it is page scroll, overflow: visible is fine.
+    */
+}

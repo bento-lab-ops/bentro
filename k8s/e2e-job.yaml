@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bentro-e2e-tests
+  namespace: bentro
+spec:
+  ttlSecondsAfterFinished: 600 # Auto-cleanup after 10 mins
+  template:
+    spec:
+      containers:
+      - name: playwright
+        image: dnlouko/bentro-e2e-runner:v1
+        env:
+        - name: BASE_URL
+          value: "http://bentro-app-service:80"
+        # We can override command to run specific tests if needed
+        command: ["npx", "playwright", "test"]
+      restartPolicy: Never
+  backoffLimit: 1

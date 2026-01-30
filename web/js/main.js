@@ -20,6 +20,7 @@ import { navController } from './controllers/NavController.js';
 import './admin-users.js';
 import './admin-boards.js';
 import './admin-actions.js';
+import './services/ToastService.js';
 
 
 
@@ -247,7 +248,7 @@ function setupEventListeners() {
                 }
                 closeModals();
             } catch (e) {
-                alert(e.message);
+                window.toast.error(e.message || 'Failed to create column');
             }
         }
     });
@@ -413,6 +414,55 @@ window.initApp = initApp;
 window.initUI = initUI;
 window.showDashboard = () => dashboardController.showView();
 window.toggleTheme = toggleTheme;
+// Actions Menu Logic
+function setupActionsMenu() {
+    const btn = document.getElementById('actionsMenuBtn');
+    const menu = document.getElementById('actionsDropdown');
+
+    if (btn && menu) {
+        // Remove old listener if any (safety)
+        btn.onclick = null;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            menu.classList.toggle('show');
+            console.log('Actions Menu Toggled', menu.classList.contains('show'));
+        });
+    }
+}
+
+// Initialize on UI init and potentially on re-renders if needed
+// (But header is static, so once is enough)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupActionsMenu);
+} else {
+    setupActionsMenu();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (event) {
+    // Actions Dropdown
+    if (!event.target.closest('.actions-dropdown-container')) {
+        const menu = document.getElementById('actionsDropdown');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    }
+    // Sort Dropdown
+    if (!event.target.closest('.sort-dropdown-container')) {
+        const menu = document.getElementById('sortDropdown');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    }
+});
+window.toggleSortMenu = function () {
+    const menu = document.getElementById('sortDropdown');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
+};
 window.filterBoards = (status) => dashboardController.filterBoards(status);
 window.joinBoardPersistent = (id) => dashboardController.joinBoard(id);
 window.leaveBoardPersistent = async (boardId) => {
@@ -443,10 +493,7 @@ window.leaveBoardPersistent = async (boardId) => {
                 window.location.hash = '#dashboard';
             } catch (e) {
                 console.error('Leave failed:', e);
-                await window.showAlert('Error', 'Failed to leave: ' + e.message);
-                // Even if API fails, user wants to leave UI?
-                // For now, let's allow them to stay if error, or prompt?
-                // Standard behavior is usually block on error.
+                window.toast.error('Failed to leave board: ' + e.message);
             }
         }
     }
@@ -509,7 +556,7 @@ window.saveBoardSettings = async function () {
             // Reload board
             if (boardController) boardController.loadBoardData();
         } catch (e) {
-            await window.showAlert('Error', 'Failed to save settings: ' + e.message);
+            window.toast.error('Failed to save settings: ' + e.message);
         }
     }
 };
@@ -519,6 +566,24 @@ window.openNewColumnModal = openNewColumnModal;
 window.closeNewColumnModal = closeNewColumnModal;
 window.openBoardSettings = openBoardSettings;
 window.closeBoardSettingsModal = closeBoardSettingsModal;
+
+function openEditColumnModal(columnId, currentName) {
+    const modal = document.getElementById('editColumnModal');
+    if (modal) {
+        document.getElementById('editColumnId').value = columnId;
+        document.getElementById('columnNameEdit').value = currentName;
+        modal.style.display = 'block';
+        document.getElementById('columnNameEdit').focus();
+    }
+}
+
+function closeEditColumnModal() {
+    const modal = document.getElementById('editColumnModal');
+    if (modal) modal.style.display = 'none';
+}
+
+window.openEditColumnModal = openEditColumnModal;
+window.closeEditColumnModal = closeEditColumnModal;
 
 // Main Execution
 

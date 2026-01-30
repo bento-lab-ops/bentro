@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bentro-app
+description: A Helm chart for BenTro - Retrospectives Application
+type: application
+version: 0.1.3
+appVersion: "v0.16.31"

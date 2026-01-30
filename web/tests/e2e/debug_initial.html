@@ -1,0 +1,1096 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BenTro - Retrospectives, packed perfectly!</title>
+    <link rel="icon" href="/static/bentrologo.png">
+    <link rel="stylesheet" href="/static/bentro.css?v=v0.15.1">
+    <link rel="stylesheet" href="/static/css/teams.css?v=v0.15.1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+
+<body>
+    <div class="container mobile-container-fix">
+        <header class="header">
+            <div class="header-left">
+                <div class="brand-logo-title" onclick="showDashboard()" style="cursor: pointer;">
+                    <img src="/static/bentrologo.png" alt="BenTro Logo" class="header-logo">
+                    <h1 class="title" data-i18n="app.title">BenTro</h1>
+                </div>
+
+            </div>
+
+            <div class="header-right">
+                <div id="headerControls" class="header-controls" style="display: flex; gap: 1.5rem; align-items: center;">
+                    <button id="newBoardBtn" class="btn btn-glass btn-small" data-i18n="btn.new_board" style="display: none;">+ New Board</button>
+                    <button id="dashboardBtn" class="btn btn-glass btn-small" onclick="showDashboard()" style="display: none;" title="Dashboard">🏠</button>
+                </div>
+                <div class="lang-selector-container">
+                    <button class="btn btn-glass btn-small" onclick="toggleLangMenu()" title="Select Language" style="min-width: 42px; justify-content: center;">🌐</button>
+                    <div id="langMenu" class="lang-dropdown">
+                        <button onclick="i18n.setLanguage('en')">English (US) 🇺🇸</button>
+                        <button onclick="i18n.setLanguage('pt-BR')">Português (BR) 🇧🇷</button>
+                    </div>
+                </div>
+                <!-- Avatar Only -->
+                <span id="userDisplay" class="user-display" onclick="openUserProfileModal()"></span>
+                <button id="hamburgerBtn" class="hamburger-btn" title="Menu">☰</button>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="dashboard-view">
+            <div class="page-hero">
+                <h1 class="page-title" data-i18n="dashboard.title">My Retrospectives</h1>
+                <p class="page-subtitle" data-i18n="dashboard.subtitle">Manage and join your team's retrospective boards</p>
+            </div>
+
+            <div class="page-controls">
+                <div class="teams-nav-tabs">
+                    <button class="team-nav-tab active" onclick="filterBoards('active')" id="filterActiveBtn" data-i18n="tab.active">Active</button>
+                    <button class="team-nav-tab" onclick="filterBoards('finished')" id="filterFinishedBtn" data-i18n="tab.finalized">Finalized</button>
+                </div>
+            </div>
+
+            <!-- Search and Custom Filters -->
+            <div class="dashboard-filters-container">
+                <input type="text" id="boardSearchInput" class="search-input-premium" placeholder="Search boards..." autocomplete="off">
+
+                <div class="filter-toggles">
+                    <button class="filter-toggle" id="myBoardsToggle" data-filter="myBoards">
+                        📋 My Boards
+                    </button>
+                    <button class="filter-toggle" id="participantToggle" data-filter="participant">
+                        👤 I'm Participating
+                    </button>
+                    <button class="filter-toggle" id="teamBoardsToggle" data-filter="teamBoards">
+                        🛡️ Team Boards
+                    </button>
+                    <button class="btn-link" id="clearFiltersBtn" style="display: none;">
+                        Clear Filters
+                    </button>
+                    <div class="active-filters-badge" id="activeFiltersBadge" style="display: none;">
+                        <span id="activeFiltersCount">0</span> filters active
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboardGrid" class="dashboard-grid">
+                <!-- Boards will be loaded here -->
+            </div>
+
+            <div id="emptyDashboard" class="welcome-screen" style="display: none;">
+                <div class="welcome-content">
+                    <h2 data-i18n="msg.no_boards">No Boards Yet</h2>
+                    <p data-i18n="msg.click_new_board">Click "+ New Board" in the header to create your first retrospective.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Items View -->
+        <div id="actionItemsView" class="dashboard-view" style="display: none;">
+            <div class="page-hero">
+                <h1 class="page-title" data-i18n="heading.action_items">⚡ My Action Items</h1>
+                <p class="page-subtitle" data-i18n="action.subtitle">Track and manage your tasks across all retrospectives</p>
+            </div>
+            <div id="actionItemsList" class="action-items-container">
+                <!-- Items table will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Teams View -->
+        <div id="teamsView" class="dashboard-view" style="display: none;">
+            <div class="page-hero">
+                <h1 class="page-title" data-i18n="heading.teams">Teams</h1>
+                <p class="page-subtitle" data-i18n="subtitle.teams">Collaborate and manage your squads</p>
+            </div>
+
+            <!-- Teams Navigation Tabs -->
+            <div class="teams-nav-tabs">
+                <button class="team-nav-tab active" onclick="switchTeamTab('myTeams')" id="tabMyTeams">My Teams</button>
+                <button class="team-nav-tab" onclick="switchTeamTab('exploreTeams')" id="tabExploreTeams">Explore
+                    Teams</button>
+            </div>
+
+            <!-- My Teams Content -->
+            <div id="myTeamsContent" class="team-tab-content">
+                <div class="page-controls" style="margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="openCreateTeamModal()">
+                        <span style="font-size: 1.2rem;">+</span> Create New Team
+                    </button>
+                </div>
+                <div id="teamsList" class="teams-grid">
+                    <!-- My Teams loaded here -->
+                </div>
+            </div>
+
+            <!-- Explore Teams Content -->
+            <div id="exploreTeamsContent" class="team-tab-content" style="display: none;">
+                <div class="page-controls">
+                    <!-- Optional: Search bar for teams could go here in future -->
+                </div>
+                <div id="availableTeamsList" class="teams-grid">
+                    <!-- Available teams loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Details View -->
+        <div id="teamDetailsView" class="dashboard-view" style="display: none;">
+            <div id="teamDetailsContent">
+                <!-- Team details loaded here -->
+            </div>
+        </div>
+
+        <!-- Create Team Modal -->
+        <div id="createTeamModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeCreateTeamModal()">×</span>
+                <h2>Create New Team</h2>
+                <form onsubmit="handleCreateTeam(event)">
+                    <div class="form-group">
+                        <label for="createTeamName">Team Name</label>
+                        <input type="text" id="createTeamName" class="form-input" required="" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="createTeamDesc">Description (Optional)</label>
+                        <textarea id="createTeamDesc" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="checkbox" id="createTeamInviteOnly" style="width: auto;">
+                        <label for="createTeamInviteOnly" style="margin: 0; cursor: pointer;">Invite Only (Users cannot
+                            join without being added)</label>
+                    </div>
+                    <div class="modal-footer" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateTeamModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Member Modal -->
+        <div id="addMemberModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddMemberModal()">×</span>
+                <h2>Add Team Member</h2>
+                <form onsubmit="handleAddMember(event)">
+                    <div class="form-group" style="position: relative;">
+                        <label for="addMemberSearch">Search User (Name or Email)</label>
+                        <input type="text" id="addMemberSearch" class="form-input" placeholder="Type to search..." autocomplete="off" oninput="handleUserSearch(this.value)">
+                        <div id="userSearchResults" class="search-results-dropdown" style="display: none;"></div>
+                        <input type="hidden" id="selectedMemberEmail">
+                    </div>
+                    <!-- Fallback or explicit email entry handled by search selection -->
+
+                    <div class="modal-footer" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeAddMemberModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="btnAddMemberSubmit" disabled="">Add
+                            Member</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Team Modal -->
+        <div id="editTeamModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditTeamModal()">×</span>
+                <h2>Edit Team</h2>
+                <form onsubmit="handleEditTeam(event)">
+                    <div class="form-group">
+                        <label for="editTeamName">Team Name</label>
+                        <input type="text" id="editTeamName" class="form-input" required="" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTeamDesc">Description</label>
+                        <textarea id="editTeamDesc" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <input type="checkbox" id="editTeamInviteOnly" style="width: auto;">
+                        <label for="editTeamInviteOnly" style="margin: 0; cursor: pointer;">Invite Only (Users cannot
+                            join without being added)</label>
+                    </div>
+                    <div class="modal-footer" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditTeamModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+
+    <!-- Admin View -->
+    <div id="adminView" class="dashboard-view" style="display: none;">
+        <div id="adminContent" class="admin-container">
+            <!-- Admin Content Loaded Here -->
+        </div>
+    </div>
+
+    <!-- Board View -->
+    <div id="boardContainer" class="board-container" style="display: none;">
+        <div id="readOnlyBanner" class="read-only-banner" style="display: none;" data-i18n="banner.read_only">⚠️ This board is finished (Read Only)</div>
+
+        <div class="board-header-container">
+            <!-- Row 1: Title -->
+            <div class="header-title-row">
+                <h2 id="boardTitle" class="board-title"></h2>
+
+                <!-- Participants Display -->
+                <div id="boardParticipantsDisplay" class="board-participants-row"></div>
+            </div>
+
+            <!-- Row 2: Grid Content -->
+            <div class="header-content-grid">
+
+                <!-- Col 1: Phase, Users, Teams (Minimalist) -->
+                <div class="header-section info-section" style="flex-direction: row; gap: 1rem; align-items: center; padding-left: 1rem;">
+
+                    <!-- Phase (Icon only if active, or minimal text) -->
+                    <div class="info-card minimal" title="Current Status">
+                        <div class="phase-info-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-hourglass-half" style="color: var(--primary); font-size: 1.2rem;"></i>
+                            <span id="currentPhase" style="font-weight: bold; font-size: 1.1rem;"></span>
+                        </div>
+                    </div>
+
+                    <div style="display: none;">
+                        <div style="width: 1px; height: 30px; background: var(--glass-border);"></div>
+
+                        <!-- Participants Icon + Count -->
+                        <div class="info-card minimal" id="participantsCard">
+                            <div class="info-summary">
+                                <i class="fas fa-user-friends" style="font-size: 1.2rem; color: var(--text-secondary);"></i>
+                                <span id="participantsCount" style="font-size: 1.1rem; font-weight: bold;">0</span>
+                            </div>
+                            <div class="info-tooltip" id="participantsTooltip"></div>
+                        </div>
+
+                        <!-- Teams Icon + Count -->
+                        <div class="info-card minimal" id="teamsCard">
+                            <div class="info-summary">
+                                <i class="fas fa-shield-alt" style="font-size: 1.2rem; color: var(--text-secondary);"></i>
+                                <span id="teamsCount" style="font-size: 1.1rem; font-weight: bold;">0</span>
+                            </div>
+                            <div class="info-tooltip" id="teamsTooltip"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Timer & Control -->
+                <div class="header-section timer-section-grid">
+
+                    <div class="timer-row">
+                        <span id="timerDisplay" class="timer-text">00:00</span>
+
+                        <div class="timer-controls-group">
+                            <input type="number" id="timerMinutes" class="timer-input" placeholder="Min" min="1" max="60" value="5" autocomplete="off">
+                            <span style="opacity:0.5; font-size:0.8rem">min</span>
+                            <div style="width: 1px; height: 20px; background: var(--glass-border); margin: 0 5px;">
+                            </div>
+                            <button id="startTimerBtn" class="btn btn-success icon-btn" style="display: none; width:32px; height:32px; padding:0; justify-content:center; align-items:center;" data-action="startTimer" title="Start"><i class="fas fa-play" style="font-size:0.9rem"></i></button>
+                            <button id="stopTimerBtn" class="btn btn-danger icon-btn" style="display: none; width:32px; height:32px; padding:0; justify-content:center; align-items:center;" data-action="stopTimer" title="Stop"><i class="fas fa-stop" style="font-size:0.9rem"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Phase Switch -->
+                    <button id="switchPhaseBtn" class="btn btn-secondary" style="width: 100%; margin-top: auto; font-size: 0.9rem; display:flex; justify-content:center; align-items:center; gap:0.5rem;" data-action="switchPhase"><i class="fas fa-exchange-alt"></i> Phase</button>
+
+                    <div id="voteStatusDisplay" class="vote-status-display" style="display:none; text-align: center; margin-top: 5px;"></div>
+                </div>
+
+                <!-- Col 3: Actions Grid -->
+                <div class="header-section actions-section">
+                    <h5 style="margin:0; opacity:0.7; font-size:0.8rem; margin-bottom:0.5rem; letter-spacing: 1px;">
+                        ACTIONS</h5>
+                    <div class="actions-grid" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                        <!-- Host Claims -->
+                        <button id="claimManagerBtn" class="btn btn-primary" data-action="claimManager" style="display: none;" title="Claim Host"><i class="fas fa-crown"></i></button>
+                        <button id="unclaimManagerBtn" class="btn btn-outline" data-action="unclaimManager" style="display: none;" title="Unclaim"><i class="fas fa-user-slash"></i></button>
+
+                        <!-- Tools -->
+                        <button id="addColumnBtn" class="btn btn-primary" style="display: none;" data-action="addColumn" title="Add Column"><i class="fas fa-plus"></i></button>
+                        <button id="manageTeamsBtn" class="btn btn-secondary" style="display: none;" data-action="manageTeams" title="Manage Teams"><i class="fas fa-users-cog"></i></button>
+                        <button id="adminSettingsBtn" class="btn btn-secondary" style="display: none;" data-action="openSettings" title="Board Settings"><i class="fas fa-cog"></i></button>
+                        <button id="exportBoardBtn" class="btn btn-secondary" data-action="exportBoard" style="display: none;" title="Export CSV"><i class="fas fa-file-csv"></i></button>
+
+                        <!-- Meta -->
+                        <button id="finishRetroBtn" class="btn btn-danger" style="display: none;" data-action="finishRetro" title="Finish Retro"><i class="fas fa-flag-checkered"></i></button>
+                        <button id="reopenRetroBtn" class="btn btn-primary" style="display: none;" data-action="reopenRetro" title="Reopen Retro"><i class="fas fa-door-open"></i></button>
+                        <button id="leaveBoardBtn" class="btn btn-danger" style="display: none;" data-action="leaveBoard" title="Leave Board"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Columns Section -->
+        <div id="columnsContainer" class="columns-container">
+            <!-- Columns will be dynamically added here -->
+        </div>
+    </div>
+     <!-- End .container -->
+
+    <div id="appSidebar" class="app-sidebar">
+        <ul id="menuList" class="menu-list"></ul>
+        <div class="sidebar-footer">
+            <small>BenTro <span id="appVersionFooter"></span></small>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+
+
+    <!-- Modals Container (Loaded dynamically) -->
+    <div id="modals-container"><!-- Modal for Manage Teams -->
+<div id="manageTeamsModal" class="modal">
+    <div class="modal-content" style="position: relative;">
+        <span class="close-modal" onclick="closeManageTeamsModal()">×</span>
+        <h2 data-i18n="modal.manage_teams_title">Manage Participating Teams</h2>
+        <p data-i18n="text.manage_teams_desc">Add or remove teams from this board.</p>
+
+        <div class="form-group">
+            <label data-i18n="label.current_teams">Current Teams</label>
+            <div id="manageTeamsList" class="teams-list">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem;">
+            <label data-i18n="label.add_team">Add Team</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="manageTeamsSelect" class="form-input" style="flex: 1;">
+                    <option value="" disabled="" selected="">Select a team...</option>
+                </select>
+                <button type="button" class="btn btn-primary" onclick="addTeamToBoard()" data-i18n="btn.add_team">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Login -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeLoginModal()">×</span>
+        <h2 data-i18n="modal.login_title">Login</h2>
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+                <label for="loginEmail" data-i18n="label.email">Email</label>
+                <input type="email" id="loginEmail" class="form-input" required="" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword" data-i18n="label.password">Password</label>
+                <input type="password" id="loginPassword" class="form-input" required="" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.login">Login</button>
+        </form>
+        <div style="margin-top: 1rem; text-align: center;">
+            <small><a href="#" onclick="switchToRegister()" data-i18n="msg.no_account">No account? Register</a></small>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Register -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeRegisterModal()">×</span>
+        <h2 data-i18n="modal.register_title">Register</h2>
+        <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+            <div class="form-row" style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="registerFirstName" data-i18n="label.first_name">First Name</label>
+                    <input type="text" id="registerFirstName" class="form-input" required="" autocomplete="given-name">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="registerLastName" data-i18n="label.last_name">Last Name</label>
+                    <input type="text" id="registerLastName" class="form-input" required="" autocomplete="family-name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="registerDisplayName" data-i18n="label.display_name">Display Name</label>
+                <input type="text" id="registerDisplayName" class="form-input" required="" minlength="3" autocomplete="nickname">
+            </div>
+            <div class="form-group">
+                <label for="registerEmail" data-i18n="label.email">Email</label>
+                <input type="email" id="registerEmail" class="form-input" required="" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword" data-i18n="label.password">Password</label>
+                <input type="password" id="registerPassword" class="form-input" required="" minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.register">Register</button>
+        </form>
+        <div style="margin-top: 1rem; text-align: center;">
+            <small><a href="#" onclick="switchToLogin()" data-i18n="msg.have_account">Have an account? Login</a></small>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for User Profile -->
+<div id="userProfileModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeUserProfileModal()">×</span>
+        <h2 data-i18n="modal.user_profile">User Profile</h2>
+
+        <div class="form-group">
+            <label data-i18n="label.avatar">Avatar</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="profileAvatarDisplay" style="font-size: 2rem;">👤</span>
+                <button type="button" class="btn btn-outline btn-small" onclick="toggleProfileAvatarSelector()" data-i18n="btn.change_avatar">Change Avatar</button>
+            </div>
+            <div id="profileAvatarSelector" class="avatar-grid" style="display: none; margin-top: 10px;"></div>
+        </div>
+
+        <div class="form-group">
+            <label data-i18n="label.display_name">Display Name</label>
+            <input type="text" id="profileDisplayName" class="form-input" readonly="">
+        </div>
+        <div class="form-group">
+            <label data-i18n="label.name">Full Name</label>
+            <input type="text" id="profileFullName" class="form-input" readonly="">
+        </div>
+        <div class="form-group">
+            <label data-i18n="label.email">Email</label>
+            <input type="email" id="profileEmail" class="form-input" readonly="" style="background-color: var(--bg-secondary); cursor: not-allowed;">
+            <small style="color: var(--text-secondary);" data-i18n="msg.email_readonly">Email cannot be changed</small>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+            <button class="btn btn-primary" onclick="saveProfileChanges()" data-i18n="btn.save_changes">Save Changes</button>
+            <button class="btn btn-outline" onclick="openChangePasswordModal(); closeUserProfileModal()" data-i18n="btn.change_password">Change Password</button>
+            <button class="btn btn-outline" onclick="handleUserLogout(); closeUserProfileModal()" data-i18n="menu.logout">Logout</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Change Password -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeChangePasswordModal()">×</span>
+        <h2 data-i18n="modal.change_password">Change Password</h2>
+        <div id="passwordChangeRequired" style="display: none; margin-bottom: 1rem;">
+            <div class="alert alert-warning" data-i18n="msg.must_change_password">You must change your password before continuing</div>
+        </div>
+        <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)">
+            <input type="email" id="changePasswordUsername" name="username" autocomplete="username" style="display:none;" aria-hidden="true">
+            <div class="form-group">
+                <label for="currentPassword" data-i18n="label.old_password">Current Password</label>
+                <input type="password" id="currentPassword" class="form-input" required="" autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <label for="newPassword" data-i18n="label.new_password">New Password</label>
+                <input type="password" id="newPassword" class="form-input" required="" minlength="6" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword" data-i18n="label.confirm_password">Confirm New Password</label>
+                <input type="password" id="confirmPassword" class="form-input" required="" minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.change_password">Change Password</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Returning User Confirmation -->
+<div id="returningUserModal" class="modal">
+    <div class="modal-content">
+        <h2 data-i18n="modal.welcome_back">Welcome Back! 👋</h2>
+        <p><span data-i18n="modal.continue_as">Continue as</span> <strong id="returningUserName"></strong>?</p>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button id="continueAsUserBtn" class="btn btn-primary" style="flex: 1;" data-i18n="modal.confirm">Confirm</button>
+            <button id="changeUserBtn" class="btn btn-outline" style="flex: 1;" data-i18n="modal.change_name">Change Name</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for User Identity -->
+<div id="userModal" class="modal" style="display: block;">
+    <div class="modal-content">
+        <h2 data-i18n="modal.welcome">Welcome!</h2>
+        <p data-i18n="modal.enter_name">Please enter your name and choose an avatar.</p>
+
+        <div class="auth-buttons" style="display: flex; flex-direction: column; gap: 1rem;">
+            <button class="btn btn-primary" onclick="openLoginModal()" data-i18n="btn.login">Login</button>
+            <button class="btn btn-outline" onclick="openRegisterModal()" data-i18n="btn.register">Register</button>
+        </div>
+
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <p style="text-align: center; font-size: 0.9rem; margin-bottom: 0.5rem;" data-i18n="msg.guest_option">Or continue as guest (Data not saved)</p>
+            <button class="btn btn-secondary btn-sm" onclick="toggleGuestForm()" style="width: 100%;" data-i18n="btn.guest_login">Continue as Guest</button>
+        </div>
+
+        <form id="userForm" style="display: none; margin-top: 1rem;">
+            <!-- Avatar Selection -->
+            <div class="form-group">
+                <label data-i18n="label.choose_avatar">Choose Your Avatar</label>
+                <div id="avatarSelector" class="avatar-selector">
+            <div class="avatar-option selected" data-avatar="😀" onclick="selectAvatar('😀')">
+                 😀
+            </div>
+        
+            <div class="avatar-option " data-avatar="😎" onclick="selectAvatar('😎')">
+                 😎
+            </div>
+        
+            <div class="avatar-option " data-avatar="🤓" onclick="selectAvatar('🤓')">
+                 🤓
+            </div>
+        
+            <div class="avatar-option " data-avatar="🥳" onclick="selectAvatar('🥳')">
+                 🥳
+            </div>
+        
+            <div class="avatar-option " data-avatar="🤩" onclick="selectAvatar('🤩')">
+                 🤩
+            </div>
+        
+            <div class="avatar-option " data-avatar="😇" onclick="selectAvatar('😇')">
+                 😇
+            </div>
+        
+            <div class="avatar-option " data-avatar="🦸" onclick="selectAvatar('🦸')">
+                 🦸
+            </div>
+        
+            <div class="avatar-option " data-avatar="🦹" onclick="selectAvatar('🦹')">
+                 🦹
+            </div>
+        
+            <div class="avatar-option " data-avatar="🧙" onclick="selectAvatar('🧙')">
+                 🧙
+            </div>
+        
+            <div class="avatar-option " data-avatar="🧚" onclick="selectAvatar('🧚')">
+                 🧚
+            </div>
+        
+            <div class="avatar-option " data-avatar="🧛" onclick="selectAvatar('🧛')">
+                 🧛
+            </div>
+        
+            <div class="avatar-option " data-avatar="🧜" onclick="selectAvatar('🧜')">
+                 🧜
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐶" onclick="selectAvatar('🐶')">
+                 🐶
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐱" onclick="selectAvatar('🐱')">
+                 🐱
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐭" onclick="selectAvatar('🐭')">
+                 🐭
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐹" onclick="selectAvatar('🐹')">
+                 🐹
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐰" onclick="selectAvatar('🐰')">
+                 🐰
+            </div>
+        
+            <div class="avatar-option " data-avatar="🦊" onclick="selectAvatar('🦊')">
+                 🦊
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐻" onclick="selectAvatar('🐻')">
+                 🐻
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐼" onclick="selectAvatar('🐼')">
+                 🐼
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐨" onclick="selectAvatar('🐨')">
+                 🐨
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐯" onclick="selectAvatar('🐯')">
+                 🐯
+            </div>
+        
+            <div class="avatar-option " data-avatar="🦁" onclick="selectAvatar('🦁')">
+                 🦁
+            </div>
+        
+            <div class="avatar-option " data-avatar="🐮" onclick="selectAvatar('🐮')">
+                 🐮
+            </div>
+        
+            <div class="avatar-option " data-avatar="🚀" onclick="selectAvatar('🚀')">
+                 🚀
+            </div>
+        
+            <div class="avatar-option " data-avatar="⚡" onclick="selectAvatar('⚡')">
+                 ⚡
+            </div>
+        
+            <div class="avatar-option " data-avatar="🔥" onclick="selectAvatar('🔥')">
+                 🔥
+            </div>
+        
+            <div class="avatar-option " data-avatar="⭐" onclick="selectAvatar('⭐')">
+                 ⭐
+            </div>
+        
+            <div class="avatar-option " data-avatar="💎" onclick="selectAvatar('💎')">
+                 💎
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎯" onclick="selectAvatar('🎯')">
+                 🎯
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎨" onclick="selectAvatar('🎨')">
+                 🎨
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎭" onclick="selectAvatar('🎭')">
+                 🎭
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎪" onclick="selectAvatar('🎪')">
+                 🎪
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎸" onclick="selectAvatar('🎸')">
+                 🎸
+            </div>
+        
+            <div class="avatar-option " data-avatar="🎮" onclick="selectAvatar('🎮')">
+                 🎮
+            </div>
+        
+            <div class="avatar-option " data-avatar="🏆" onclick="selectAvatar('🏆')">
+                 🏆
+            </div>
+        </div>
+                <input type="hidden" id="selectedAvatar" value="😀">
+            </div>
+
+            <div class="form-group">
+                <label for="userNameInput" data-i18n="label.your_name">Your Name</label>
+                <input type="text" id="userNameInput" class="form-input" required="" autocomplete="name">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btn.join_retro">Join Retrospective</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Help/About -->
+<div id="helpModal" class="modal">
+    <div class="modal-content help-modal-content">
+        <span class="close">×</span>
+        <h2><span data-i18n="help.title">About BenTro</span> <img src="/static/bentrologo.png" alt="BenTro Logo" style="height: 32px; vertical-align: bottom;"></h2>
+        <div class="help-content">
+            <p><strong>BenTro</strong> = <em>Bento</em> + <em>Retrospective</em></p>
+            <p class="tagline-help" data-i18n="help.tagline">Retrospectives, packed perfectly!</p>
+            <p data-i18n="help.desc_full">Retrospectives are a vital part of agile development. Use BenTro to collaborate with your team, vote on ideas, and create action items for continuous improvement.</p>
+            <hr>
+            <h3 data-i18n="help.quick_start">Quick Start</h3>
+            <ul>
+                <li>Create a board with custom columns</li>
+                <li>Add cards during Input Phase</li>
+                <li>Switch to Voting Phase to vote on cards</li>
+                <li>Click "Select" on a card, then "Merge Here" on another to combine similar ideas</li>
+                <li>Export your retrospective data as CSV</li>
+            </ul>
+            <hr>
+            <h3 data-i18n="help.shortcuts">Keyboard Shortcuts</h3>
+            <ul class="shortcuts-list">
+                <li><kbd>?</kbd> <span data-i18n="help.shortcut.toggle_help">Toggle Help</span></li>
+                <li><kbd>Esc</kbd> <span data-i18n="help.shortcut.close_modals">Close Modals</span></li>
+                <li><kbd>Shift</kbd> + <kbd>E</kbd> <span data-i18n="help.shortcut.export_csv">Export CSV</span></li>
+                <li><kbd>Shift</kbd> + <kbd>T</kbd> <span data-i18n="help.shortcut.toggle_timer">Toggle Timer</span>
+                </li>
+                <li><kbd>Shift</kbd> + <kbd>V</kbd> <span data-i18n="help.shortcut.switch_phase">Switch Phase</span>
+                </li>
+                <li><kbd>Shift</kbd> + <kbd>N</kbd> <span data-i18n="help.shortcut.new_card">New Card</span></li>
+            </ul>
+            <hr>
+            <p><a href="https://github.com/bento-lab-ops/bentro" id="githubLink" target="_blank" data-i18n="help.view_docs">View Documentation on GitHub</a></p>
+            <hr>
+            <p><small>Version: <span id="appVersion">v0.15.4</span></small></p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for New Board -->
+<div id="newBoardModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2 data-i18n="heading.create_new_board">Create New Board</h2>
+        <form id="newBoardForm">
+            <div class="form-group">
+                <label for="boardName" data-i18n="label.board_name">Board Name</label>
+                <input type="text" id="boardName" class="form-input" placeholder="Sprint 42 Retrospective" data-i18n="placeholder.board_name" data-i18n-target="placeholder" required="" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="boardTeamSelect" data-i18n="label.team_optional">Team (Optional)</label>
+                <select id="boardTeamSelect" class="form-input">
+                    <option value="" data-i18n="option.no_team">No Team (Personal)</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="boardTemplate" data-i18n="label.template">Template</label>
+                <select id="boardTemplate" class="form-input">
+                    <option value="custom" data-i18n="template.custom">Custom (Manual Entry)</option>
+                    <!-- Templates loaded dynamically from board-templates.json -->
+                </select>
+                <small data-i18n="small.template_help">Choose a template or enter custom columns below</small>
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.column_names">Column Names (one per line)</label>
+                <textarea id="columnNames" class="form-textarea" rows="4" placeholder="Select a template above or enter custom columns"></textarea>
+                <small data-i18n="small.columns_help">Leave empty for default columns</small>
+            </div>
+            <button type="submit" class="btn btn-primary" data-i18n="btn.create_board">Create Board</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for New Card -->
+<div id="newCardModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2>Add New Card</h2>
+        <form id="newCardForm">
+            <div class="form-group">
+                <label for="cardContent" data-i18n="label.card_content">Card Content</label>
+                <textarea id="cardContent" class="form-textarea" rows="3" placeholder="Enter your thoughts..." data-i18n="placeholder.card_content" data-i18n-target="placeholder" required=""></textarea>
+            </div>
+            <input type="hidden" id="cardColumnId">
+            <button type="submit" class="btn btn-primary" data-i18n="btn.add_card">Add Card</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for New Column -->
+<div id="newColumnModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeNewColumnModal()">×</span>
+        <h2 data-i18n="heading.add_column">Add Column</h2>
+        <form id="newColumnForm">
+            <div class="form-group">
+                <label for="newColumnName" data-i18n="label.column_name">Column Name</label>
+                <input type="text" id="newColumnName" class="form-input" placeholder="e.g. Action Items" required="">
+            </div>
+            <input type="hidden" id="newColumnBoardId">
+            <button type="submit" class="btn btn-primary" data-i18n="btn.add_column">+ Add Column</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Edit Column -->
+<div id="editColumnModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2 data-i18n="heading.edit_column">Edit Column Name</h2>
+        <form id="editColumnForm">
+            <div class="form-group">
+                <label for="columnNameEdit" data-i18n="label.column_name">Column Name</label>
+                <input type="text" id="columnNameEdit" class="form-input" required="">
+            </div>
+            <input type="hidden" id="editColumnId">
+            <button type="submit" class="btn btn-primary" data-i18n="btn.update_column">btn.update_column</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Unmerge Cards -->
+<div id="unmergeModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2>Merged Cards</h2>
+        <div id="mergedCardsList" class="merged-cards-list">
+            <!-- Merged cards will be listed here -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Action Item Details -->
+<div id="actionItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <div class="modal-header">
+            <h2 data-i18n="heading.action_details">⚡ Action Item Details</h2>
+        </div>
+        <div class="form-group">
+            <label for="actionItemOwner" data-i18n="action.owner">Owner</label>
+            <div class="action-owner-input-wrapper">
+                <select id="actionItemOwner" class="form-input">
+                    <option value="" data-i18n="action.unassigned">Unassigned</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="actionItemDueDate" data-i18n="action.due_date">Due Date</label>
+            <input type="hidden" id="actionItemDueDate" class="form-input flatpickr-input"><input class="form-input form-control input" placeholder="" tabindex="0" type="text" readonly="readonly">
+        </div>
+        <input type="hidden" id="actionItemCardId">
+        <div class="modal-actions" style="justify-content: space-between;">
+            <button class="btn btn-danger" onclick="actionItemsController.handleRemove()" style="display: none;">Remove Action Status</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="actionItemsController.closeEditModal()" data-i18n="btn.cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="actionItemsController.handleSave()" data-i18n="btn.save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Admin Users Management -->
+<div id="adminUsersModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminUsersModal()">×</span>
+        <h2 data-i18n="admin.user_management">User Management</h2>
+
+        <div id="usersTableContainer" style="margin-top: 1.5rem;">
+            <table class="users-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border);">
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.avatar">Avatar</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.display_name">Display Name</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="label.email">Email</th>
+                        <th style="padding: 0.75rem; text-align: left;" data-i18n="admin.role">Role</th>
+                        <th style="padding: 0.75rem; text-align: center;" data-i18n="admin.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <button class="btn btn-outline" onclick="closeAdminUsersModal()" data-i18n="btn.close">Close</button>
+        </div>
+    </div>
+</div>
+<!-- Modal for Admin Boards Management -->
+<!-- Included from modals_admin_boards.html -->
+<div id="adminBoardsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminBoardsModal()">×</span>
+        <h2 data-i18n="admin.manage_boards">Manage Boards</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminBoardSearch" placeholder="Search boards..." onkeyup="filterAdminBoards()" autocomplete="off">
+            </div>
+            <div class="filter-box">
+                <select id="adminBoardFilter" onchange="filterAdminBoards()">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="finished">Finished</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.board_name">Board Name</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.created_at">Created At</th>
+                        <th data-i18n="label.duration">Duration</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminBoardsList">
+                    <!-- Boards will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Admin Action Items Management -->
+<!-- Included from modals_admin_actions.html -->
+<div id="adminActionsModal" class="modal">
+    <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeAdminActionsModal()">×</span>
+        <h2 data-i18n="admin.manage_actions">Manage Action Items</h2>
+
+        <div class="admin-toolbar">
+            <div class="search-box">
+                <input type="text" id="adminActionSearch" placeholder="Search items..." onkeyup="filterAdminActions()" autocomplete="off">
+            </div>
+            <div class="filter-box">
+                <select id="adminActionFilter" onchange="filterAdminActions()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="label.description">label.description</th>
+                        <th data-i18n="label.board">Board</th>
+                        <th data-i18n="label.owner">Owner</th>
+                        <th data-i18n="label.assignee">Assignee</th>
+                        <th data-i18n="label.status">Status</th>
+                        <th data-i18n="label.actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminActionsList">
+                    <!-- Action Items will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Action Item Sub-Modal -->
+<div id="adminEditActionModal" class="modal" style="z-index: 1002;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeAdminEditActionModal()">×</span>
+        <h3 data-i18n="admin.edit_action">Edit Action Item</h3>
+        <form id="adminEditActionForm" onsubmit="handleAdminUpdateAction(event)">
+            <input type="hidden" id="editActionId">
+            <div class="form-group">
+                <label data-i18n="label.description">label.description</label>
+                <textarea id="editActionContent" class="form-input" rows="3" required=""></textarea>
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.assignee">Assignee</label>
+                <input type="text" id="editActionOwner" class="form-input" list="userListData">
+            </div>
+            <div class="form-group">
+                <label data-i18n="label.status">Status</label>
+                <select id="editActionStatus" class="form-input">
+                    <option value="false">Pending</option>
+                    <option value="true">Completed</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeAdminEditActionModal()" data-i18n="btn.cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Generic Confirmation Modal -->
+<div id="confirmationModal" class="modal" style="z-index: 10000;">
+    <div class="modal-content confirmation-modal-content" style="max-width: 400px; text-align: center;">
+        <h2 id="confirmationTitle" style="margin-bottom: 1rem;">Confirm</h2>
+        <p id="confirmationMessage" style="color: var(--text-secondary); margin-bottom: 2rem;"></p>
+        <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+            <button id="btnConfirmCancel" class="btn btn-outline" style="min-width: 100px;">Cancel</button>
+            <button id="btnConfirmOk" class="btn btn-primary" style="min-width: 100px;">Confirm</button>
+        </div>
+    </div>
+</div><!-- Settings Modal -->
+<div id="boardSettingsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBoardSettingsModal()">×</span>
+        <h2>Board Settings</h2>
+        <div class="form-group">
+            <label for="settingVoteLimit">Vote Limit per User (0 = unlimited)</label>
+            <input type="number" id="settingVoteLimit" class="form-input" min="0">
+        </div>
+        <div class="form-group">
+            <label for="settingBlindVoting" style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="checkbox" id="settingBlindVoting">
+                Enable Blind Voting (Hide counts during voting)
+            </label>
+        </div>
+        <button class="btn btn-primary" onclick="saveBoardSettings()">Save Settings</button>
+    </div>
+</div>
+
+<div id="settingsModal" class="modal">
+    <div class="modal-content settings-modal-content">
+        <span class="close" onclick="closeSettingsModal()">×</span>
+        <h2>Settings</h2>
+        <div id="settingsContent">
+            <!-- Content will be rendered by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Complete Action Item Modal -->
+<div id="completeActionItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="actionItemsController.closeCompleteModal()">×</span>
+        <h2 data-i18n="heading.complete_action">✅ Complete Action Item</h2>
+        <p data-i18n="text.resolution_details">Add details about the resolution.</p>
+        <form id="completeActionItemForm" onsubmit="actionItemsController.handleCompleteSubmit(event)">
+            <input type="hidden" id="completeActionItemId">
+
+            <div class="form-group">
+                <label data-i18n="label.completion_date">Completion Date</label>
+                <input type="hidden" id="completeActionItemDate" class="form-input flatpickr-input" required=""><input class="form-input form-control input" placeholder="" required="" tabindex="0" type="text" readonly="readonly">
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="label.link_optional">Link / PR (Optional)</label>
+                <input type="url" id="completeActionItemLink" class="form-input" placeholder="https://github.com/...">
+            </div>
+
+            <div class="form-group">
+                <label data-i18n="label.desc_optional">Description / Notes (Optional)</label>
+                <textarea id="completeActionItemDesc" class="form-textarea" placeholder="What was done..." data-i18n="placeholder.what_done" data-i18n-target="placeholder"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="actionItemsController.closeCompleteModal()" data-i18n="modal.cancel">Cancel</button>
+                <button type="submit" class="btn btn-success" data-i18n="btn.complete_item">Complete Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Read-Only Details Modal -->
+<div id="actionItemDetailsModal" class="modal" style="z-index: 1005;">
+    <div class="modal-content">
+        <span class="close-modal" onclick="actionItemsController.closeDetails()">×</span>
+        <h2>ℹ️ Action Item Details</h2>
+
+        <div class="form-group">
+            <label>Link</label>
+            <div id="detailsLinkContainer" style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px;">
+                <a id="detailsLink" href="#" target="_blank" style="color: var(--accent-color);">No Link</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label data-i18n="label.desc_notes">Description / Notes</label>
+            <div id="detailsDesc" style="padding: 0.75rem; background: var(--bg-light); border-radius: 8px; white-space: pre-wrap; min-height: 50px;">
+                No description provided.
+            </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end;">
+            <button type="button" class="btn btn-primary" onclick="actionItemsController.closeDetails()">Close</button>
+        </div>
+    </div>
+</div></div>
+    <script type="module" src="/static/js/main.js?v=v0.15.6"></script>
+
+
+<div class="flatpickr-calendar animate" tabindex="-1"><div class="flatpickr-months"><span class="flatpickr-prev-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M5.207 8.471l7.146 7.147-0.707 0.707-7.853-7.854 7.854-7.853 0.707 0.707-7.147 7.146z"></path></svg></span><div class="flatpickr-month"><div class="flatpickr-current-month"><select class="flatpickr-monthDropdown-months" aria-label="Month" tabindex="-1"><option class="flatpickr-monthDropdown-month" value="0" tabindex="-1">January</option><option class="flatpickr-monthDropdown-month" value="1" tabindex="-1">February</option><option class="flatpickr-monthDropdown-month" value="2" tabindex="-1">March</option><option class="flatpickr-monthDropdown-month" value="3" tabindex="-1">April</option><option class="flatpickr-monthDropdown-month" value="4" tabindex="-1">May</option><option class="flatpickr-monthDropdown-month" value="5" tabindex="-1">June</option><option class="flatpickr-monthDropdown-month" value="6" tabindex="-1">July</option><option class="flatpickr-monthDropdown-month" value="7" tabindex="-1">August</option><option class="flatpickr-monthDropdown-month" value="8" tabindex="-1">September</option><option class="flatpickr-monthDropdown-month" value="9" tabindex="-1">October</option><option class="flatpickr-monthDropdown-month" value="10" tabindex="-1">November</option><option class="flatpickr-monthDropdown-month" value="11" tabindex="-1">December</option></select><div class="numInputWrapper"><input class="numInput cur-year" type="number" tabindex="-1" aria-label="Year"><span class="arrowUp"></span><span class="arrowDown"></span></div></div></div><span class="flatpickr-next-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M13.207 8.472l-7.854 7.854-0.707-0.707 7.146-7.146-7.146-7.148 0.707-0.707 7.854 7.854z"></path></svg></span></div><div class="flatpickr-innerContainer"><div class="flatpickr-rContainer"><div class="flatpickr-weekdays"><div class="flatpickr-weekdaycontainer">
+      <span class="flatpickr-weekday">
+        Sun</span><span class="flatpickr-weekday">Mon</span><span class="flatpickr-weekday">Tue</span><span class="flatpickr-weekday">Wed</span><span class="flatpickr-weekday">Thu</span><span class="flatpickr-weekday">Fri</span><span class="flatpickr-weekday">Sat
+      </span>
+      </div></div><div class="flatpickr-days" tabindex="-1"><div class="dayContainer"><span class="flatpickr-day prevMonthDay" aria-label="December 28, 2025" tabindex="-1">28</span><span class="flatpickr-day prevMonthDay" aria-label="December 29, 2025" tabindex="-1">29</span><span class="flatpickr-day prevMonthDay" aria-label="December 30, 2025" tabindex="-1">30</span><span class="flatpickr-day prevMonthDay" aria-label="December 31, 2025" tabindex="-1">31</span><span class="flatpickr-day" aria-label="January 1, 2026" tabindex="-1">1</span><span class="flatpickr-day" aria-label="January 2, 2026" tabindex="-1">2</span><span class="flatpickr-day" aria-label="January 3, 2026" tabindex="-1">3</span><span class="flatpickr-day" aria-label="January 4, 2026" tabindex="-1">4</span><span class="flatpickr-day" aria-label="January 5, 2026" tabindex="-1">5</span><span class="flatpickr-day" aria-label="January 6, 2026" tabindex="-1">6</span><span class="flatpickr-day" aria-label="January 7, 2026" tabindex="-1">7</span><span class="flatpickr-day" aria-label="January 8, 2026" tabindex="-1">8</span><span class="flatpickr-day" aria-label="January 9, 2026" tabindex="-1">9</span><span class="flatpickr-day" aria-label="January 10, 2026" tabindex="-1">10</span><span class="flatpickr-day" aria-label="January 11, 2026" tabindex="-1">11</span><span class="flatpickr-day" aria-label="January 12, 2026" tabindex="-1">12</span><span class="flatpickr-day" aria-label="January 13, 2026" tabindex="-1">13</span><span class="flatpickr-day" aria-label="January 14, 2026" tabindex="-1">14</span><span class="flatpickr-day today" aria-label="January 15, 2026" aria-current="date" tabindex="-1">15</span><span class="flatpickr-day" aria-label="January 16, 2026" tabindex="-1">16</span><span class="flatpickr-day" aria-label="January 17, 2026" tabindex="-1">17</span><span class="flatpickr-day" aria-label="January 18, 2026" tabindex="-1">18</span><span class="flatpickr-day" aria-label="January 19, 2026" tabindex="-1">19</span><span class="flatpickr-day" aria-label="January 20, 2026" tabindex="-1">20</span><span class="flatpickr-day" aria-label="January 21, 2026" tabindex="-1">21</span><span class="flatpickr-day" aria-label="January 22, 2026" tabindex="-1">22</span><span class="flatpickr-day" aria-label="January 23, 2026" tabindex="-1">23</span><span class="flatpickr-day" aria-label="January 24, 2026" tabindex="-1">24</span><span class="flatpickr-day" aria-label="January 25, 2026" tabindex="-1">25</span><span class="flatpickr-day" aria-label="January 26, 2026" tabindex="-1">26</span><span class="flatpickr-day" aria-label="January 27, 2026" tabindex="-1">27</span><span class="flatpickr-day" aria-label="January 28, 2026" tabindex="-1">28</span><span class="flatpickr-day" aria-label="January 29, 2026" tabindex="-1">29</span><span class="flatpickr-day" aria-label="January 30, 2026" tabindex="-1">30</span><span class="flatpickr-day" aria-label="January 31, 2026" tabindex="-1">31</span><span class="flatpickr-day nextMonthDay" aria-label="February 1, 2026" tabindex="-1">1</span><span class="flatpickr-day nextMonthDay" aria-label="February 2, 2026" tabindex="-1">2</span><span class="flatpickr-day nextMonthDay" aria-label="February 3, 2026" tabindex="-1">3</span><span class="flatpickr-day nextMonthDay" aria-label="February 4, 2026" tabindex="-1">4</span><span class="flatpickr-day nextMonthDay" aria-label="February 5, 2026" tabindex="-1">5</span><span class="flatpickr-day nextMonthDay" aria-label="February 6, 2026" tabindex="-1">6</span><span class="flatpickr-day nextMonthDay" aria-label="February 7, 2026" tabindex="-1">7</span></div></div></div></div></div><div class="flatpickr-calendar animate" tabindex="-1"><div class="flatpickr-months"><span class="flatpickr-prev-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M5.207 8.471l7.146 7.147-0.707 0.707-7.853-7.854 7.854-7.853 0.707 0.707-7.147 7.146z"></path></svg></span><div class="flatpickr-month"><div class="flatpickr-current-month"><select class="flatpickr-monthDropdown-months" aria-label="Month" tabindex="-1"><option class="flatpickr-monthDropdown-month" value="0" tabindex="-1">January</option><option class="flatpickr-monthDropdown-month" value="1" tabindex="-1">February</option><option class="flatpickr-monthDropdown-month" value="2" tabindex="-1">March</option><option class="flatpickr-monthDropdown-month" value="3" tabindex="-1">April</option><option class="flatpickr-monthDropdown-month" value="4" tabindex="-1">May</option><option class="flatpickr-monthDropdown-month" value="5" tabindex="-1">June</option><option class="flatpickr-monthDropdown-month" value="6" tabindex="-1">July</option><option class="flatpickr-monthDropdown-month" value="7" tabindex="-1">August</option><option class="flatpickr-monthDropdown-month" value="8" tabindex="-1">September</option><option class="flatpickr-monthDropdown-month" value="9" tabindex="-1">October</option><option class="flatpickr-monthDropdown-month" value="10" tabindex="-1">November</option><option class="flatpickr-monthDropdown-month" value="11" tabindex="-1">December</option></select><div class="numInputWrapper"><input class="numInput cur-year" type="number" tabindex="-1" aria-label="Year"><span class="arrowUp"></span><span class="arrowDown"></span></div></div></div><span class="flatpickr-next-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M13.207 8.472l-7.854 7.854-0.707-0.707 7.146-7.146-7.146-7.148 0.707-0.707 7.854 7.854z"></path></svg></span></div><div class="flatpickr-innerContainer"><div class="flatpickr-rContainer"><div class="flatpickr-weekdays"><div class="flatpickr-weekdaycontainer">
+      <span class="flatpickr-weekday">
+        Sun</span><span class="flatpickr-weekday">Mon</span><span class="flatpickr-weekday">Tue</span><span class="flatpickr-weekday">Wed</span><span class="flatpickr-weekday">Thu</span><span class="flatpickr-weekday">Fri</span><span class="flatpickr-weekday">Sat
+      </span>
+      </div></div><div class="flatpickr-days" tabindex="-1"><div class="dayContainer"><span class="flatpickr-day prevMonthDay" aria-label="December 28, 2025" tabindex="-1">28</span><span class="flatpickr-day prevMonthDay" aria-label="December 29, 2025" tabindex="-1">29</span><span class="flatpickr-day prevMonthDay" aria-label="December 30, 2025" tabindex="-1">30</span><span class="flatpickr-day prevMonthDay" aria-label="December 31, 2025" tabindex="-1">31</span><span class="flatpickr-day" aria-label="January 1, 2026" tabindex="-1">1</span><span class="flatpickr-day" aria-label="January 2, 2026" tabindex="-1">2</span><span class="flatpickr-day" aria-label="January 3, 2026" tabindex="-1">3</span><span class="flatpickr-day" aria-label="January 4, 2026" tabindex="-1">4</span><span class="flatpickr-day" aria-label="January 5, 2026" tabindex="-1">5</span><span class="flatpickr-day" aria-label="January 6, 2026" tabindex="-1">6</span><span class="flatpickr-day" aria-label="January 7, 2026" tabindex="-1">7</span><span class="flatpickr-day" aria-label="January 8, 2026" tabindex="-1">8</span><span class="flatpickr-day" aria-label="January 9, 2026" tabindex="-1">9</span><span class="flatpickr-day" aria-label="January 10, 2026" tabindex="-1">10</span><span class="flatpickr-day" aria-label="January 11, 2026" tabindex="-1">11</span><span class="flatpickr-day" aria-label="January 12, 2026" tabindex="-1">12</span><span class="flatpickr-day" aria-label="January 13, 2026" tabindex="-1">13</span><span class="flatpickr-day" aria-label="January 14, 2026" tabindex="-1">14</span><span class="flatpickr-day today" aria-label="January 15, 2026" aria-current="date" tabindex="-1">15</span><span class="flatpickr-day" aria-label="January 16, 2026" tabindex="-1">16</span><span class="flatpickr-day" aria-label="January 17, 2026" tabindex="-1">17</span><span class="flatpickr-day" aria-label="January 18, 2026" tabindex="-1">18</span><span class="flatpickr-day" aria-label="January 19, 2026" tabindex="-1">19</span><span class="flatpickr-day" aria-label="January 20, 2026" tabindex="-1">20</span><span class="flatpickr-day" aria-label="January 21, 2026" tabindex="-1">21</span><span class="flatpickr-day" aria-label="January 22, 2026" tabindex="-1">22</span><span class="flatpickr-day" aria-label="January 23, 2026" tabindex="-1">23</span><span class="flatpickr-day" aria-label="January 24, 2026" tabindex="-1">24</span><span class="flatpickr-day" aria-label="January 25, 2026" tabindex="-1">25</span><span class="flatpickr-day" aria-label="January 26, 2026" tabindex="-1">26</span><span class="flatpickr-day" aria-label="January 27, 2026" tabindex="-1">27</span><span class="flatpickr-day" aria-label="January 28, 2026" tabindex="-1">28</span><span class="flatpickr-day" aria-label="January 29, 2026" tabindex="-1">29</span><span class="flatpickr-day" aria-label="January 30, 2026" tabindex="-1">30</span><span class="flatpickr-day" aria-label="January 31, 2026" tabindex="-1">31</span><span class="flatpickr-day nextMonthDay" aria-label="February 1, 2026" tabindex="-1">1</span><span class="flatpickr-day nextMonthDay" aria-label="February 2, 2026" tabindex="-1">2</span><span class="flatpickr-day nextMonthDay" aria-label="February 3, 2026" tabindex="-1">3</span><span class="flatpickr-day nextMonthDay" aria-label="February 4, 2026" tabindex="-1">4</span><span class="flatpickr-day nextMonthDay" aria-label="February 5, 2026" tabindex="-1">5</span><span class="flatpickr-day nextMonthDay" aria-label="February 6, 2026" tabindex="-1">6</span><span class="flatpickr-day nextMonthDay" aria-label="February 7, 2026" tabindex="-1">7</span></div></div></div></div></div></body></html>

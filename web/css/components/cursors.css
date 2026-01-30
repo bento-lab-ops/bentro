@@ -1,0 +1,23 @@
+/* Remote Cursors */
+.remote-cursor {
+    position: absolute;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 9999;
+    transition: left 0.5s linear, top 0.5s linear;
+    /* Smooth interpolation between 500ms updates */
+    will-change: left, top;
+}
+
+.cursor-label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
