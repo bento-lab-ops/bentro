@@ -68,6 +68,7 @@ jobs:
           ls -l "$TRUSTSTORE_PATH"
 
           # 4. Run Scanner
+          PROJECT_KEY="bento-lab-ops_bentro_77a58586-0bf3-48b2-b015-3c496755bf3c"
           CLEAN_TOKEN=$(echo "$SONAR_TOKEN" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
           CLEAN_URL="https://sonar.bento.lab"
 
@@ -79,10 +80,12 @@ jobs:
           export SONAR_SCANNER_JAVA_OPTS="$SSL_OPTS"
           
           echo "Debug: SSL_OPTS=$SSL_OPTS"
+          ls -la # Debug: Verify file existence
           
           sonar-scanner \
             -Dsonar.token="$CLEAN_TOKEN" \
             -Dsonar.host.url="$CLEAN_URL" \
+            -Dsonar.projectKey="$PROJECT_KEY" \
             -Dsonar.scanner.skipJreProvisioning=true
       
       - name: SonarQube Quality Gate Summary
